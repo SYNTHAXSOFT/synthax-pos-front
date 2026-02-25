@@ -1,0 +1,48 @@
+<div id="logo" class="my-4 px-6">
+  <h1 class="text-lg md:text-2xl font-bold text-white">
+    {{ envs.companyName }}<span class="text-blue-500">{{ envs.companyName2 }}</span>
+  </h1>
+  <p class="text-slate-500 text-sm">{{ envs.companySlogan }}</p>
+</div>
+
+<div id="profile" class="px-6">
+    <div class="flex justify-between items-center mb-2">
+      <h1 class="text-slate-500"><b>Bienvenido</b></h1>
+      
+      <!-- ✅ Campanita navega al área principal -->
+      <button 
+          *ngIf="currentUser?.rol === 'CANDIDATO'"
+          (click)="irANotificaciones()"
+          class="relative p-2 text-white hover:text-blue-400 transition-colors duration-200"
+        >
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6z"></path>
+          <path d="M10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
+        </svg>
+        
+        <span 
+          *ngIf="notificationCount > 0"
+          class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse"
+        >
+          {{ notificationCount > 99 ? '99+' : notificationCount }}
+        </span>
+      </button>
+    </div>
+    
+    <!-- Resto del perfil -->
+    <a [routerLink]="homeRoute" class="inline-flex space-x-2 items-center cursor-pointer hover:opacity-80 transition-opacity">
+        <span>
+            <img 
+              class="rounded-full w-8 h-8" 
+              src="https://ui-avatars.com/api/?name={{ fullName }}&background=3b82f6&color=fff" 
+              alt="Avatar">
+        </span>
+        <span class="text-sm md:text-base font-bold">
+            {{ fullName }}
+        </span>
+    </a>
+    <p class="text-slate-400 text-xs mt-1 ml-10 mb-5">{{ userRole }}</p>
+</div>
+
+<!-- ❌ TODO EL PANEL DE NOTIFICACIONES ELIMINADO -->
+<!-- ❌ TODO EL MODAL DE DETALLES ELIMINADO -->

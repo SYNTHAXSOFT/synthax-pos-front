@@ -1,0 +1,18 @@
+<div
+  id="menu"
+  class="fixed top-0 left-0 h-full w-[220px] bg-gray-900 text-slate-300 z-50 overflow-y-auto transform transition-transform duration-300 ease-in-out
+         md:translate-x-0 md:relative md:block"
+  [class.translate-x-0]="isOpen"
+  [class.-translate-x-full]="!isOpen"
+>
+  <app-side-menu-header></app-side-menu-header>
+
+  <app-side-menu-options (optionSelected)="closeSideMenu()"></app-side-menu-options>
+
+  <button
+    class="md:hidden w-full bg-slate-800 text-white py-2 mt-2 hover:bg-slate-700"
+    (click)="closeSideMenu()"
+  >
+
+  </button>
+</div>

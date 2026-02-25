@@ -1,0 +1,65 @@
+<div class="container mx-auto px-4">
+  <h2 class="text-2xl font-bold mb-2">Lista de Departamentos</h2>
+  <hr class="mb-4 border-gray-300">
+
+  @if (cargando) {
+    <div class="flex justify-center items-center py-8">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <span class="sr-only">Cargando...</span>
+    </div>
+  }
+
+  @if (!cargando) {
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Código</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Nombre</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Activo</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          @for (depto of departamentos; track depto.id) {
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3 text-sm">{{ depto.id }}</td>
+              <td class="px-4 py-3 text-sm">{{ depto.nombre }}</td>
+              <td class="px-4 py-3">
+                <span
+                  [class]="depto.activo
+                    ? 'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'
+                    : 'px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800'"
+                >
+                  {{ depto.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="px-4 py-3 space-x-2">
+                <button
+                  class="px-3 py-1 text-xs font-medium text-white bg-yellow-500 rounded hover:bg-yellow-600"
+                  (click)="desactivar(depto.id)"
+                >
+                  Desactivar
+                </button>
+                <button
+                  class="px-3 py-1 text-xs font-medium text-white bg-red-500 rounded hover:bg-red-600"
+                  (click)="eliminar(depto.id)"
+                >
+                  Eliminar
+                </button>
+                <button class="px-3 py-1 text-xs font-medium text-white bg-cyan-500 rounded hover:bg-cyan-600" (click)="editar(depto.id!)">Editar</button>      
+              </td>
+            </tr>
+          }
+          @empty {
+            <tr>
+              <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                No hay departamentos registrados
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

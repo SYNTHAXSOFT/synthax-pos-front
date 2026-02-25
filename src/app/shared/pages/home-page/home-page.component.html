@@ -1,0 +1,53 @@
+<div class="hero min-h-screen">
+  <div class="hero-overlay bg-opacity-60"></div>
+  <div class="hero-content text-neutral-content text-center">
+    <div class="max-w-md w-full">
+      <img src="/assets/img/logo.png" alt="Logo Synthax Votos" class="mb-5 mx-auto w-48" />
+      <h1 class="mb-3 text-5xl font-bold">SYNTHAX POS</h1>
+      <p class="mb-6 text-sm opacity-90">
+        Gestiona elecciones internas de forma simple y segura.<br>
+        Inicia sesión para monitorizar resultados en tiempo real.
+      </p>
+
+      <form (ngSubmit)="onLogin()" class="bg-base-100 bg-opacity-10 backdrop-blur-sm p-8 rounded-lg shadow-xl">
+        
+        <div class="mb-4">
+          <input 
+            type="text" 
+            placeholder="Cedula" 
+            [(ngModel)]="credentials.cedula"
+            name="cedula"
+            class="input input-bordered w-full bg-white bg-opacity-90 text-gray-800"
+            required>
+        </div>
+
+        <div class="mb-6">
+          <input 
+            type="password" 
+            placeholder="Contraseña" 
+            [(ngModel)]="credentials.password"
+            name="password"
+            class="input input-bordered w-full bg-white bg-opacity-90 text-gray-800"
+            required>
+        </div>
+
+        @if (errorMessage) {
+          <div class="alert alert-error mb-4 text-sm">
+            <span>{{ errorMessage }}</span>
+          </div>
+        }
+
+        <button 
+          type="submit" 
+          class="btn btn-primary w-full"
+          [disabled]="cargando">
+          @if (cargando) {
+            <span class="loading loading-spinner"></span>
+          }
+          {{ cargando ? 'Ingresando...' : 'Ingresar' }}
+        </button>
+
+      </form>
+    </div>
+  </div>
+</div>

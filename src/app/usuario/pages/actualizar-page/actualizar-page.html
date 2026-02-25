@@ -1,0 +1,131 @@
+<div class="container mx-auto px-4">
+  <h2 class="text-2xl font-bold mb-2">Actualizar Usuario</h2>
+  <hr class="mb-4 border-gray-300">
+
+  @if (cargando) {
+    <div class="flex justify-center items-center py-8">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <span class="sr-only">Cargando...</span>
+    </div>
+  }
+
+  @if (!cargando) {
+    <form (ngSubmit)="actualizarUsuario()">
+            <div class="flex items-center mb-4">
+        <label class="w-1/4 text-sm font-medium text-gray-700">Cedula</label>
+        <div class="w-3/4">
+          <input 
+            type="text" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            [(ngModel)]="usuario.cedula" 
+            name="cedula" 
+            required>
+        </div>
+      </div>
+
+      <div class="flex items-center mb-4">
+        <label class="w-1/4 text-sm font-medium text-gray-700">Nombre</label>
+        <div class="w-3/4">
+          <input 
+            type="text" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            [(ngModel)]="usuario.nombre" 
+            name="nombre" 
+            required>
+        </div>
+      </div>
+
+      <div class="flex items-center mb-4">
+        <label class="w-1/4 text-sm font-medium text-gray-700">Apellido</label>
+        <div class="w-3/4">
+          <input 
+            type="text" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            [(ngModel)]="usuario.apellido" 
+            name="apellido" 
+            required>
+        </div>
+      </div>
+
+
+      <div class="flex items-center mb-4">
+        <label class="w-1/4 text-sm font-medium text-gray-700">Email</label>
+        <div class="w-3/4">
+          <input 
+            type="text" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            [(ngModel)]="usuario.email" 
+            name="email" 
+            required>
+        </div>
+      </div>
+
+      <div class="flex items-center mb-4">
+        <label class="w-1/4 text-sm font-medium text-gray-700">Password</label>
+        <div class="w-3/4">
+          <input 
+            type="text" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            [(ngModel)]="usuario.password" 
+            name="password" 
+            required>
+        </div>
+      </div>
+
+      <div class="flex items-center mb-4">
+        <label class="w-1/4 text-sm font-medium text-gray-700">Rol</label>
+        <div class="w-3/4">
+          <select 
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed" 
+            [(ngModel)]="usuario.rol" 
+            name="rol" >
+            <option value="">Seleccione un rol</option>
+            <option value="ROOT">ROOT</option>
+            <option value="CANDIDATO">CANDIDATO</option>
+            <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+            <option value="TESTIGO">TESTIGO</option>         
+          </select>
+        </div>
+      </div>
+
+      <div class="flex items-center mb-4">
+        <label class="w-1/4 text-sm font-medium text-gray-700">Candidato</label>
+        <div class="w-3/4">
+          <select 
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" 
+            [(ngModel)]="selectedCandidato" 
+            name="candidato">
+            <option value="">Seleccione un candidato</option>
+            <option *ngFor="let can of candidatos" [value]="can.id">{{ can.nombre }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex items-center mb-4">
+        <label class="w-1/4 text-sm font-medium text-gray-700">Activo</label>
+        <div class="w-3/4">
+          <input 
+            type="checkbox" 
+            class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500" 
+            [(ngModel)]="usuario.activo" 
+            name="activo">
+        </div>
+      </div>
+
+      <div class="flex justify-between">
+        <button 
+          type="button" 
+          class="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2" 
+          (click)="cancelar()">
+          Cancelar
+        </button>
+        <button 
+          type="submit" 
+          class="px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+          Actualizar
+        </button>
+      </div>
+
+    </form>
+  }
+</div>

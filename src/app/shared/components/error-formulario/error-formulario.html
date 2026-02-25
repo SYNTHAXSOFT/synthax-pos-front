@@ -1,0 +1,19 @@
+@if (isLoading()) {
+    <div class="row">
+        <div class="col">
+            <span>Valid</span>
+            <pre>{{ myForm()?.valid | json }}</pre>
+
+            <span>Pristine</span>
+            <pre>{{ myForm()?.pristine | json }}</pre>
+
+            <span>Touched</span>
+            <pre>{{ myForm()?.touched | json }}</pre>
+
+            <span>Value</span>
+            <pre>{{ myForm()?.value | json }}</pre>
+        </div>
+    </div>
+}
+
+

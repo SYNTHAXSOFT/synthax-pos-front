@@ -1,0 +1,46 @@
+<div class="container">
+  <h2>Actualizar Departamento</h2>
+  <hr>
+
+  @if (cargando) {
+    <div class="text-center">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+  }
+
+  @if (!cargando) {
+    <form (ngSubmit)="actualizarDepartamento()">
+
+      <div class="mb-3 row">
+        <label class="col-sm-3 col-form-label">Código</label>
+        <div class="col-sm-9">
+          <input type="text" class="form-control" [(ngModel)]="departamento.id" name="id" readonly>
+        </div>
+      </div>
+
+      <div class="mb-3 row">
+        <label class="col-sm-3 col-form-label">Nombre</label>
+        <div class="col-sm-9">
+          <input type="text" class="form-control" [(ngModel)]="departamento.nombre" name="nombre" required>
+        </div>
+      </div>
+
+      <div class="mb-3 row">
+        <label class="col-sm-3 col-form-label">Activo</label>
+        <div class="col-sm-9">
+          <input type="checkbox" class="form-check-input" [(ngModel)]="departamento.activo" name="activo">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <button type="button" class="btn btn-secondary me-2" (click)="cancelar()">Cancelar</button>
+          <button type="submit" class="btn btn-primary float-end">Actualizar</button>
+        </div>
+      </div>
+
+    </form>
+  }
+</div>
