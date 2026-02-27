@@ -1,4 +1,524 @@
-@import "tailwindcss";
-@plugin "daisyui" {
-  themes: all;
+/* Bootstrap ya se carga desde angular.json */
+
+/* ========================================
+   PALETA DE COLORES - SYNTHAX POS (VERDE)
+   ======================================== */
+:root {
+  /* Colores principales - VERDE FINANCIERO */
+  --primary-color: #059669;        /* Verde esmeralda principal */
+  --primary-dark: #047857;         /* Verde oscuro */
+  --primary-light: #10b981;        /* Verde claro */
+  
+  --secondary-color: #f97316;      /* Naranja energético (acento) */
+  --secondary-dark: #ea580c;
+  --secondary-light: #fb923c;
+  
+  --accent-color: #0891b2;         /* Cyan (complementario) */
+  --accent-dark: #0e7490;
+  --accent-light: #06b6d4;
+  
+  /* Colores de estado */
+  --success-color: #10b981;        /* Verde éxito */
+  --warning-color: #f59e0b;        /* Amarillo advertencia */
+  --danger-color: #ef4444;         /* Rojo peligro */
+  --info-color: #06b6d4;           /* Cyan información */
+  
+  /* Colores neutrales */
+  --dark-bg: #1e293b;              /* Fondo sidebar oscuro */
+  --dark-bg-hover: #334155;        /* Hover sidebar */
+  --light-bg: #f0fdf4;             /* Fondo general con tinte verde muy suave */
+  --card-bg: #ffffff;              /* Fondo tarjetas */
+  
+  --text-primary: #0f172a;         /* Texto principal */
+  --text-secondary: #64748b;       /* Texto secundario */
+  --text-muted: #94a3b8;           /* Texto deshabilitado */
+  
+  --border-color: #d1fae5;         /* Bordes con tinte verde suave */
+  --border-light: #ecfdf5;         /* Bordes muy claros */
+  
+  /* Sombras */
+  --shadow-sm: 0 1px 2px 0 rgba(5, 150, 105, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(5, 150, 105, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(5, 150, 105, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(5, 150, 105, 0.15);
+}
+
+/* ========================================
+   FUENTES Y TIPOGRAFÍA
+   ======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--light-bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* ========================================
+   HEADINGS
+   ======================================== */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
+/* ========================================
+   SIDEBAR / MENÚ LATERAL - TEMA VERDE POS
+   ======================================== */
+#menu {
+  background: linear-gradient(180deg, var(--dark-bg) 0%, #0f172a 100%) !important;
+  box-shadow: var(--shadow-xl);
+}
+
+#menu .text-white-50 {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Links del menú */
+#menu a {
+  transition: all 0.2s ease-in-out;
+}
+
+#menu a:hover {
+  background-color: var(--dark-bg-hover) !important;
+  transform: translateX(4px);
+}
+
+/* Item activo del menú - VERDE */
+#menu a.bg-primary {
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-light) 100%) !important;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+}
+
+/* ========================================
+   BOTONES PERSONALIZADOS - TEMA VERDE
+   ======================================== */
+.btn {
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-in-out;
+  border: none;
+}
+
+/* Botón primario (VERDE) */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #065f46 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(5, 150, 105, 0.3);
+}
+
+/* Botón success (verde más claro) */
+.btn-success {
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+}
+
+/* Botón warning (NARANJA - acento) */
+.btn-warning {
+  background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-dark) 100%);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-warning:hover {
+  background: linear-gradient(135deg, var(--secondary-dark) 0%, #c2410c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(249, 115, 22, 0.3);
+}
+
+/* Botón info (cyan) */
+.btn-info {
+  background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent-dark) 100%);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-info:hover {
+  background: linear-gradient(135deg, var(--accent-dark) 0%, #155e75 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(6, 182, 212, 0.3);
+}
+
+/* Botón danger (rojo) */
+.btn-danger {
+  background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
+}
+
+/* Botón secondary (gris) */
+.btn-secondary {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-secondary:hover {
+  background: linear-gradient(135deg, #475569 0%, #334155 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ========================================
+   CARDS - TEMA VERDE
+   ======================================== */
+.card {
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-bg);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease-in-out;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
+  border-color: var(--primary-light);
+}
+
+.card-header {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: white;
+  border-radius: 1rem 1rem 0 0 !important;
+  font-weight: 600;
+}
+
+/* ========================================
+   TABLAS - TEMA VERDE
+   ======================================== */
+.table {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.table thead,
+.table-light {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+  color: white !important;
+  border: none;
+}
+
+.table thead th,
+.table-light th {
+  border: none !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.5px;
+  color: white !important;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #d1fae5;
+  transform: scale(1.005);
+  transition: all 0.2s ease-in-out;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #ecfdf5;
+}
+
+/* ========================================
+   BADGES - TEMA VERDE
+   ======================================== */
+.badge {
+  font-weight: 600;
+  padding: 0.4em 0.8em;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.bg-purple {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+  color: white !important;
+}
+
+.badge.bg-success {
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%) !important;
+}
+
+.badge.bg-warning {
+  background: linear-gradient(135deg, var(--secondary-light) 0%, var(--secondary-color) 100%) !important;
+}
+
+/* ========================================
+   FORMULARIOS - TEMA VERDE
+   ======================================== */
+.form-control,
+.form-select {
+  border-radius: 0.5rem;
+  border: 2px solid var(--border-color);
+  transition: all 0.2s ease-in-out;
+  background-color: white;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.25rem rgba(5, 150, 105, 0.15);
+  background-color: white;
+}
+
+.form-label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+/* ========================================
+   ALERTS - TEMA VERDE
+   ======================================== */
+.alert {
+  border-radius: 0.75rem;
+  border: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.alert-success {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border-left: 4px solid var(--primary-color);
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  border-left: 4px solid var(--danger-color);
+}
+
+.alert-warning {
+  background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+  color: #9a3412;
+  border-left: 4px solid var(--secondary-color);
+}
+
+.alert-info {
+  background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
+  color: #155e75;
+  border-left: 4px solid var(--accent-light);
+}
+
+/* ========================================
+   SPINNERS - VERDE
+   ======================================== */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+  border-width: 0.3em;
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.2em;
+}
+
+.spinner-border.text-primary {
+  border-color: var(--primary-light);
+  border-right-color: transparent;
+}
+
+/* ========================================
+   UTILIDADES PERSONALIZADAS
+   ======================================== */
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+.bg-primary {
+  background-color: var(--primary-color) !important;
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+}
+
+.bg-gradient-success {
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+}
+
+.border-primary {
+  border-color: var(--primary-color) !important;
+}
+
+/* ========================================
+   SCROLLBAR PERSONALIZADA - VERDE
+   ======================================== */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light-bg);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+}
+
+/* ========================================
+   ANIMACIONES
+   ======================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-green {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(5, 150, 105, 0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.4s ease-in-out;
+}
+
+.pulse-green {
+  animation: pulse-green 2s infinite;
+}
+
+/* ========================================
+   COMPONENTES ESPECIALES POS
+   ======================================== */
+
+/* Badge de dinero/precio */
+.badge-money {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: white;
+  font-weight: 700;
+  padding: 0.5em 1em;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+}
+
+/* Indicador de stock */
+.stock-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.stock-indicator.high {
+  background-color: var(--primary-color);
+  box-shadow: 0 0 8px rgba(5, 150, 105, 0.6);
+}
+
+.stock-indicator.medium {
+  background-color: var(--secondary-color);
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.6);
+}
+
+.stock-indicator.low {
+  background-color: var(--danger-color);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  animation: pulse-green 1.5s infinite;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 768px) {
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+  h3 { font-size: 1.5rem; }
+  
+  .card {
+    border-radius: 0.75rem;
+  }
+  
+  .badge-money {
+    font-size: 0.875rem;
+    padding: 0.4em 0.8em;
+  }
+}
+
+/* ========================================
+   UTILIDADES DE HOVER
+   ======================================== */
+.hover-lift {
+  transition: all 0.3s ease-in-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.hover-glow {
+  transition: all 0.3s ease-in-out;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(5, 150, 105, 0.4);
 }

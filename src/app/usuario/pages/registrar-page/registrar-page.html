@@ -1,181 +1,193 @@
-<h2 class="text-2xl font-semibold mb-2 text-gray-800">Registrar usuarios</h2>
-<hr class="border-gray-300 mb-6">
+<h2 class="mb-2">Registrar usuarios</h2>
+<hr class="mb-4">
 
-<div class="max-w-3xl mx-auto bg-white shadow-md rounded-xl p-6">
-  <form autocomplete="off" [formGroup]="myform" (ngSubmit)="onSave()" class="space-y-5">
+<div class="container" style="max-width: 48rem;">
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+      <form autocomplete="off" [formGroup]="myform" (ngSubmit)="onSave()">
 
-    <!-- Rol -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
-      <select 
-        class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" 
-        formControlName="rol">
-        <option value="">Seleccione un rol</option>
-        <option *ngFor="let rol of rolesDisponibles" [value]="rol">
-          {{ rol }}
-        </option>
-      </select>
-      @if (formUtils.isValidField(myform, 'rol')) {
-        <span class="text-sm text-red-600">
-          {{ formUtils.getFieldError(myform, 'rol') }}
-        </span>
-      }
-    </div>
-
+        <!-- Rol -->
+        <div class="mb-3">
+          <label class="form-label">Rol</label>
+          <select class="form-select" formControlName="rol">
+            <option value="">Seleccione un rol</option>
+            <option *ngFor="let rol of rolesDisponibles" [value]="rol">
+              {{ rol }}
+            </option>
+          </select>
+          @if (formUtils.isValidField(myform, 'rol')) {
+            <div class="text-danger small mt-1">
+              {{ formUtils.getFieldError(myform, 'rol') }}
+            </div>
+          }
+        </div>
 
         <!-- Sección de Ubicación -->
-    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-      <h3 class="text-lg font-medium text-gray-800 mb-3">Ubicación</h3>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Departamento -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Departamento <span class="text-red-500">*</span>
-          </label>
-          <select
-            formControlName="departamentoId"
-            (change)="onDepartamentoChange()"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option [ngValue]="null">Seleccione un departamento</option>
-            @for (departamento of departamentosList; track departamento.id) {
-              <option [value]="departamento.id">{{ departamento.nombre }}</option>
-            }
-          </select>
-          @if (formUtils.isValidField(myform, 'departamentoId')) {
-            <span class="text-sm text-red-600 mt-1 block">
-              {{ formUtils.getFieldError(myform, 'departamentoId') }}
-            </span>
+        <div class="card bg-light mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Ubicación</h5>
+            
+            <div class="row g-3">
+              <!-- Departamento -->
+              <div class="col-12 col-md-6">
+                <label class="form-label">
+                  Departamento <span class="text-danger">*</span>
+                </label>
+                <select
+                  formControlName="departamentoId"
+                  (change)="onDepartamentoChange()"
+                  class="form-select"
+                >
+                  <option [ngValue]="null">Seleccione un departamento</option>
+                  @for (departamento of departamentosList; track departamento.id) {
+                    <option [value]="departamento.id">{{ departamento.nombre }}</option>
+                  }
+                </select>
+                @if (formUtils.isValidField(myform, 'departamentoId')) {
+                  <div class="text-danger small mt-1">
+                    {{ formUtils.getFieldError(myform, 'departamentoId') }}
+                  </div>
+                }
+              </div>
+
+              <!-- Municipio -->
+              <div class="col-12 col-md-6">
+                <label class="form-label">
+                  Municipio <span class="text-danger">*</span>
+                </label>
+                <select
+                  formControlName="municipioId"
+                  class="form-select"
+                >
+                  <option [ngValue]="null">
+                    {{ !departamentoSeleccionado ? 'Seleccione primero un departamento' : 'Seleccione un municipio' }}
+                  </option>
+                  @for (municipio of municipiosListFiltrados; track municipio.id) {
+                    <option [value]="municipio.id">{{ municipio.nombre }}</option>
+                  }
+                </select>
+                @if (formUtils.isValidField(myform, 'municipioId')) {
+                  <div class="text-danger small mt-1">
+                    {{ formUtils.getFieldError(myform, 'municipioId') }}
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nombre -->
+        <div class="mb-3">
+          <label class="form-label">Nombre</label>
+          <input 
+            type="text" 
+            placeholder="Nombre del usuario" 
+            formControlName="nombre"
+            [readonly]="!snCandidato()"
+            [ngClass]="{
+              'form-control': true,
+              'bg-light text-secondary': !snCandidato()
+            }"
+            [style.cursor]="!snCandidato() ? 'not-allowed' : 'text'"
+          />
+          @if (formUtils.isValidField(myform, 'nombre')) {
+            <div class="text-danger small mt-1">
+              {{ formUtils.getFieldError(myform, 'nombre') }}
+            </div>
           }
         </div>
 
-        <!-- Municipio -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Municipio<span class="text-red-500">*</span>
-          </label>
-          <select
-            formControlName="municipioId"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option [ngValue]="null">
-              {{ !departamentoSeleccionado ? 'Seleccione primero un departamento' : 'Seleccione un municipio' }}
-            </option>
-            @for (municipio of municipiosListFiltrados; track municipio.id) {
-              <option [value]="municipio.id">{{ municipio.nombre }}</option>
-            }
-          </select>
-          @if (formUtils.isValidField(myform, 'municipioId')) {
-            <span class="text-sm text-red-600 mt-1 block">
-              {{ formUtils.getFieldError(myform, 'municipioId') }}
-            </span>
+        <!-- Apellido -->
+        <div class="mb-3">
+          <label class="form-label">Apellido</label>
+          <input 
+            type="text" 
+            placeholder="Apellido del usuario" 
+            formControlName="apellido"
+            [readonly]="!snCandidato()"
+            [ngClass]="{
+              'form-control': true,
+              'bg-light text-secondary': !snCandidato()
+            }"
+            [style.cursor]="!snCandidato() ? 'not-allowed' : 'text'"
+          />
+          @if (formUtils.isValidField(myform, 'apellido')) {
+            <div class="text-danger small mt-1">
+              {{ formUtils.getFieldError(myform, 'apellido') }}
+            </div>
           }
         </div>
-      </div>
-    </div>
 
-    <!-- Nombre -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-      <input 
-        type="text" 
-        placeholder="Nombre del usuario" 
-        formControlName="nombre"
-        [readonly]="!snCandidato()"
-        [ngClass]="{
-          'w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500': true,
-          'bg-gray-100 text-gray-500 cursor-not-allowed': !snCandidato()
-        }"
-      />
-      @if (formUtils.isValidField(myform, 'nombre')) {
-        <span class="text-sm text-red-600">{{ formUtils.getFieldError(myform, 'nombre') }}</span>
-      }
-    </div>
+        <!-- Cedula -->
+        <div class="mb-3">
+          <label class="form-label">Cedula</label>
+          <input 
+            type="text" 
+            placeholder="Cedula del usuario" 
+            class="form-control" 
+            formControlName="cedula" 
+          />
+          @if (formUtils.isValidField(myform, 'cedula')) {
+            <div class="text-danger small mt-1">
+              {{ formUtils.getFieldError(myform, 'cedula') }}
+            </div>
+          }
+        </div>
 
-    <!-- Apellido -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
-      <input 
-        type="text" 
-        placeholder="Apellido del usuario" 
-        formControlName="apellido"
-        [readonly]="!snCandidato()"
-        [ngClass]="{
-          'w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500': true,
-          'bg-gray-100 text-gray-500 cursor-not-allowed': !snCandidato()
-        }"
-      />
-      @if (formUtils.isValidField(myform, 'apellido')) {
-        <span class="text-sm text-red-600">{{ formUtils.getFieldError(myform, 'apellido') }}</span>
-      }
-    </div>
+        <!-- Email -->
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input 
+            type="email" 
+            placeholder="correo@ejemplo.com" 
+            class="form-control" 
+            formControlName="email" 
+          />
+          @if (formUtils.isValidField(myform, 'email')) {
+            <div class="text-danger small mt-1">
+              {{ formUtils.getFieldError(myform, 'email') }}
+            </div>
+          }
+        </div>
 
-    <!-- cedula -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Cedula</label>
-      <input 
-        type="text" 
-        placeholder="Cedula del usuario" 
-        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-        formControlName="cedula" 
-      />
-      @if (formUtils.isValidField(myform, 'cedula')) {
-        <span class="text-sm text-red-600">{{ formUtils.getFieldError(myform, 'cedula') }}</span>
-      }
-    </div>
+        <!-- Password -->
+        <div class="mb-3">
+          <label class="form-label">Contraseña</label>
+          <input 
+            type="password" 
+            placeholder="••••••••" 
+            class="form-control" 
+            formControlName="password" 
+          />
+          @if (formUtils.isValidField(myform, 'password')) {
+            <div class="text-danger small mt-1">
+              {{ formUtils.getFieldError(myform, 'password') }}
+            </div>
+          }
+        </div>
 
-    <!-- Email -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-      <input 
-        type="email" 
-        placeholder="correo@ejemplo.com" 
-        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-        formControlName="email" 
-      />
-      @if (formUtils.isValidField(myform, 'email')) {
-        <span class="text-sm text-red-600">{{ formUtils.getFieldError(myform, 'email') }}</span>
-      }
-    </div>
+        <!-- Activo -->
+        <div class="form-check mb-3">
+          <input 
+            type="checkbox" 
+            id="activo"
+            class="form-check-input" 
+            formControlName="activo" 
+          />
+          <label for="activo" class="form-check-label">Usuario activo</label>
+        </div>
 
-    <!-- Password -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-      <input 
-        type="password" 
-        placeholder="••••••••" 
-        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-        formControlName="password" 
-      />
-      @if (formUtils.isValidField(myform, 'password')) {
-        <span class="text-sm text-red-600">{{ formUtils.getFieldError(myform, 'password') }}</span>
-      }
+        <!-- Botón -->
+        <div class="d-flex justify-content-end">
+          <button type="submit" class="btn btn-primary px-4">
+            Guardar
+          </button>
+        </div>
+      </form>
     </div>
-
-    <!-- Activo -->
-    <div class="flex items-center">
-      <input 
-        type="checkbox" 
-        id="activo"
-        class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500" 
-        formControlName="activo" 
-      />
-      <label for="activo" class="ml-2 text-sm font-medium text-gray-700">Usuario activo</label>
-    </div>
-
-    <!-- Botón -->
-    <div class="flex justify-end">
-      <button
-        type="submit"
-        class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
-      >
-        Guardar
-      </button>
-    </div>
-  </form>
+  </div>
 </div>
 
-<div class="mt-10">
+<div class="mt-5">
   <app-listar-page/>
 </div>

@@ -1,63 +1,69 @@
-<div class="container mx-auto px-4">
-  <h2 class="text-2xl font-bold mb-2">Lista de Usuarios</h2>
-  <hr class="mb-4 border-gray-300">
+<div class="container-fluid px-4">
+  <h2 class="mb-2">Lista de Usuarios</h2>
+  <hr class="mb-4">
 
   @if (isLoading()) {
-    <div class="flex justify-center items-center py-8">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      <span class="sr-only">Cargando...</span>
+    <div class="d-flex justify-content-center align-items-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
     </div>
   }
 
   @if (!isLoading()) {
-    <div class="overflow-x-auto">
-      <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow">
-        <thead class="bg-gray-100">
+    <div class="table-responsive">
+      <table class="table table-striped table-hover table-bordered">
+        <thead class="table-light">
           <tr>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Nombre</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Apellido</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Rol</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Estado</th>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Apellido</th>
+            <th scope="col">Email</th>
+            <th scope="col">Rol</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Acciones</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200">
+        <tbody>
           @for (usuario of usuariosList(); track usuario.id) {
-            <tr class="hover:bg-gray-50">
-              <td class="px-4 py-3 text-sm">{{ usuario.nombre }}</td>
-              <td class="px-4 py-3 text-sm">{{ usuario.apellido }}</td>
-              <td class="px-4 py-3 text-sm">{{ usuario.email }}</td>
-              <td class="px-4 py-3 text-sm">
+            <tr>
+              <td>{{ usuario.nombre }}</td>
+              <td>{{ usuario.apellido }}</td>
+              <td>{{ usuario.email }}</td>
+              <td>
                 <span
                   [class]="
-                    usuario.rol === 'ROOT' ? 'px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800' :
-                    usuario.rol === 'ADMINISTRADOR' ? 'px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800' :
-                    usuario.rol === 'CANDIDATO' ? 'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800' :
-                    'px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'
+                    usuario.rol === 'ROOT' ? 'badge bg-purple' :
+                    usuario.rol === 'ADMINISTRADOR' ? 'badge bg-primary' :
+                    usuario.rol === 'CANDIDATO' ? 'badge bg-success' :
+                    'badge bg-warning text-dark'
                   "
+                  [style.background-color]="usuario.rol === 'ROOT' ? '#6f42c1' : ''"
                 >
                   {{ usuario.rol }}
                 </span>
               </td>
-              <td class="px-4 py-3">
+              <td>
                 <span
                   [class]="usuario.activo
-                    ? 'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'
-                    : 'px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800'"
+                    ? 'badge bg-success'
+                    : 'badge bg-danger'"
                 >
                   {{ usuario.activo ? 'Activo' : 'Inactivo' }}
                 </span>
               </td>
 
-              <td class="px-4 py-3 space-x-2">
-                <button class="px-3 py-1 text-xs font-medium text-white bg-cyan-500 rounded hover:bg-cyan-600" (click)="editar(usuario.id!)">Editar</button>
+              <td>
+                <button 
+                  class="btn btn-info btn-sm me-1" 
+                  (click)="editar(usuario.id!)">
+                  Editar
+                </button>
                 <button
                   [class]="puedeModificar(usuario) 
                     ? (usuario.activo 
-                      ? 'px-3 py-1 text-xs font-medium text-white bg-red-500 rounded hover:bg-red-600 transition'
-                      : 'px-3 py-1 text-xs font-medium text-white bg-green-500 rounded hover:bg-green-600 transition')
-                    : 'px-3 py-1 text-xs font-medium text-white bg-gray-400 rounded cursor-not-allowed'"
+                      ? 'btn btn-danger btn-sm'
+                      : 'btn btn-success btn-sm')
+                    : 'btn btn-secondary btn-sm'"
                   [disabled]="!puedeModificar(usuario)"
                   (click)="activarInactivarAction(usuario)"
                 >
@@ -68,7 +74,7 @@
           }
           @empty {
             <tr>
-              <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+              <td colspan="6" class="text-center text-muted py-4">
                 No hay usuarios registrados
               </td>
             </tr>
@@ -79,7 +85,7 @@
   }
 
   @if (isError()) {
-    <div class="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+    <div class="alert alert-danger mt-3" role="alert">
       {{ errorMessage() }}
     </div>
   }

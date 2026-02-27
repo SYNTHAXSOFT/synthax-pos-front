@@ -1,18 +1,32 @@
 <div
   id="menu"
-  class="fixed top-0 left-0 h-full w-[220px] bg-gray-900 text-slate-300 z-50 overflow-y-auto transform transition-transform duration-300 ease-in-out
-         md:translate-x-0 md:relative md:block"
-  [class.translate-x-0]="isOpen"
-  [class.-translate-x-full]="!isOpen"
+  class="position-fixed top-0 start-0 h-100 bg-dark text-white-50 overflow-auto"
+  [class.d-none]="!isOpen"
+  style="width: 220px; z-index: 1050; transition: transform 0.3s ease-in-out;"
 >
   <app-side-menu-header></app-side-menu-header>
 
   <app-side-menu-options (optionSelected)="closeSideMenu()"></app-side-menu-options>
 
   <button
-    class="md:hidden w-full bg-slate-800 text-white py-2 mt-2 hover:bg-slate-700"
+    class="d-md-none w-100 btn btn-secondary mt-2"
     (click)="closeSideMenu()"
   >
-
+    Cerrar
   </button>
 </div>
+
+<style>
+  @media (min-width: 768px) {
+    #menu {
+      position: relative !important;
+      display: block !important;
+    }
+  }
+  
+  @media (max-width: 767px) {
+    #menu {
+      transform: translateX(0);
+    }
+  }
+</style>
