@@ -1,7 +1,7 @@
 import { Routes } from "@angular/router";
-import { ListarPage } from "./pages/listar-page/listar-page"
-import { RegistrarPage } from "./pages/registrar-page/registrar-page"
-import { ActualizarUsuarioPageComponent } from "./pages/actualizar-page/actualizar-page"
+import { ListarPage } from "./pages/usuario-listar/usuario-listar"
+import { RegistrarPage } from "./pages/usuario-registrar/usuario-registrar"
+import { ActualizarUsuarioPageComponent } from "./pages/usuario-actualizar/usuario-actualizar"
 
 export const usuarioRoutes: Routes = [
   {

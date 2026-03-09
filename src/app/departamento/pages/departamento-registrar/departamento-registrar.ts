@@ -3,13 +3,13 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { DepartamentoService } from '../../services/departamento.service';
 import { Departamento } from '../../interfaces/departamento.interface';
 import { CommonModule } from '@angular/common';
-import { ListarPageComponent } from '../listar-page/listar-page';
+import { ListarPageComponent } from '../departamento-listar/departamento-listar';
 
 @Component({
   selector: 'app-registrar-page',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ListarPageComponent],
-  templateUrl: './registrar-page.html'
+  templateUrl: './departamento-registrar.html'
 })
 export class RegistrarPageComponent {
   
@@ -37,7 +37,6 @@ export class RegistrarPageComponent {
       next: () => {
         alert('Departamento creado exitosamente');
         this.myForm.reset({ activo: true });
-        // 👇 refresca la tabla automáticamente
         this.listarComponent?.cargarDepartamentos();
       },
       error: (error) => {

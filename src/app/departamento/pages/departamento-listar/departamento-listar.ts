@@ -8,7 +8,7 @@ import { Departamento } from '../../interfaces/departamento.interface';
   selector: 'app-listar-page',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './listar-page.html'
+  templateUrl: './departamento-listar.html'
 })
 export class ListarPageComponent implements OnInit {
   

@@ -5,14 +5,14 @@ import { MunicipioService } from '../../service/municipio.service';
 import { DepartamentoService } from '../../../departamento/services/departamento.service';
 import { Municipio } from '../../interfaces/municipio.interface';
 import { Departamento } from '../../../departamento/interfaces/departamento.interface';
-import { ListarMunicipioPageComponent } from '../listar-page/listar-page';
+import { ListarMunicipioPageComponent } from '../municipio-listar/municipio-listar';
 
 
 @Component({
   selector: 'app-registrar-municipio',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ListarMunicipioPageComponent],
-  templateUrl: './registrar-page.html'
+  templateUrl: './municipio-registrar.html'
 })
 export class RegistrarMunicipioPageComponent implements OnInit {
 

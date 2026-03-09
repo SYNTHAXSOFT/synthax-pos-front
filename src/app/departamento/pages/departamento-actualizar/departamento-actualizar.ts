@@ -9,7 +9,7 @@ import { Departamento } from '../../interfaces/departamento.interface';
   selector: 'app-actualizar-departamento',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './actualizar-page.html'
+  templateUrl: './departamento-actualizar.html'
 })
 export class ActualizarDepartamentoPageComponent implements OnInit {
 

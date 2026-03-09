@@ -7,7 +7,7 @@ import { Municipio } from '../../interfaces/municipio.interface';
   selector: 'app-listar-municipio-page',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './listar-page.html'
+  templateUrl: './municipio-listar.html'
 })
 export class ListarMunicipioPageComponent implements OnInit {
 

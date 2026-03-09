@@ -4,7 +4,7 @@ import { Formutils } from '../../../utils/form-utils';
 import { Usuario } from '../../interfaces/usuario.interface';
 import { UsuarioService } from '../../services/usuario.service';
 import { AuthService } from '../../../auth/services/auth.service'; 
-import { ListarPage } from '../listar-page/listar-page';
+import { ListarPage } from '../usuario-listar/usuario-listar';
 import { CommonModule } from '@angular/common';
 import { DepartamentoService } from '../../../departamento/services/departamento.service';
 import { MunicipioService } from '../../../municipio/service/municipio.service';
@@ -15,7 +15,7 @@ import { ELECCION } from '../../../utils/constantes-utils';
 @Component({
   selector: 'app-registrar-page',
   imports: [ReactiveFormsModule, ListarPage, CommonModule], 
-  templateUrl: './registrar-page.html',
+  templateUrl: './usuario-registrar.html',
 })
 export class RegistrarPage implements OnInit {
 
