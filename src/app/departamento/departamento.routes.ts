@@ -8,16 +8,16 @@ export const departamentoRoutes: Routes = [
       children:[
         {
           path: 'registrar',
-          loadComponent: () => import('./pages/registrar-page/registrar-page').then(m => m.RegistrarPageComponent)
+          loadComponent: () => import('./pages/departamento-registrar/departamento-registrar').then(m => m.RegistrarPageComponent)
         },
         {
           path: 'listar',
-          loadComponent: () => import('./pages/listar-page/listar-page').then(m => m.ListarPageComponent)
+          loadComponent: () => import('./pages/departamento-listar/departamento-listar').then(m => m.ListarPageComponent)
         },
         {
         path: 'actualizar/:id',
         loadComponent: () =>
-          import('./pages/actualizar-page/actualizar-page').then(
+          import('./pages/departamento-actualizar/departamento-actualizar').then(
             (m) => m.ActualizarDepartamentoPageComponent
           ),
         },

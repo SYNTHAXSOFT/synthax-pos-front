@@ -1,0 +1,92 @@
+<div class="container-fluid px-4">
+  <h2 class="mb-2">Lista de Usuarios</h2>
+  <hr class="mb-4">
+
+  @if (isLoading()) {
+    <div class="d-flex justify-content-center align-items-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+  }
+
+  @if (!isLoading()) {
+    <div class="table-responsive">
+      <table class="table table-striped table-hover table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Apellido</th>
+            <th scope="col">Email</th>
+            <th scope="col">Rol</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (usuario of usuariosList(); track usuario.id) {
+            <tr>
+              <td>{{ usuario.nombre }}</td>
+              <td>{{ usuario.apellido }}</td>
+              <td>{{ usuario.email }}</td>
+              <td>
+                <span
+                  [class]="
+                    usuario.rol === 'ROOT' ? 'badge bg-purple' :
+                    usuario.rol === 'ADMINISTRADOR' ? 'badge bg-primary' :
+                    usuario.rol === 'CANDIDATO' ? 'badge bg-success' :
+                    'badge bg-warning text-dark'
+                  "
+                  [style.background-color]="usuario.rol === 'ROOT' ? '#6f42c1' : ''"
+                >
+                  {{ usuario.rol }}
+                </span>
+              </td>
+              <td>
+                <span
+                  [class]="usuario.activo
+                    ? 'badge bg-success'
+                    : 'badge bg-danger'"
+                >
+                  {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+
+              <td>
+                <button 
+                  class="btn btn-info btn-sm me-1" 
+                  (click)="editar(usuario.id!)">
+                  Editar
+                </button>
+                <button
+                  [class]="puedeModificar(usuario) 
+                    ? (usuario.activo 
+                      ? 'btn btn-danger btn-sm'
+                      : 'btn btn-success btn-sm')
+                    : 'btn btn-secondary btn-sm'"
+                  [disabled]="!puedeModificar(usuario)"
+                  (click)="activarInactivarAction(usuario)"
+                >
+                  {{ usuario.activo ? 'Desactivar' : 'Activar' }}
+                </button>
+              </td>
+            </tr>
+          }
+          @empty {
+            <tr>
+              <td colspan="6" class="text-center text-muted py-4">
+                No hay usuarios registrados
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (isError()) {
+    <div class="alert alert-danger mt-3" role="alert">
+      {{ errorMessage() }}
+    </div>
+  }
+</div>

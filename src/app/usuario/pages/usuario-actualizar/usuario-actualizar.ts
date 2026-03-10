@@ -9,7 +9,7 @@ import { Usuario } from '../../interfaces/usuario.interface';
   selector: 'app-actualizar-usuario',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './actualizar-page.html'
+  templateUrl: './usuario-actualizar.html'
 })
 export class ActualizarUsuarioPageComponent implements OnInit {
 

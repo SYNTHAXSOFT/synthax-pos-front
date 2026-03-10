@@ -8,7 +8,7 @@ import { Usuario } from '../../interfaces/usuario.interface';
 @Component({
   selector: 'app-listar-page',
   imports: [ɵInternalFormsSharedModule, ReactiveFormsModule],
-  templateUrl: './listar-page.html',
+  templateUrl: './usuario-listar.html',
 })
 
 export class ListarPage implements OnInit {

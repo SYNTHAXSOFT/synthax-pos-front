@@ -1,0 +1,87 @@
+<h2 class="mb-2">Registrar Municipio</h2>
+<hr class="mb-4">
+
+<div class="container" style="max-width: 88rem;">
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+      <form [formGroup]="myForm" (ngSubmit)="onSave()">
+
+        <!-- ID -->
+        <div class="mb-3">
+          <label class="form-label">Código</label>
+          <input
+            type="number"
+            placeholder="ID del municipio"
+            formControlName="id"
+            class="form-control"
+          />
+          @if (isValidField('id')) {
+            <div class="text-danger small mt-1">
+              {{ getFieldError('id') }}
+            </div>
+          }
+        </div>
+
+        <!-- Nombre -->
+        <div class="mb-3">
+          <label class="form-label">Nombre</label>
+          <input
+            type="text"
+            placeholder="Nombre del municipio"
+            formControlName="nombre"
+            class="form-control"
+          />
+          @if (isValidField('nombre')) {
+            <div class="text-danger small mt-1">
+              {{ getFieldError('nombre') }}
+            </div>
+          }
+        </div>
+
+        <!-- Departamento -->
+        <div class="mb-3">
+          <label class="form-label">Departamento</label>
+          <select
+            formControlName="departamentoId"
+            class="form-select"
+          >
+            <option [ngValue]="null">Seleccione un departamento</option>
+            @for (depto of departamentos; track depto.id) {
+              <option [value]="depto.id">{{ depto.nombre }}</option>
+            }
+          </select>
+          @if (isValidField('departamentoId')) {
+            <div class="text-danger small mt-1">
+              {{ getFieldError('departamentoId') }}
+            </div>
+          }
+        </div>
+
+        <!-- Activo -->
+        <div class="form-check mb-3">
+          <input
+            type="checkbox"
+            formControlName="activo"
+            class="form-check-input"
+            id="activoMuni"
+          />
+          <label class="form-check-label" for="activoMuni">
+            Activo
+          </label>
+        </div>
+
+        <!-- Botón -->
+        <div class="d-flex justify-content-end">
+          <button type="submit" class="btn btn-primary px-4">
+            Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabla de municipios -->
+  <div class="mt-4">
+    <app-listar-municipio-page></app-listar-municipio-page>
+  </div>
+</div>

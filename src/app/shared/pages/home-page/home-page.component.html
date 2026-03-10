@@ -1,53 +1,66 @@
-<div class="hero min-h-screen">
-  <div class="hero-overlay bg-opacity-60"></div>
-  <div class="hero-content text-neutral-content text-center">
-    <div class="max-w-md w-full">
-      <img src="/assets/img/logo.png" alt="Logo Synthax Votos" class="mb-5 mx-auto w-48" />
-      <h1 class="mb-3 text-5xl font-bold">SYNTHAX POS</h1>
-      <p class="mb-6 text-sm opacity-90">
-        Gestiona tu negocio de forma facil, legal y segura.<br>
-        Inicia sesión para gestionartus ventas, inventarios y registros ante la DIAN .
-      </p>
+<div class="min-vh-100 d-flex align-items-center justify-content-center position-relative" 
+     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+  
+  <!-- Overlay oscuro -->
+  <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50"></div>
+  
+  <!-- Contenido principal -->
+  <div class="position-relative text-center text-white" style="max-width: 28rem; width: 100%; padding: 1rem;">
+    
+    <img src="/assets/img/logo.png" alt="Logo Synthax Votos" class="mb-4 mx-auto" style="width: 12rem;" />
+    
+    <h1 class="mb-3 fw-bold" style="font-size: 3rem;">SYNTHAX POS</h1>
+    
+    <p class="mb-4 opacity-75" style="font-size: 0.875rem;">
+      Gestiona tu negocio de forma facil, legal y segura.<br>
+      Inicia sesión para gestionartus ventas, inventarios y registros ante la DIAN .
+    </p>
 
-      <form (ngSubmit)="onLogin()" class="bg-base-100 bg-opacity-10 backdrop-blur-sm p-8 rounded-lg shadow-xl">
-        
-        <div class="mb-4">
-          <input 
-            type="text" 
-            placeholder="Cedula" 
-            [(ngModel)]="credentials.cedula"
-            name="cedula"
-            class="input input-bordered w-full bg-white bg-opacity-90 text-gray-800"
-            required>
+    <form (ngSubmit)="onLogin()" class="bg-white bg-opacity-10 p-4 rounded-3 shadow-lg" 
+          style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+      
+      <!-- Campo Cédula -->
+      <div class="mb-3">
+        <input 
+          type="text" 
+          placeholder="Cedula" 
+          [(ngModel)]="credentials.cedula"
+          name="cedula"
+          class="form-control form-control-lg bg-white bg-opacity-90"
+          style="color: #1f2937;"
+          required>
+      </div>
+
+      <!-- Campo Contraseña -->
+      <div class="mb-4">
+        <input 
+          type="password" 
+          placeholder="Contraseña" 
+          [(ngModel)]="credentials.password"
+          name="password"
+          class="form-control form-control-lg bg-white bg-opacity-90"
+          style="color: #1f2937;"
+          required>
+      </div>
+
+      <!-- Mensaje de error -->
+      @if (errorMessage) {
+        <div class="alert alert-danger mb-3 py-2" role="alert" style="font-size: 0.875rem;">
+          <span>{{ errorMessage }}</span>
         </div>
+      }
 
-        <div class="mb-6">
-          <input 
-            type="password" 
-            placeholder="Contraseña" 
-            [(ngModel)]="credentials.password"
-            name="password"
-            class="input input-bordered w-full bg-white bg-opacity-90 text-gray-800"
-            required>
-        </div>
-
-        @if (errorMessage) {
-          <div class="alert alert-error mb-4 text-sm">
-            <span>{{ errorMessage }}</span>
-          </div>
+      <!-- Botón de ingreso -->
+      <button 
+        type="submit" 
+        class="btn btn-primary btn-lg w-100"
+        [disabled]="cargando">
+        @if (cargando) {
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
         }
+        {{ cargando ? 'Ingresando...' : 'Ingresar' }}
+      </button>
 
-        <button 
-          type="submit" 
-          class="btn btn-primary w-full"
-          [disabled]="cargando">
-          @if (cargando) {
-            <span class="loading loading-spinner"></span>
-          }
-          {{ cargando ? 'Ingresando...' : 'Ingresar' }}
-        </button>
-
-      </form>
-    </div>
+    </form>
   </div>
 </div>

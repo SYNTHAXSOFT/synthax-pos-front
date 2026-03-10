@@ -4,14 +4,14 @@ export const municipioRoutes: Routes = [
   {
     path: 'registrar',
     loadComponent: () =>
-      import('./pages/registrar-page/registrar-page').then(
+      import('./pages/municipio-registrar/municipio-registrar').then(
         (m) => m.RegistrarMunicipioPageComponent
       ),
   },
   {
     path: 'listar',
     loadComponent: () =>
-      import('./pages/listar-page/listar-page').then(
+      import('./pages/municipio-listar/municipio-listar').then(
         (m) => m.ListarMunicipioPageComponent
       ),
   },

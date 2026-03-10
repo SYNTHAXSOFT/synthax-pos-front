@@ -1,0 +1,68 @@
+<h2 class="mb-2">Registrar Departamento</h2>
+<hr class="mb-4">
+
+<div class="container" style="max-width: 88rem;">
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+      <form [formGroup]="myForm" (ngSubmit)="onSave()">
+
+        <!-- ID -->
+        <div class="mb-3">
+          <label class="form-label">Código</label>
+          <input
+            type="number"
+            placeholder="ID del departamento"
+            formControlName="id"
+            class="form-control"
+          />
+          @if (isValidField('id')) {
+            <div class="text-danger small mt-1">
+              {{ getFieldError('id') }}
+            </div>
+          }
+        </div>
+
+        <!-- Nombre -->
+        <div class="mb-3">
+          <label class="form-label">Nombre</label>
+          <input
+            type="text"
+            placeholder="Nombre del departamento"
+            formControlName="nombre"
+            class="form-control"
+          />
+          @if (isValidField('nombre')) {
+            <div class="text-danger small mt-1">
+              {{ getFieldError('nombre') }}
+            </div>
+          }
+        </div>
+
+        <!-- Activo -->
+        <div class="form-check mb-3">
+          <input
+            type="checkbox"
+            formControlName="activo"
+            class="form-check-input"
+            id="activoDepto"
+          />
+          <label class="form-check-label" for="activoDepto">
+            Activo
+          </label>
+        </div>
+
+        <!-- Botón -->
+        <div class="d-flex justify-content-end">
+          <button type="submit" class="btn btn-primary px-4">
+            Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabla de departamentos -->
+  <div class="mt-4">
+    <app-listar-page></app-listar-page>
+  </div>
+</div>

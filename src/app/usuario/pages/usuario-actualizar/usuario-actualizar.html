@@ -1,0 +1,138 @@
+<div class="container-fluid px-4">
+  <h2 class="mb-2">Actualizar Usuario</h2>
+  <hr class="mb-4">
+
+  @if (cargando) {
+    <div class="d-flex justify-content-center align-items-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+  }
+
+  @if (!cargando) {
+    <form (ngSubmit)="actualizarUsuario()">
+      
+      <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">Cedula</label>
+        <div class="col-sm-9">
+          <input 
+            type="text" 
+            class="form-control" 
+            [(ngModel)]="usuario.cedula" 
+            name="cedula" 
+            required>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">Nombre</label>
+        <div class="col-sm-9">
+          <input 
+            type="text" 
+            class="form-control" 
+            [(ngModel)]="usuario.nombre" 
+            name="nombre" 
+            required>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">Apellido</label>
+        <div class="col-sm-9">
+          <input 
+            type="text" 
+            class="form-control" 
+            [(ngModel)]="usuario.apellido" 
+            name="apellido" 
+            required>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">Email</label>
+        <div class="col-sm-9">
+          <input 
+            type="email" 
+            class="form-control" 
+            [(ngModel)]="usuario.email" 
+            name="email" 
+            required>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">Password</label>
+        <div class="col-sm-9">
+          <input 
+            type="password" 
+            class="form-control" 
+            [(ngModel)]="usuario.password" 
+            name="password" 
+            required>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">Rol</label>
+        <div class="col-sm-9">
+          <select 
+            class="form-select" 
+            [(ngModel)]="usuario.rol" 
+            name="rol">
+            <option value="">Seleccione un rol</option>
+            <option value="ROOT">ROOT</option>
+            <option value="CANDIDATO">CANDIDATO</option>
+            <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+            <option value="TESTIGO">TESTIGO</option>         
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">Candidato</label>
+        <div class="col-sm-9">
+          <select 
+            class="form-select" 
+            [(ngModel)]="selectedCandidato" 
+            name="candidato">
+            <option value="">Seleccione un candidato</option>
+            <option *ngFor="let can of candidatos" [value]="can.id">{{ can.nombre }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label class="col-sm-3 col-form-label">Activo</label>
+        <div class="col-sm-9">
+          <div class="form-check">
+            <input 
+              type="checkbox" 
+              class="form-check-input" 
+              id="activo"
+              [(ngModel)]="usuario.activo" 
+              name="activo">
+            <label class="form-check-label" for="activo">
+              Usuario activo
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          (click)="cancelar()">
+          Cancelar
+        </button>
+        <button 
+          type="submit" 
+          class="btn btn-primary">
+          Actualizar
+        </button>
+      </div>
+
+    </form>
+  }
+</div>
