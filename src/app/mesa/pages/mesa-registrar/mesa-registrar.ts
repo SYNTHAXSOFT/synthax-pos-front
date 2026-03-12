@@ -1,0 +1,101 @@
+import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { MesaService } from '../../services/mesa.service';
+import { Mesa } from '../../interfaces/mesa.interface';
+import { MesaListarPageComponent } from '../mesa-listar/mesa-listar';
+
+@Component({
+  selector: 'app-mesa-registrar',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, MesaListarPageComponent],
+  templateUrl: './mesa-registrar.html',
+})
+export class MesaRegistrarPageComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly mesaService = inject(MesaService);
+  private readonly route = inject(ActivatedRoute);
+
+  @ViewChild(MesaListarPageComponent) listarComponent?: MesaListarPageComponent;
+
+  public editando: boolean = false;
+  private mesaId?: number;
+
+  public myForm: FormGroup = this.fb.group({
+    codigo: ['', [Validators.required, Validators.minLength(2)]],
+    nombre: ['', [Validators.required, Validators.minLength(3)]],
+    activo: [true],
+  });
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe((params) => {
+      const id = params['id'];
+      if (id) {
+        this.editando = true;
+        this.mesaId = +id;
+        this.mesaService.obtenerPorId(this.mesaId).subscribe({
+          next: (m) => this.myForm.patchValue(m),
+          error: (err) => console.error('Error al cargar mesa:', err),
+        });
+      }
+    });
+  }
+
+  onSave(): void {
+    if (this.myForm.invalid) {
+      this.myForm.markAllAsTouched();
+      return;
+    }
+
+    const mesa: Mesa = this.myForm.value;
+
+    if (this.editando && this.mesaId) {
+      this.mesaService.actualizar(this.mesaId, mesa).subscribe({
+        next: () => {
+          alert('Mesa actualizada exitosamente');
+          this.resetForm();
+          this.listarComponent?.cargarMesas();
+        },
+        error: (err) => {
+          console.error('Error:', err);
+          alert('Error al actualizar: ' + (err.error?.error || 'Error desconocido'));
+        },
+      });
+    } else {
+      this.mesaService.crear(mesa).subscribe({
+        next: () => {
+          alert('Mesa creada exitosamente');
+          this.resetForm();
+          this.listarComponent?.cargarMesas();
+        },
+        error: (err) => {
+          console.error('Error:', err);
+          alert('Error al crear: ' + (err.error?.error || 'Error desconocido'));
+        },
+      });
+    }
+  }
+
+  resetForm(): void {
+    this.editando = false;
+    this.mesaId = undefined;
+    this.myForm.reset({ activo: true });
+  }
+
+  isValidField(field: string): boolean | null {
+    return this.myForm.controls[field].errors && this.myForm.controls[field].touched;
+  }
+
+  getFieldError(field: string): string | null {
+    if (!this.myForm.controls[field]) return null;
+    const errors = this.myForm.controls[field].errors || {};
+    for (const key of Object.keys(errors)) {
+      switch (key) {
+        case 'required':  return 'Este campo es requerido';
+        case 'minlength': return `Mínimo ${errors['minlength'].requiredLength} caracteres`;
+      }
+    }
+    return null;
+  }
+}

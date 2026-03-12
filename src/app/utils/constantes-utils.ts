@@ -1,37 +1,41 @@
+// Endpoints del API REST — base URL definida en environment.ts
 export const API_ENDPOINTS = {
+  // Auth
+  AUTH: 'auth',
+
+  // Usuarios
   USUARIOS: 'usuarios',
   USUARIOS_ROL_ACTIVOS: 'rolActivo',
+
+  // Geografía (Colombia)
   DEPTOS: 'departamentos',
   MPIOS: 'municipios',
-  ZONAS: 'zonas',
-  PUESTOS: 'puestos',
-  MESAS: 'mesas',
-  PARTIDOS: 'partidos',
-  CANDIDATO: 'candidato',
-  ASIGNACION_MESA: 'asignacionMesa',
-  VOTO: 'voto',
-  REPORTE_DINAMICO: 'reporteDinamico',
-  AUTH: 'auth',
+
+  // Catálogos del POS
+  PRODUCTOS:      'productos',
+  MESAS:          'mesas',
+  TIPOS_PEDIDO:   'tipos-pedido',
+  IMPUESTOS:      'impuestos',
+
+  // Transacciones
+  VENTAS:         'ventas',
+  PEDIDOS:        'pedidos',
+  IMPUESTOS_VENTA:'impuestos-venta',
+  DETALLE_PRODUCTO: 'detalle-producto',
+  FACTURAS:       'facturas',
 };
 
-export const ELECCION = {
-    PRESIDENTE: 'PRESIDENTE',
-    CONGRESISTA: 'CONGRESISTA',
-    REPRESENTANTE: 'REPRESENTANTE',
-    GOBERNADOR: 'GOBERNADOR',
-    DIPUTADO: 'DIPUTADO',
-    ALCALDE: 'ALCALDE',
-    CONCEJAL: 'CONCEJAL'
+// Roles del sistema POS
+export const ROLES_POS = {
+  ROOT:          'ROOT',
+  ADMINISTRADOR: 'ADMINISTRADOR',
+  CAJERO:        'CAJERO',
+  MESERO:        'MESERO',
+  DOMICILIARIO:  'DOMICILIARIO',
 };
 
-export const LISTADOS = {
-  tipoEleccion: [
-    'PRESIDENTE',
-    'CONGRESISTA',
-    'REPRESENTANTE',
-    'GOBERNADOR',
-    'DIPUTADO',
-    'ALCALDE',
-    'CONCEJAL'
-  ]
-};
+// Estados de Venta
+export const ESTADOS_VENTA = ['ABIERTA', 'PAGADA', 'ANULADA'];
+
+// Tipos de Factura
+export const TIPOS_FACTURA = ['VENTA', 'DEVOLUCION', 'NOTA_CREDITO', 'NOTA_DEBITO'];

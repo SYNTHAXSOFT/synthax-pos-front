@@ -11,9 +11,9 @@
           <label class="form-label">Rol</label>
           <select class="form-select" formControlName="rol">
             <option value="">Seleccione un rol</option>
-            <option *ngFor="let rol of rolesDisponibles" [value]="rol">
-              {{ rol }}
-            </option>
+            @for (rol of rolesDisponibles; track rol) {
+              <option [value]="rol">{{ rol }}</option>
+            }
           </select>
           @if (formUtils.isValidField(myform, 'rol')) {
             <div class="text-danger small mt-1">
@@ -39,7 +39,7 @@
                   class="form-select"
                 >
                   <option [ngValue]="null">Seleccione un departamento</option>
-                  @for (departamento of departamentosList; track departamento.id) {
+                  @for (departamento of departamentos; track departamento.id) {
                     <option [value]="departamento.id">{{ departamento.nombre }}</option>
                   }
                 </select>
@@ -60,9 +60,9 @@
                   class="form-select"
                 >
                   <option [ngValue]="null">
-                    {{ !departamentoSeleccionado ? 'Seleccione primero un departamento' : 'Seleccione un municipio' }}
+                    {{ !deptoSeleccionado ? 'Seleccione primero un departamento' : 'Seleccione un municipio' }}
                   </option>
-                  @for (municipio of municipiosListFiltrados; track municipio.id) {
+                  @for (municipio of municipiosFiltrados; track municipio.id) {
                     <option [value]="municipio.id">{{ municipio.nombre }}</option>
                   }
                 </select>
@@ -79,16 +79,11 @@
         <!-- Nombre -->
         <div class="mb-3">
           <label class="form-label">Nombre</label>
-          <input 
-            type="text" 
-            placeholder="Nombre del usuario" 
+          <input
+            type="text"
+            placeholder="Nombre del usuario"
             formControlName="nombre"
-            [readonly]="!snCandidato()"
-            [ngClass]="{
-              'form-control': true,
-              'bg-light text-secondary': !snCandidato()
-            }"
-            [style.cursor]="!snCandidato() ? 'not-allowed' : 'text'"
+            class="form-control"
           />
           @if (formUtils.isValidField(myform, 'nombre')) {
             <div class="text-danger small mt-1">
@@ -100,16 +95,11 @@
         <!-- Apellido -->
         <div class="mb-3">
           <label class="form-label">Apellido</label>
-          <input 
-            type="text" 
-            placeholder="Apellido del usuario" 
+          <input
+            type="text"
+            placeholder="Apellido del usuario"
             formControlName="apellido"
-            [readonly]="!snCandidato()"
-            [ngClass]="{
-              'form-control': true,
-              'bg-light text-secondary': !snCandidato()
-            }"
-            [style.cursor]="!snCandidato() ? 'not-allowed' : 'text'"
+            class="form-control"
           />
           @if (formUtils.isValidField(myform, 'apellido')) {
             <div class="text-danger small mt-1">

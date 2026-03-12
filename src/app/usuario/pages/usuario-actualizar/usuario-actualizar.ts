@@ -5,6 +5,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { UsuarioService } from '../../services/usuario.service';
 import { Usuario } from '../../interfaces/usuario.interface';
 
+// Roles del POS — sincronizados con el enum Rol.java del backend
+const ROLES_POS = ['ROOT', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'DOMICILIARIO'];
+
 @Component({
   selector: 'app-actualizar-usuario',
   standalone: true,
@@ -13,80 +16,63 @@ import { Usuario } from '../../interfaces/usuario.interface';
 })
 export class ActualizarUsuarioPageComponent implements OnInit {
 
-  selectedRol = '';
-  selectedCandidato = '';
-  candidatos: any[] = [];
+  public readonly rolesPOS = ROLES_POS;
+
   usuario: Usuario = {
-    
     nombre:   '',
     apellido: '',
     email:    '',
     password: '',
     rol:      '',
     cedula:   '',
-    candidato: {id: ''},
-    activo: true
-   
+    activo:   true,
   };
 
-  cargando = true;
-  
-  usuarioId: number = 0;
+  cargando  = true;
+  usuarioId = 0;
 
   constructor(
-    private usuarioService: UsuarioService,
-    private route: ActivatedRoute,
-    private router: Router
+    private readonly usuarioService: UsuarioService,
+    private readonly route:          ActivatedRoute,
+    private readonly router:         Router,
   ) {}
 
   ngOnInit(): void {
-    
-    const idParam = this.route.snapshot.paramMap.get('id');
+    const idParam  = this.route.snapshot.paramMap.get('id');
     this.usuarioId = idParam ? Number(idParam) : 0;
     this.cargarUsuario();
-    this.cargarCandidatos();
   }
 
-  cargarCandidatos(){
-      this.usuarioService.listarCandidatos().subscribe(data => {
-      this.candidatos = data;
-    });
-  }
-  cargarUsuario() {
+  cargarUsuario(): void {
     this.usuarioService.obtenerPorId(this.usuarioId).subscribe({
       next: (data) => {
-        this.usuario = data;
+        this.usuario  = data;
         this.cargando = false;
-
-        if (!this.usuario.candidato) {
-        this.usuario.candidato = { id: '', nombre: '' };
-      }
       },
-      error: (error) => {
+      error: () => {
         alert('Error al cargar el usuario');
-        this.router.navigate(['synthax-votos/usuario/listar']);
-      }
+        this.router.navigate(['/synthax-pos/usuario/listar']);
+      },
     });
   }
 
-  actualizarUsuario() {
-    if (!this.usuario.nombre) {
-      alert('Debe completar todos los campos');
+  actualizarUsuario(): void {
+    if (!this.usuario.nombre || !this.usuario.cedula) {
+      alert('Debe completar todos los campos requeridos');
       return;
     }
-    this.usuario.candidato.id = this.selectedCandidato;
     this.usuarioService.actualizar(this.usuarioId, this.usuario).subscribe({
       next: () => {
         alert('Usuario actualizado exitosamente');
-        this.router.navigate(['synthax-votos/usuario/actualizar']);
+        this.router.navigate(['/synthax-pos/usuario/listar']);
       },
       error: (err) => {
-        alert('Error al actualizar el usuario');
-      }
+        alert('Error al actualizar el usuario: ' + (err.error?.error ?? 'Error desconocido'));
+      },
     });
   }
 
-  cancelar() {
-    this.router.navigate(['synthax-votos/usuario/registrar']);
+  cancelar(): void {
+    this.router.navigate(['/synthax-pos/usuario/listar']);
   }
 }

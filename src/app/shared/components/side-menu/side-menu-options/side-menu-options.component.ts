@@ -17,6 +17,7 @@ interface MenuItem {
   roles?: string[];
 }
 
+// Lee las rutas hijas del dashboard (índice 1 = 'synthax-pos')
 const reactiveItems = routes[1].children ?? [];
 
 @Component({
@@ -29,26 +30,27 @@ export class SideMenuOptionsComponent {
 
   private authService = inject(AuthService);
 
+  // Genera los ítems del menú desde las rutas, excluyendo comodines y redirects
   reactiveMenu: MenuItem[] = reactiveItems
-  .filter((item) => item.path && item.path !== '**' && !item.redirectTo)
-  .filter((item) => item.path !== 'notificaciones')
-  .map((item) => ({
-    route: `synthax-votos/${item.path}`,
-    title: `${item.title}`,
-    roles: item.data?.['roles'] as string[],
-  }));
+    .filter((item) => item.path && item.path !== '**' && !item.redirectTo)
+    .map((item) => ({
+      route: `synthax-pos/${item.path}`,   // prefijo actualizado a synthax-pos
+      title: `${item.title}`,
+      roles: item.data?.['roles'] as string[],
+    }));
 
+  // Filtra el menú según el rol del usuario logueado
   menuOptions: MenuOption[] = this.reactiveMenu
     .filter((item) => {
       if (!item.roles) return true;
       return this.authService.hasRole(item.roles);
     })
     .map((item) => ({
-      icon: this.getIconForRoute(item.title),
-      label: item.title,
-      subLabel: ``,
-      route: `/${item.route}`,
-      roles: item.roles,
+      icon:     this.getIconForRoute(item.title),
+      label:    item.title,
+      subLabel: '',
+      route:    `/${item.route}`,
+      roles:    item.roles,
     }));
 
   logout(): void {
@@ -61,22 +63,19 @@ export class SideMenuOptionsComponent {
     this.optionSelected.emit();
   }
 
+  /** Asigna un ícono de Font Awesome según el título del ítem */
   getIconForRoute(name: string): string {
-    const lowerName = name.toLowerCase();
-
-    if (lowerName.includes('usuario')) return 'fa-solid fa-users';
-    if (lowerName.includes('candidato')) return 'fa-solid fa-user-tie';
-    if (lowerName.includes('votación') || lowerName.includes('voto')) return 'fa-solid fa-check-to-slot';
-    if (lowerName.includes('resultado')) return 'fa-solid fa-chart-pie';
-    if (lowerName.includes('mesa')) return 'fa-solid fa-table';
-    if (lowerName.includes('departamento')) return 'fa-solid fa-map-location-dot';
-    if (lowerName.includes('municipio')) return 'fa-solid fa-city';
-    if (lowerName.includes('zona')) return 'fa-solid fa-map-location-dot';
-    if (lowerName.includes('puesto')) return 'fa-solid fa-building';
-    if (lowerName.includes('partido')) return 'fa-solid fa-handshake';
-    if (lowerName.includes('inicio')) return 'fa-solid fa-house';
-    if (lowerName.includes('notificaciones')) return 'fa-solid fa-bell';
-
-    return 'fa-solid fa-circle-dot'; // icono por defecto
+    const n = name.toLowerCase();
+    if (n.includes('inicio'))            return 'fa-solid fa-house';
+    if (n.includes('usuario'))           return 'fa-solid fa-users';
+    if (n.includes('departamento'))      return 'fa-solid fa-map-location-dot';
+    if (n.includes('municipio'))         return 'fa-solid fa-city';
+    if (n.includes('producto'))          return 'fa-solid fa-box-open';
+    if (n.includes('mesa'))              return 'fa-solid fa-chair';
+    if (n.includes('tipo'))              return 'fa-solid fa-tags';
+    if (n.includes('impuesto'))          return 'fa-solid fa-percent';
+    if (n.includes('venta'))             return 'fa-solid fa-cash-register';
+    if (n.includes('pedido'))            return 'fa-solid fa-receipt';
+    return 'fa-solid fa-circle-dot';
   }
 }

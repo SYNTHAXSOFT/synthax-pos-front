@@ -1,0 +1,87 @@
+<h2 class="mb-2">Agregar Ítem al Pedido</h2>
+<hr class="mb-4">
+
+<div class="container" style="max-width: 88rem;">
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+      <form [formGroup]="myForm" (ngSubmit)="onSave()">
+
+        <div class="row g-3">
+
+          <!-- Venta -->
+          <div class="col-md-4">
+            <label class="form-label">Venta (ABIERTA) <span class="text-danger">*</span></label>
+            <select formControlName="ventaId" class="form-select"
+                    (change)="onVentaChange(+$any($event.target).value)">
+              <option [value]="null" disabled selected>Seleccione una venta</option>
+              @for (venta of ventasAbiertas; track venta.id) {
+                <option [value]="venta.id">
+                  #{{ venta.id }} — {{ venta.tipoPedido?.nombre }}
+                  @if (venta.mesa?.nombre) { — {{ venta.mesa?.nombre }} }
+                </option>
+              }
+            </select>
+            @if (isValidField('ventaId')) {
+              <div class="text-danger small mt-1">{{ getFieldError('ventaId') }}</div>
+            }
+          </div>
+
+          <!-- Producto -->
+          <div class="col-md-4">
+            <label class="form-label">Producto <span class="text-danger">*</span></label>
+            <select formControlName="productoId" class="form-select">
+              <option [value]="null" disabled selected>Seleccione un producto</option>
+              @for (prod of productos; track prod.id) {
+                <option [value]="prod.id">
+                  {{ prod.nombre }} — ${{ prod.precio | number:'1.0-2' }}
+                </option>
+              }
+            </select>
+            @if (isValidField('productoId')) {
+              <div class="text-danger small mt-1">{{ getFieldError('productoId') }}</div>
+            }
+          </div>
+
+          <!-- Cantidad -->
+          <div class="col-md-2">
+            <label class="form-label">Cantidad <span class="text-danger">*</span></label>
+            <input type="number" formControlName="cantidad" class="form-control"
+                   min="0.01" step="1" placeholder="1" />
+            @if (isValidField('cantidad')) {
+              <div class="text-danger small mt-1">{{ getFieldError('cantidad') }}</div>
+            }
+          </div>
+
+          <!-- Subtotal en tiempo real -->
+          <div class="col-md-2 d-flex align-items-end">
+            <div class="w-100 p-2 bg-light rounded text-center">
+              <div class="text-muted small">Subtotal</div>
+              <div class="fw-bold fs-5">$ {{ getSubtotalActual() | number:'1.0-2' }}</div>
+            </div>
+          </div>
+
+          <!-- Observación -->
+          <div class="col-12">
+            <label class="form-label">Observación <span class="text-muted">(opcional)</span></label>
+            <input type="text" formControlName="observacion" class="form-control"
+                   placeholder="Sin cebolla, término 3/4, etc." />
+          </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end mt-4">
+          <button type="submit" class="btn btn-primary px-4">
+            Agregar al Pedido
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Ítems del pedido seleccionado -->
+  @if (myForm.get('ventaId')?.value) {
+    <div class="mt-4">
+      <app-pedido-listar [ventaId]="myForm.getRawValue().ventaId"></app-pedido-listar>
+    </div>
+  }
+</div>

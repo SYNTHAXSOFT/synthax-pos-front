@@ -4,17 +4,23 @@ import { AuthGuard } from './auth/guards/auth.guard';
 import { RoleGuard } from './auth/guards/role.guard';
 
 export const routes: Routes = [
-  {
-    path: '',
-    component: HomePageComponent,
-  },
+  { path: '', component: HomePageComponent },
 
   {
-    path: 'synthax-votos',
+    // Ruta principal del dashboard POS
+    // (renombrado de 'synthax-votos' a 'synthax-pos' para reflejar el dominio)
+    path: 'synthax-pos',
     loadComponent: () =>
       import('./shared/pages/dashboard-page/dashboard-page.component'),
     canActivate: [AuthGuard],
     children: [
+
+      // ── Inicio ──────────────────────────────────────────────────────────────
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'inicio',
+      },
       {
         path: 'inicio',
         title: 'Inicio',
@@ -24,47 +30,85 @@ export const routes: Routes = [
           ),
       },
 
-      {
-        path: '',
-        pathMatch: 'full',
-        redirectTo: 'inicio',
-      },
-
+      // ── Administración ──────────────────────────────────────────────────────
       {
         path: 'usuario',
-        title: 'Usuario',
+        title: 'Usuarios',
         loadChildren: () =>
-          import('./usuario/usuario.routes').then(
-            (modulo) => modulo.usuarioRoutes
-          ),
+          import('./usuario/usuario.routes').then((m) => m.usuarioRoutes),
         canActivate: [RoleGuard],
-        data: { roles: ['ROOT', 'ADMINISTRADOR', 'CANDIDATO'] },
+        data: { roles: ['ROOT', 'ADMINISTRADOR'] },
       },
-
       {
         path: 'departamento',
-        title: 'Departamento',
+        title: 'Departamentos',
         loadChildren: () =>
-          import('./departamento/departamento.routes').then(
-            (m) => m.departamentoRoutes
-          ),
+          import('./departamento/departamento.routes').then((m) => m.departamentoRoutes),
         canActivate: [RoleGuard],
         data: { roles: ['ROOT'] },
       },
-      
       {
         path: 'municipio',
-        title: 'Municipio',
+        title: 'Municipios',
         loadChildren: () =>
           import('./municipio/municipio.routes').then((m) => m.municipioRoutes),
         canActivate: [RoleGuard],
         data: { roles: ['ROOT'] },
       },
 
+      // ── Catálogos POS ───────────────────────────────────────────────────────
       {
-        path: '**',
-        redirectTo: 'inicio',
+        path: 'producto',
+        title: 'Productos',
+        loadChildren: () =>
+          import('./producto/producto.routes').then((m) => m.productoRoutes),
+        canActivate: [RoleGuard],
+        data: { roles: ['ROOT', 'ADMINISTRADOR'] },
       },
+      {
+        path: 'mesa',
+        title: 'Mesas',
+        loadChildren: () =>
+          import('./mesa/mesa.routes').then((m) => m.mesaRoutes),
+        canActivate: [RoleGuard],
+        data: { roles: ['ROOT', 'ADMINISTRADOR'] },
+      },
+      {
+        path: 'tipo-pedido',
+        title: 'Tipos de Pedido',
+        loadChildren: () =>
+          import('./tipo-pedido/tipo-pedido.routes').then((m) => m.tipoPedidoRoutes),
+        canActivate: [RoleGuard],
+        data: { roles: ['ROOT', 'ADMINISTRADOR'] },
+      },
+      {
+        path: 'impuesto',
+        title: 'Impuestos',
+        loadChildren: () =>
+          import('./impuesto/impuesto.routes').then((m) => m.impuestoRoutes),
+        canActivate: [RoleGuard],
+        data: { roles: ['ROOT', 'ADMINISTRADOR'] },
+      },
+
+      // ── Operación POS ───────────────────────────────────────────────────────
+      {
+        path: 'venta',
+        title: 'Ventas',
+        loadChildren: () =>
+          import('./venta/venta.routes').then((m) => m.ventaRoutes),
+        canActivate: [RoleGuard],
+        data: { roles: ['ROOT', 'ADMINISTRADOR', 'CAJERO', 'MESERO'] },
+      },
+      {
+        path: 'pedido',
+        title: 'Pedidos',
+        loadChildren: () =>
+          import('./pedido/pedido.routes').then((m) => m.pedidoRoutes),
+        canActivate: [RoleGuard],
+        data: { roles: ['ROOT', 'ADMINISTRADOR', 'CAJERO', 'MESERO'] },
+      },
+
+      { path: '**', redirectTo: 'inicio' },
     ],
   },
 
@@ -74,8 +118,5 @@ export const routes: Routes = [
     loadChildren: () => import('./auth/auth.routes'),
   },
 
-  {
-    path: '**',
-    redirectTo: '',
-  },
+  { path: '**', redirectTo: '' },
 ];

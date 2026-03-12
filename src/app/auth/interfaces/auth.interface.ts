@@ -1,22 +1,25 @@
+// Roles del sistema POS — alineados con el backend (Rol.java)
 export enum Rol {
-  ROOT = 'ROOT',
+  ROOT          = 'ROOT',
   ADMINISTRADOR = 'ADMINISTRADOR',
-  CANDIDATO = 'CANDIDATO',
-  TESTIGO = 'TESTIGO'
+  CAJERO        = 'CAJERO',
+  MESERO        = 'MESERO',
+  DOMICILIARIO  = 'DOMICILIARIO',
 }
 
-export interface LoginRequest {  // 👈 Asegúrate que tenga export
+export interface LoginRequest {
   cedula: string;
   password: string;
 }
 
-export interface LoginResponse {  // 👈 Asegúrate que tenga export
+export interface LoginResponse {
   usuario: {
     id: number;
     nombre: string;
     apellido: string;
+    cedula: string;
     email: string;
-    rol: string;  // o Rol si prefieres usar el enum
+    rol: string;
   };
   token: string;
   mensaje: string;

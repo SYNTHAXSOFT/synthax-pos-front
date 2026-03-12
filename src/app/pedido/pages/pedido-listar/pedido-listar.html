@@ -1,0 +1,67 @@
+<div class="container-fluid px-4">
+  <h2 class="mb-2">Ítems del Pedido</h2>
+  <hr class="mb-4">
+
+  @if (cargando) {
+    <div class="d-flex justify-content-center py-4">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+  }
+
+  @if (!cargando) {
+    <div class="table-responsive">
+      <table class="table table-striped table-hover table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio Unit.</th>
+            <th>Subtotal</th>
+            <th>Observación</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (pedido of pedidos; track pedido.id) {
+            <tr [class.table-secondary]="!pedido.activo">
+              <td>{{ pedido.producto?.nombre }}</td>
+              <td>{{ pedido.cantidad }}</td>
+              <td>$ {{ pedido.producto?.precio | number:'1.0-2' }}</td>
+              <td>$ {{ subtotal(pedido) | number:'1.0-2' }}</td>
+              <td>{{ pedido.observacion ?? '—' }}</td>
+              <td>
+                <span [class]="pedido.activo ? 'badge bg-success' : 'badge bg-secondary'">
+                  {{ pedido.activo ? 'Activo' : 'Cancelado' }}
+                </span>
+              </td>
+              <td>
+                @if (pedido.activo) {
+                  <button class="btn btn-danger btn-sm" (click)="cancelarItem(pedido.id)">
+                    Cancelar
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+          @empty {
+            <tr>
+              <td colspan="7" class="text-center text-muted py-4">
+                No hay ítems en este pedido
+              </td>
+            </tr>
+          }
+        </tbody>
+        @if (pedidos.length > 0) {
+          <tfoot class="table-light">
+            <tr>
+              <td colspan="3" class="text-end fw-bold">Total:</td>
+              <td class="fw-bold">$ {{ totalGeneral() | number:'1.0-2' }}</td>
+              <td colspan="3"></td>
+            </tr>
+          </tfoot>
+        }
+      </table>
+    </div>
+  }
+</div>

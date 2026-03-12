@@ -6,26 +6,23 @@ import { LoginRequest, LoginResponse } from '../interfaces/auth.interface';
 import { environment } from '../../../environments/environment';
 import { API_ENDPOINTS } from '../../utils/constantes-utils';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  
-  private readonly USER_KEY = 'current_user';
+
+  private readonly USER_KEY  = 'current_user';
   private readonly TOKEN_KEY = 'auth_token';
 
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${environment.URL}/${API_ENDPOINTS.AUTH}/login`, credentials).pipe(
-      tap(response => {
-        localStorage.setItem(this.USER_KEY, JSON.stringify(response.usuario));
-        localStorage.setItem(this.TOKEN_KEY, response.token);
-      })
-    );
+    return this.http
+      .post<LoginResponse>(`${environment.URL}/${API_ENDPOINTS.AUTH}/login`, credentials)
+      .pipe(
+        tap(response => {
+          localStorage.setItem(this.USER_KEY,  JSON.stringify(response.usuario));
+          localStorage.setItem(this.TOKEN_KEY, response.token);
+        })
+      );
   }
 
   logout(): void {
@@ -62,25 +59,11 @@ export class AuthService {
     return user ? user.id : null;
   }
 
-  getCandidatoId(): number | null {
-    const user = this.getCurrentUser();
-    return user && user.candidato ? user.candidato.id : null;
-  }
-
+  /** Ruta de inicio según el rol del usuario logueado */
   getDefaultRouteByRole(): string {
     const user = this.getCurrentUser();
     if (!user) return '/';
-
-    switch (user.rol) {
-      case 'ROOT':
-      case 'ADMINISTRADOR':
-        return '/synthax-votos/inicio';
-      case 'CANDIDATO':
-        return '/synthax-votos/inicio';
-      case 'TESTIGO':
-        return '/synthax-votos/inicio';
-      default:
-        return '/synthax-votos';
-    }
+    // Todos los roles válidos del POS van al dashboard
+    return '/synthax-pos/inicio';
   }
 }
