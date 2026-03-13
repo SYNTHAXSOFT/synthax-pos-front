@@ -1,0 +1,115 @@
+<div class="container-fluid px-4">
+  <h2 class="mb-2">Lista de Restaurantes</h2>
+  <hr class="mb-3">
+
+  @if (cargando) {
+    <div class="d-flex justify-content-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+  }
+
+  @if (!cargando) {
+    <div class="table-responsive">
+      <table class="table table-striped table-hover table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Logo</th>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Marca</th>
+            <th>Propietario</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of restaurantes; track r.id) {
+            <tr>
+              <td>{{ r.id }}</td>
+
+              <!-- Miniatura del logo -->
+              <td class="text-center" style="width:4rem;">
+                @if (r.logo) {
+                  <img [src]="r.logo"
+                       [alt]="r.nombre"
+                       class="rounded"
+                       style="width:2.5rem;height:2.5rem;object-fit:contain;background:#f8f9fa;padding:2px;">
+                } @else {
+                  <div class="rounded d-inline-flex align-items-center justify-content-center"
+                       style="width:2.5rem;height:2.5rem;"
+                       [style.background]="r.colorPrimario ?? '#059669'">
+                    <i class="fa-solid fa-store text-white" style="font-size:0.75rem;"></i>
+                  </div>
+                }
+              </td>
+
+              <td><code>{{ r.codigo }}</code></td>
+              <td class="fw-semibold">{{ r.nombre }}</td>
+
+              <!-- Swatches de colores -->
+              <td>
+                <div class="d-flex align-items-center gap-1">
+                  <span class="rounded-circle border border-white shadow-sm"
+                        title="Color primario"
+                        style="width:1.1rem;height:1.1rem;display:inline-block;cursor:default;"
+                        [style.background]="r.colorPrimario ?? '#059669'">
+                  </span>
+                  <span class="rounded-circle border border-white shadow-sm"
+                        title="Color secundario"
+                        style="width:1.1rem;height:1.1rem;display:inline-block;cursor:default;"
+                        [style.background]="r.colorSecundario ?? '#f97316'">
+                  </span>
+                  <span class="rounded-circle border shadow-sm"
+                        title="Fondo"
+                        style="width:1.1rem;height:1.1rem;display:inline-block;cursor:default;"
+                        [style.background]="r.colorFondo ?? '#f0fdf4'">
+                  </span>
+                </div>
+              </td>
+
+              <td>
+                @if (r.propietario) {
+                  {{ r.propietario.nombre }} {{ r.propietario.apellido }}
+                } @else {
+                  <span class="text-muted">—</span>
+                }
+              </td>
+
+              <td>
+                <span [class]="r.activo ? 'badge bg-success' : 'badge bg-secondary'">
+                  {{ r.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+
+              <td class="text-nowrap">
+                <button class="btn btn-warning btn-sm me-1" (click)="editar(r.id)"
+                        title="Editar datos">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button class="btn btn-info btn-sm me-1"
+                        (click)="configurarBranding(r.id)"
+                        title="Configurar marca">
+                  <i class="fa-solid fa-palette"></i>
+                </button>
+                @if (r.activo) {
+                  <button class="btn btn-danger btn-sm" (click)="desactivar(r.id)"
+                          title="Desactivar">
+                    <i class="fa-solid fa-ban"></i>
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+          @empty {
+            <tr>
+              <td colspan="8" class="text-center text-muted py-4">
+                No hay restaurantes registrados
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

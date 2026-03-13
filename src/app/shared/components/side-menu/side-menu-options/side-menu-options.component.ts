@@ -76,6 +76,11 @@ export class SideMenuOptionsComponent {
     if (n.includes('impuesto'))          return 'fa-solid fa-percent';
     if (n.includes('venta'))             return 'fa-solid fa-cash-register';
     if (n.includes('pedido'))            return 'fa-solid fa-receipt';
+    if (n.includes('restaurante'))       return 'fa-solid fa-store';
+    if (n.includes('identidad'))         return 'fa-solid fa-palette';
+    if (n.includes('branding'))          return 'fa-solid fa-palette';
+    if (n.includes('insumo'))            return 'fa-solid fa-boxes-stacked';
+    if (n.includes('compra'))            return 'fa-solid fa-cart-flatbed';
     return 'fa-solid fa-circle-dot';
   }
 }

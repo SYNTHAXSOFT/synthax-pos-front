@@ -23,11 +23,17 @@ export const API_ENDPOINTS = {
   IMPUESTOS_VENTA:'impuestos-venta',
   DETALLE_PRODUCTO: 'detalle-producto',
   FACTURAS:       'facturas',
+
+  // Multi-tenancy
+  RESTAURANTES:   'restaurantes',
+  INSUMOS:        'insumos',
+  COMPRAS:        'compras',
 };
 
-// Roles del sistema POS
+// Roles del sistema POS (sincronizados con Rol.java del backend)
 export const ROLES_POS = {
   ROOT:          'ROOT',
+  PROPIETARIO:   'PROPIETARIO',
   ADMINISTRADOR: 'ADMINISTRADOR',
   CAJERO:        'CAJERO',
   MESERO:        'MESERO',
@@ -39,3 +45,6 @@ export const ESTADOS_VENTA = ['ABIERTA', 'PAGADA', 'ANULADA'];
 
 // Tipos de Factura
 export const TIPOS_FACTURA = ['VENTA', 'DEVOLUCION', 'NOTA_CREDITO', 'NOTA_DEBITO'];
+
+// Unidades de medida para insumos
+export const MEDIDAS_INSUMO = ['KG', 'GRAMO', 'LITRO', 'ML', 'UNIDAD', 'CAJA', 'BOLSA', 'PORCION'];

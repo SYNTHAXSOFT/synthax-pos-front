@@ -6,7 +6,7 @@ import { UsuarioService } from '../../services/usuario.service';
 import { Usuario } from '../../interfaces/usuario.interface';
 
 // Roles del POS — sincronizados con el enum Rol.java del backend
-const ROLES_POS = ['ROOT', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'DOMICILIARIO'];
+const ROLES_POS = ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'DOMICILIARIO'];
 
 @Component({
   selector: 'app-actualizar-usuario',

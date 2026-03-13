@@ -1,0 +1,145 @@
+<!-- ══════════════════════════════════════════════════════════════════════
+     TICKET / FACTURA CON BRANDING DINÁMICO DEL RESTAURANTE
+     Ancho óptimo de impresión: 80mm (estándar térmica)
+     ══════════════════════════════════════════════════════════════════════ -->
+
+<div class="ticket-wrapper p-3" style="max-width: 340px; margin: 0 auto; font-size: 0.85rem;">
+
+  <!-- ── Encabezado con branding ──────────────────────────────────────────── -->
+  <div class="ticket-header text-center py-3 px-2 rounded-top-3 mb-0"
+       [style.background]="branding.colorPrimario"
+       [style.color]="branding.colorTexto">
+
+    <!-- Logo del restaurante -->
+    @if (branding.logo) {
+      <img [src]="branding.logo"
+           [alt]="restauranteNombre"
+           class="mb-2 d-block mx-auto"
+           style="max-height:4rem;max-width:8rem;object-fit:contain;
+                  background:rgba(255,255,255,0.15);border-radius:6px;padding:4px;">
+    } @else {
+      <i class="fa-solid fa-store mb-2 d-block" style="font-size:2rem;opacity:0.85;"></i>
+    }
+
+    <h1 class="fw-bold mb-0" style="font-size:1.1rem;letter-spacing:1px;">
+      {{ restauranteNombre | uppercase }}
+    </h1>
+
+    @if (restauranteTelefono) {
+      <p class="mb-0 small opacity-75">Tel: {{ restauranteTelefono }}</p>
+    }
+    @if (restauranteCorreo) {
+      <p class="mb-0 small opacity-75">{{ restauranteCorreo }}</p>
+    }
+  </div>
+
+  <!-- ── Separador ────────────────────────────────────────────────────────── -->
+  <div class="py-1 px-2 text-center small"
+       style="border:1px dashed #ccc;border-top:none;border-bottom:none;background:#fafafa;">
+    <span class="fw-semibold">TIQUETE POS</span>
+    @if (venta?.solicitaFacturaElectronica) {
+      — <span style="color:var(--brand-primary,#059669)" class="fw-bold">FACTURA ELECTRÓNICA</span>
+    }
+  </div>
+
+  <!-- ── Datos de la venta ─────────────────────────────────────────────────── -->
+  @if (venta) {
+    <div class="border border-top-0 rounded-bottom-0 px-3 py-2" style="background:white;">
+
+      <!-- Info general -->
+      <table class="w-100 mb-2" style="font-size:0.8rem;">
+        <tr>
+          <td class="text-muted">Código</td>
+          <td class="text-end fw-semibold">{{ venta.codigo ?? '—' }}</td>
+        </tr>
+        <tr>
+          <td class="text-muted">Fecha</td>
+          <td class="text-end">{{ fechaImpresion | date:'dd/MM/yyyy HH:mm' }}</td>
+        </tr>
+        <tr>
+          <td class="text-muted">Tipo</td>
+          <td class="text-end">{{ venta.tipoPedido?.nombre ?? '—' }}</td>
+        </tr>
+        @if (venta.mesa) {
+          <tr>
+            <td class="text-muted">Mesa</td>
+            <td class="text-end">{{ venta.mesa.nombre ?? venta.mesa.id }}</td>
+          </tr>
+        }
+        @if (venta.usuarioCliente) {
+          <tr>
+            <td class="text-muted">Cliente</td>
+            <td class="text-end">
+              {{ venta.usuarioCliente.nombre }} {{ venta.usuarioCliente.apellido }}
+            </td>
+          </tr>
+          <tr>
+            <td class="text-muted">Cédula</td>
+            <td class="text-end">{{ venta.usuarioCliente.cedula }}</td>
+          </tr>
+        }
+        <tr>
+          <td class="text-muted">Atendió</td>
+          <td class="text-end">
+            {{ venta.usuarioCreador?.nombre }} {{ venta.usuarioCreador?.apellido }}
+          </td>
+        </tr>
+      </table>
+
+      <hr class="my-2" style="border-style:dashed;">
+
+      <!-- Total -->
+      <div class="d-flex justify-content-between align-items-center py-2 px-2 rounded-2 mb-2"
+           [style.background]="branding.colorFondo">
+        <span class="fw-bold">TOTAL</span>
+        <span class="fw-bold fs-5" [style.color]="branding.colorPrimario">
+          {{ formatCOP(venta.valorTotal) }}
+        </span>
+      </div>
+
+      <!-- Observación -->
+      @if (venta.observacion) {
+        <p class="text-muted small mb-2">
+          <i class="fa-solid fa-circle-info me-1"></i>{{ venta.observacion }}
+        </p>
+      }
+
+      <!-- Estado -->
+      <div class="text-center">
+        <span class="badge fs-6 px-3 py-2"
+              [class.bg-success]="venta.estado === 'PAGADA'"
+              [class.bg-warning]="venta.estado === 'ABIERTA'"
+              [class.bg-danger]="venta.estado === 'ANULADA'">
+          {{ venta.estado }}
+        </span>
+      </div>
+
+    </div>
+
+    <!-- ── Pie de factura ────────────────────────────────────────────────── -->
+    <div class="text-center py-2 px-2 rounded-bottom-3"
+         style="background:#f8f9fa;border:1px solid #dee2e6;border-top:none;font-size:0.75rem;">
+      <p class="text-muted mb-1">¡Gracias por su visita!</p>
+      <p class="text-muted mb-0" style="font-size:0.7rem;">
+        Powered by <strong>SYNTHAX POS</strong>
+      </p>
+    </div>
+
+  } @else {
+    <div class="alert alert-warning text-center mt-2">
+      <i class="fa-solid fa-triangle-exclamation me-1"></i>
+      No hay venta seleccionada
+    </div>
+  }
+
+  <!-- ── Botón imprimir (no aparece en impresión) ──────────────────────── -->
+  <div class="text-center mt-3 no-print">
+    <button class="btn btn-sm px-4"
+            [style.background]="branding.colorPrimario"
+            [style.color]="branding.colorTexto"
+            (click)="imprimir()">
+      <i class="fa-solid fa-print me-1"></i>Imprimir
+    </button>
+  </div>
+
+</div>

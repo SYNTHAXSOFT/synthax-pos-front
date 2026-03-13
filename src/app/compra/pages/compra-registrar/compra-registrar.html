@@ -1,0 +1,107 @@
+<h2 class="mb-2">Registrar Compra de Insumo</h2>
+<hr class="mb-4">
+
+<div class="container" style="max-width: 88rem;">
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+      <form [formGroup]="myForm" (ngSubmit)="onSave()">
+        <div class="row g-3">
+
+          <!-- Código -->
+          <div class="col-md-3">
+            <label class="form-label">Código de compra <span class="text-danger">*</span></label>
+            <input type="text" formControlName="codigo" class="form-control"
+                   placeholder="CMP-001" [class.is-invalid]="isValidField('codigo')">
+            @if (isValidField('codigo')) {
+              <div class="invalid-feedback">Código obligatorio (mín. 2 caracteres)</div>
+            }
+          </div>
+
+          <!-- Restaurante -->
+          <div class="col-md-4">
+            <label class="form-label">Restaurante <span class="text-danger">*</span></label>
+            <select formControlName="restauranteId" class="form-select"
+                    [class.is-invalid]="isValidField('restauranteId')"
+                    (change)="onRestauranteChange()">
+              <option [value]="null">Seleccione un restaurante...</option>
+              @for (r of restaurantes; track r.id) {
+                <option [value]="r.id">{{ r.nombre }}</option>
+              }
+            </select>
+            @if (isValidField('restauranteId')) {
+              <div class="invalid-feedback">Restaurante obligatorio</div>
+            }
+          </div>
+
+          <!-- Insumo -->
+          <div class="col-md-5">
+            <label class="form-label">Insumo <span class="text-danger">*</span></label>
+            <select formControlName="insumoId" class="form-select"
+                    [class.is-invalid]="isValidField('insumoId')"
+                    [attr.disabled]="!myForm.value.restauranteId ? true : null">
+              <option [value]="null">
+                {{ myForm.value.restauranteId ? 'Seleccione un insumo...' : 'Primero seleccione un restaurante' }}
+              </option>
+              @for (i of insumos; track i.id) {
+                <option [value]="i.id">
+                  {{ i.descripcion }} — Stock: {{ i.stock }} {{ i.medida }}
+                </option>
+              }
+            </select>
+            @if (isValidField('insumoId')) {
+              <div class="invalid-feedback">Insumo obligatorio</div>
+            }
+          </div>
+
+          <!-- Cantidad -->
+          <div class="col-md-3">
+            <label class="form-label">Cantidad <span class="text-danger">*</span></label>
+            <input type="number" formControlName="cantidad" class="form-control"
+                   min="0.01" step="0.01" placeholder="0"
+                   [class.is-invalid]="isValidField('cantidad')">
+            @if (isValidField('cantidad')) {
+              <div class="invalid-feedback">Cantidad requerida (mayor a 0)</div>
+            }
+          </div>
+
+          <!-- Valor unitario -->
+          <div class="col-md-3">
+            <label class="form-label">Valor unitario (COP) <span class="text-danger">*</span></label>
+            <input type="number" formControlName="valorUnidad" class="form-control"
+                   min="1" step="1" placeholder="0"
+                   [class.is-invalid]="isValidField('valorUnidad')">
+            @if (isValidField('valorUnidad')) {
+              <div class="invalid-feedback">Valor unitario requerido</div>
+            }
+          </div>
+
+          <!-- Subtotal calculado -->
+          <div class="col-md-3 d-flex align-items-end">
+            <div class="alert alert-success w-100 py-2 mb-0 text-center">
+              <small class="text-muted d-block">Valor total</small>
+              <strong class="fs-5">{{ subtotal | currency:'COP':'symbol':'1.0-0' }}</strong>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="alert alert-info mt-3 mb-0 py-2 small">
+          <i class="fas fa-info-circle me-1"></i>
+          Al registrar la compra, el <strong>stock del insumo</strong> se incrementará automáticamente
+          con la cantidad indicada.
+        </div>
+
+        <div class="d-flex justify-content-end mt-4">
+          <button type="submit" class="btn btn-primary px-4">
+            <i class="fas fa-shopping-cart me-1"></i> Registrar Compra
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista -->
+  <div class="mt-4">
+    <app-compra-listar></app-compra-listar>
+  </div>
+</div>

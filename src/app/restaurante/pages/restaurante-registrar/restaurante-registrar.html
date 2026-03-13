@@ -1,0 +1,101 @@
+<h2 class="mb-2">{{ editando ? 'Editar' : 'Nuevo' }} Restaurante</h2>
+<hr class="mb-4">
+
+<div class="container" style="max-width: 88rem;">
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+      <form [formGroup]="myForm" (ngSubmit)="onSave()">
+        <div class="row g-3">
+
+          <!-- Código -->
+          <div class="col-md-3">
+            <label class="form-label">Código <span class="text-danger">*</span></label>
+            <input type="text" formControlName="codigo" class="form-control"
+                   placeholder="REST-001" [class.is-invalid]="isValidField('codigo')">
+            @if (isValidField('codigo')) {
+              <div class="invalid-feedback">Código obligatorio (mín. 2 caracteres)</div>
+            }
+          </div>
+
+          <!-- Nombre -->
+          <div class="col-md-5">
+            <label class="form-label">Nombre <span class="text-danger">*</span></label>
+            <input type="text" formControlName="nombre" class="form-control"
+                   placeholder="Mi Restaurante" [class.is-invalid]="isValidField('nombre')">
+            @if (isValidField('nombre')) {
+              <div class="invalid-feedback">Nombre obligatorio (mín. 3 caracteres)</div>
+            }
+          </div>
+
+          <!-- Propietario -->
+          <div class="col-md-4">
+            <label class="form-label">Propietario <span class="text-muted">(opcional)</span></label>
+            <select formControlName="propietarioId" class="form-select">
+              <option [value]="null">Sin propietario asignado</option>
+              @for (u of propietarios; track u.id) {
+                <option [value]="u.id">{{ u.nombre }} {{ u.apellido }} — {{ u.cedula }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Teléfono -->
+          <div class="col-md-3">
+            <label class="form-label">Teléfono</label>
+            <input type="text" formControlName="telefono" class="form-control"
+                   placeholder="3001234567">
+          </div>
+
+          <!-- Correo -->
+          <div class="col-md-4">
+            <label class="form-label">Correo electrónico</label>
+            <input type="email" formControlName="correo" class="form-control"
+                   placeholder="contacto@restaurante.com"
+                   [class.is-invalid]="isValidField('correo')">
+            @if (isValidField('correo')) {
+              <div class="invalid-feedback">Ingrese un correo válido</div>
+            }
+          </div>
+
+          <!-- Logo URL -->
+          <div class="col-md-5">
+            <label class="form-label">Logo <span class="text-muted">(URL o Base64)</span></label>
+            <input type="text" formControlName="logo" class="form-control"
+                   placeholder="https://...">
+          </div>
+
+          <!-- Descripción -->
+          <div class="col-12">
+            <label class="form-label">Descripción</label>
+            <textarea formControlName="descripcion" class="form-control" rows="2"
+                      placeholder="Breve descripción del establecimiento..."></textarea>
+          </div>
+
+          <!-- Activo -->
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" formControlName="activo" id="activoCheck">
+              <label class="form-check-label" for="activoCheck">Restaurante activo</label>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          @if (editando) {
+            <button type="button" class="btn btn-secondary" (click)="resetForm()">
+              Cancelar
+            </button>
+          }
+          <button type="submit" class="btn btn-primary px-4">
+            {{ editando ? 'Actualizar' : 'Crear Restaurante' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista -->
+  <div class="mt-4">
+    <app-restaurante-listar></app-restaurante-listar>
+  </div>
+</div>

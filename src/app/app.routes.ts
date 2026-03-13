@@ -3,12 +3,29 @@ import { HomePageComponent } from './shared/pages/home-page/home-page.component'
 import { AuthGuard } from './auth/guards/auth.guard';
 import { RoleGuard } from './auth/guards/role.guard';
 
+/**
+ * Rutas del sistema POS (alineadas con SecurityConfig.java):
+ *
+ *  Ruta              | Roles permitidos
+ *  ------------------|------------------------------------------------------
+ *  Usuarios          | ROOT, PROPIETARIO, ADMINISTRADOR
+ *  Restaurantes      | ROOT, ADMINISTRADOR   (PROPIETARIO NO puede listar/crear)
+ *  Identidad Visual  | ROOT, PROPIETARIO, ADMINISTRADOR
+ *  Mesas             | ROOT, PROPIETARIO, ADMINISTRADOR
+ *  Productos         | ROOT, PROPIETARIO, ADMINISTRADOR
+ *  Tipos de Pedido   | ROOT, PROPIETARIO, ADMINISTRADOR
+ *  Impuestos         | ROOT, PROPIETARIO, ADMINISTRADOR
+ *  Insumos           | ROOT, PROPIETARIO, ADMINISTRADOR
+ *  Compras           | ROOT, PROPIETARIO, ADMINISTRADOR
+ *  Ventas            | ROOT, PROPIETARIO, ADMINISTRADOR, CAJERO, MESERO
+ *  Pedidos           | ROOT, PROPIETARIO, ADMINISTRADOR, CAJERO, MESERO, DOMICILIARIO
+ *  Departamentos     | ROOT
+ *  Municipios        | ROOT
+ */
 export const routes: Routes = [
   { path: '', component: HomePageComponent },
 
   {
-    // Ruta principal del dashboard POS
-    // (renombrado de 'synthax-votos' a 'synthax-pos' para reflejar el dominio)
     path: 'synthax-pos',
     loadComponent: () =>
       import('./shared/pages/dashboard-page/dashboard-page.component'),
@@ -16,11 +33,7 @@ export const routes: Routes = [
     children: [
 
       // ── Inicio ──────────────────────────────────────────────────────────────
-      {
-        path: '',
-        pathMatch: 'full',
-        redirectTo: 'inicio',
-      },
+      { path: '', pathMatch: 'full', redirectTo: 'inicio' },
       {
         path: 'inicio',
         title: 'Inicio',
@@ -30,15 +43,18 @@ export const routes: Routes = [
           ),
       },
 
-      // ── Administración ──────────────────────────────────────────────────────
+      // ── Administración de usuarios ───────────────────────────────────────────
       {
         path: 'usuario',
         title: 'Usuarios',
         loadChildren: () =>
           import('./usuario/usuario.routes').then((m) => m.usuarioRoutes),
         canActivate: [RoleGuard],
-        data: { roles: ['ROOT', 'ADMINISTRADOR'] },
+        // PROPIETARIO puede gestionar el personal de su restaurante
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
+
+      // ── Geografía (solo ROOT) ────────────────────────────────────────────────
       {
         path: 'departamento',
         title: 'Departamentos',
@@ -56,14 +72,55 @@ export const routes: Routes = [
         data: { roles: ['ROOT'] },
       },
 
-      // ── Catálogos POS ───────────────────────────────────────────────────────
+      // ── Multi-tenancy ───────────────────────────────────────────────────────
+      {
+        // PROPIETARIO no puede listar ni crear restaurantes.
+        // Solo ROOT y ADMINISTRADOR tienen acceso al CRUD completo.
+        path: 'restaurante',
+        title: 'Restaurantes',
+        loadChildren: () =>
+          import('./restaurante/restaurante.routes').then((m) => m.restauranteRoutes),
+        canActivate: [RoleGuard],
+        data: { roles: ['ROOT', 'ADMINISTRADOR'] },
+      },
+      {
+        // Acceso directo a la identidad visual (logo + colores).
+        // PROPIETARIO entra SOLO por esta ruta — no ve el listado de restaurantes.
+        path: 'identidad-visual',
+        title: 'Identidad Visual',
+        loadComponent: () =>
+          import('./restaurante/pages/restaurante-branding/restaurante-branding').then(
+            (m) => m.RestauranteBrandingComponent
+          ),
+        canActivate: [RoleGuard],
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
+      },
+      {
+        path: 'insumo',
+        title: 'Insumos',
+        loadChildren: () =>
+          import('./insumo/insumo.routes').then((m) => m.insumoRoutes),
+        canActivate: [RoleGuard],
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
+      },
+      {
+        path: 'compra',
+        title: 'Compras',
+        loadChildren: () =>
+          import('./compra/compra.routes').then((m) => m.compraRoutes),
+        canActivate: [RoleGuard],
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
+      },
+
+      // ── Catálogos POS ────────────────────────────────────────────────────────
       {
         path: 'producto',
         title: 'Productos',
         loadChildren: () =>
           import('./producto/producto.routes').then((m) => m.productoRoutes),
         canActivate: [RoleGuard],
-        data: { roles: ['ROOT', 'ADMINISTRADOR'] },
+        // PROPIETARIO gestiona el catálogo de su restaurante
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
       {
         path: 'mesa',
@@ -71,7 +128,8 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./mesa/mesa.routes').then((m) => m.mesaRoutes),
         canActivate: [RoleGuard],
-        data: { roles: ['ROOT', 'ADMINISTRADOR'] },
+        // PROPIETARIO gestiona las mesas de su restaurante
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
       {
         path: 'tipo-pedido',
@@ -79,7 +137,7 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./tipo-pedido/tipo-pedido.routes').then((m) => m.tipoPedidoRoutes),
         canActivate: [RoleGuard],
-        data: { roles: ['ROOT', 'ADMINISTRADOR'] },
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
       {
         path: 'impuesto',
@@ -87,17 +145,18 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./impuesto/impuesto.routes').then((m) => m.impuestoRoutes),
         canActivate: [RoleGuard],
-        data: { roles: ['ROOT', 'ADMINISTRADOR'] },
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
 
-      // ── Operación POS ───────────────────────────────────────────────────────
+      // ── Operación POS ────────────────────────────────────────────────────────
       {
         path: 'venta',
         title: 'Ventas',
         loadChildren: () =>
           import('./venta/venta.routes').then((m) => m.ventaRoutes),
         canActivate: [RoleGuard],
-        data: { roles: ['ROOT', 'ADMINISTRADOR', 'CAJERO', 'MESERO'] },
+        // PROPIETARIO puede supervisar y controlar ventas
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO'] },
       },
       {
         path: 'pedido',
@@ -105,7 +164,7 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./pedido/pedido.routes').then((m) => m.pedidoRoutes),
         canActivate: [RoleGuard],
-        data: { roles: ['ROOT', 'ADMINISTRADOR', 'CAJERO', 'MESERO'] },
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO'] },
       },
 
       { path: '**', redirectTo: 'inicio' },
