@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { VentaService } from '../../services/venta.service';
 import { Venta } from '../../interfaces/venta.interface';
 import { ESTADOS_VENTA } from '../../../utils/constantes-utils';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-venta-listar',
@@ -14,13 +15,16 @@ import { ESTADOS_VENTA } from '../../../utils/constantes-utils';
 export class VentaListarPageComponent implements OnInit {
   private readonly ventaService = inject(VentaService);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   public ventas: Venta[] = [];
   public cargando: boolean = false;
   public estadoFiltro: string = '';
   public readonly estadosVenta = ESTADOS_VENTA;
+  public restauranteId?: number;
 
   ngOnInit(): void {
+    this.restauranteId = this.authService.getRestauranteId() ?? undefined;
     this.cargarVentas();
   }
 

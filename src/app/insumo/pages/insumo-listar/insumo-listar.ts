@@ -2,6 +2,7 @@ import { Component, inject, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { InsumoService } from '../../services/insumo.service';
+import { AuthService } from '../../../auth/services/auth.service';
 import { Insumo } from '../../interfaces/insumo.interface';
 
 @Component({
@@ -12,15 +13,21 @@ import { Insumo } from '../../interfaces/insumo.interface';
 })
 export class InsumoListarPageComponent implements OnInit {
   private readonly insumoService = inject(InsumoService);
+  private readonly authService   = inject(AuthService);
   private readonly router = inject(Router);
 
-  /** Si se proporciona, filtra los insumos por restaurante */
+  /** Si se proporciona explicitamente, filtra los insumos por restaurante.
+   *  Si no, se auto-completa con el restaurante del usuario logueado. */
   @Input() restauranteId?: number;
 
   public insumos: Insumo[] = [];
   public cargando: boolean = false;
 
   ngOnInit(): void {
+    // Auto-asignar restaurante desde el usuario logueado si no viene como @Input
+    if (!this.restauranteId) {
+      this.restauranteId = this.authService.getRestauranteId() ?? undefined;
+    }
     this.cargarInsumos();
   }
 

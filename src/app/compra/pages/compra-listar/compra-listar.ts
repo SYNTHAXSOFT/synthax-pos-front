@@ -1,6 +1,7 @@
 import { Component, inject, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CompraService } from '../../services/compra.service';
+import { AuthService } from '../../../auth/services/auth.service';
 import { Compra } from '../../interfaces/compra.interface';
 
 @Component({
@@ -11,14 +12,20 @@ import { Compra } from '../../interfaces/compra.interface';
 })
 export class CompraListarPageComponent implements OnInit {
   private readonly compraService = inject(CompraService);
+  private readonly authService   = inject(AuthService);
 
-  /** Filtra por restaurante si se provee */
+  /** Filtra por restaurante si se provee explicitamente.
+   *  Si no, se auto-completa con el restaurante del usuario logueado. */
   @Input() restauranteId?: number;
 
   public compras: Compra[] = [];
   public cargando: boolean = false;
 
   ngOnInit(): void {
+    // Auto-asignar restaurante desde el usuario logueado si no viene como @Input
+    if (!this.restauranteId) {
+      this.restauranteId = this.authService.getRestauranteId() ?? undefined;
+    }
     this.cargarCompras();
   }
 

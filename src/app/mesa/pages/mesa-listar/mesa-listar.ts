@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MesaService } from '../../services/mesa.service';
 import { Mesa } from '../../interfaces/mesa.interface';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-mesa-listar',
@@ -13,11 +14,14 @@ import { Mesa } from '../../interfaces/mesa.interface';
 export class MesaListarPageComponent implements OnInit {
   private readonly mesaService = inject(MesaService);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   public mesas: Mesa[] = [];
   public cargando: boolean = false;
+  public restauranteId?: number;
 
   ngOnInit(): void {
+    this.restauranteId = this.authService.getRestauranteId() ?? undefined;
     this.cargarMesas();
   }
 

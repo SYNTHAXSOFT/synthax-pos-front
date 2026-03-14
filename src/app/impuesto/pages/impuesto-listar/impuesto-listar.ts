@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ImpuestoService } from '../../services/impuesto.service';
 import { Impuesto } from '../../interfaces/impuesto.interface';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-impuesto-listar',
@@ -13,11 +14,14 @@ import { Impuesto } from '../../interfaces/impuesto.interface';
 export class ImpuestoListarPageComponent implements OnInit {
   private readonly impuestoService = inject(ImpuestoService);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   public impuestos: Impuesto[] = [];
   public cargando: boolean = false;
+  public restauranteId?: number;
 
   ngOnInit(): void {
+    this.restauranteId = this.authService.getRestauranteId() ?? undefined;
     this.cargarImpuestos();
   }
 

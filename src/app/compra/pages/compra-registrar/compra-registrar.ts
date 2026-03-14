@@ -8,6 +8,7 @@ import { InsumoService } from '../../../insumo/services/insumo.service';
 import { Restaurante } from '../../../restaurante/interfaces/restaurante.interface';
 import { Insumo } from '../../../insumo/interfaces/insumo.interface';
 import { CompraListarPageComponent } from '../compra-listar/compra-listar';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-compra-registrar',
@@ -20,11 +21,14 @@ export class CompraRegistrarPageComponent implements OnInit {
   private readonly compraService      = inject(CompraService);
   private readonly restauranteService = inject(RestauranteService);
   private readonly insumoService      = inject(InsumoService);
+  private readonly authService        = inject(AuthService);
 
   @ViewChild(CompraListarPageComponent) listarComponent?: CompraListarPageComponent;
 
   public restaurantes: Restaurante[] = [];
   public insumos:      Insumo[]      = [];
+  /** true si el usuario es ROOT y puede elegir cualquier restaurante */
+  public esRoot: boolean = false;
 
   public myForm: FormGroup = this.fb.group({
     codigo:        ['', [Validators.required, Validators.minLength(2)]],
@@ -42,7 +46,24 @@ export class CompraRegistrarPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.restauranteService.obtenerActivos().subscribe({ next: (d) => this.restaurantes = d });
+    const rol = this.authService.getUserRole();
+    this.esRoot = (rol === 'ROOT');
+
+    if (this.esRoot) {
+      // ROOT puede elegir cualquier restaurante
+      this.restauranteService.obtenerActivos().subscribe({ next: (d) => this.restaurantes = d });
+    } else {
+      // PROPIETARIO / ADMINISTRADOR: solo su propio restaurante, autoseleccionado
+      const rest = this.authService.getCurrentRestaurante();
+      if (rest) {
+        this.restaurantes = [rest as unknown as Restaurante];
+        this.myForm.patchValue({ restauranteId: rest.id });
+        // Cargar insumos del restaurante automáticamente
+        this.insumoService.obtenerActivosPorRestaurante(rest.id).subscribe({
+          next: (d) => this.insumos = d,
+        });
+      }
+    }
   }
 
   /** Al cambiar de restaurante, recarga los insumos filtrados */
@@ -76,8 +97,17 @@ export class CompraRegistrarPageComponent implements OnInit {
     this.compraService.crear(payload).subscribe({
       next: () => {
         alert('Compra registrada. Stock del insumo actualizado automáticamente.');
-        this.myForm.reset();
-        this.insumos = [];
+        // Mantener el restaurante seleccionado para no-ROOT
+        const restauranteId = this.esRoot ? null : (this.authService.getRestauranteId() ?? null);
+        this.myForm.reset({ restauranteId });
+        if (!this.esRoot && restauranteId) {
+          // Recargar insumos del restaurante
+          this.insumoService.obtenerActivosPorRestaurante(restauranteId).subscribe({
+            next: (d) => this.insumos = d,
+          });
+        } else {
+          this.insumos = [];
+        }
         this.listarComponent?.cargarCompras();
       },
       error: (err) => alert('Error: ' + (err.error?.error || 'Error desconocido')),

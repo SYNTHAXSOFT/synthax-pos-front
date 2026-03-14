@@ -8,6 +8,7 @@ import { RestauranteService } from '../../../restaurante/services/restaurante.se
 import { Restaurante } from '../../../restaurante/interfaces/restaurante.interface';
 import { MEDIDAS_INSUMO } from '../../../utils/constantes-utils';
 import { InsumoListarPageComponent } from '../insumo-listar/insumo-listar';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-insumo-registrar',
@@ -19,6 +20,7 @@ export class InsumoRegistrarPageComponent implements OnInit {
   private readonly fb                 = inject(FormBuilder);
   private readonly insumoService      = inject(InsumoService);
   private readonly restauranteService = inject(RestauranteService);
+  private readonly authService        = inject(AuthService);
   private readonly route              = inject(ActivatedRoute);
 
   @ViewChild(InsumoListarPageComponent) listarComponent?: InsumoListarPageComponent;
@@ -27,6 +29,8 @@ export class InsumoRegistrarPageComponent implements OnInit {
   private insumoId?: number;
   public restaurantes: Restaurante[] = [];
   public readonly medidas = MEDIDAS_INSUMO;
+  /** true si el usuario es ROOT y puede elegir cualquier restaurante */
+  public esRoot: boolean = false;
 
   public myForm: FormGroup = this.fb.group({
     codigo:       ['', [Validators.required, Validators.minLength(2)]],
@@ -38,7 +42,20 @@ export class InsumoRegistrarPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.restauranteService.obtenerActivos().subscribe({ next: (d) => this.restaurantes = d });
+    const rol = this.authService.getUserRole();
+    this.esRoot = (rol === 'ROOT');
+
+    if (this.esRoot) {
+      // ROOT puede elegir cualquier restaurante
+      this.restauranteService.obtenerActivos().subscribe({ next: (d) => this.restaurantes = d });
+    } else {
+      // PROPIETARIO / ADMINISTRADOR: solo su propio restaurante, autoseleccionado
+      const rest = this.authService.getCurrentRestaurante();
+      if (rest) {
+        this.restaurantes = [rest as unknown as Restaurante];
+        this.myForm.patchValue({ restauranteId: rest.id });
+      }
+    }
 
     this.route.queryParams.subscribe((params) => {
       const id = params['id'];
@@ -101,7 +118,8 @@ export class InsumoRegistrarPageComponent implements OnInit {
   resetForm(): void {
     this.editando = false;
     this.insumoId = undefined;
-    this.myForm.reset({ stock: 0, medida: 'UNIDAD', activo: true });
+    const restauranteId = this.esRoot ? null : (this.authService.getRestauranteId() ?? null);
+    this.myForm.reset({ stock: 0, medida: 'UNIDAD', activo: true, restauranteId });
   }
 
   isValidField(field: string): boolean | null {

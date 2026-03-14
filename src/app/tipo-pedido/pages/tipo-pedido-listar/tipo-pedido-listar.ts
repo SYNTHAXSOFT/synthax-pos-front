@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TipoPedidoService } from '../../services/tipo-pedido.service';
 import { TipoPedido } from '../../interfaces/tipo-pedido.interface';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-tipo-pedido-listar',
@@ -13,11 +14,14 @@ import { TipoPedido } from '../../interfaces/tipo-pedido.interface';
 export class TipoPedidoListarPageComponent implements OnInit {
   private readonly tipoPedidoService = inject(TipoPedidoService);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   public tiposPedido: TipoPedido[] = [];
   public cargando: boolean = false;
+  public restauranteId?: number;
 
   ngOnInit(): void {
+    this.restauranteId = this.authService.getRestauranteId() ?? undefined;
     this.cargarTiposPedido();
   }
 
