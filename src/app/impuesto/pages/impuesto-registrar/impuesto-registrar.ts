@@ -11,6 +11,7 @@ import { ImpuestoListarPageComponent } from '../impuesto-listar/impuesto-listar'
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ImpuestoListarPageComponent],
   templateUrl: './impuesto-registrar.html',
+  styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
 export class ImpuestoRegistrarPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);

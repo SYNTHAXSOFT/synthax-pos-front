@@ -8,11 +8,11 @@ import { Pedido } from '../../interfaces/pedido.interface';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './pedido-listar.html',
+  styleUrls: ['./pedido-listar.css'],
 })
 export class PedidoListarPageComponent implements OnInit, OnChanges {
   private readonly pedidoService = inject(PedidoService);
 
-  /** Si se provee ventaId, se muestran solo los ítems de esa venta */
   @Input() ventaId?: number;
 
   public pedidos: Pedido[] = [];
@@ -35,14 +35,8 @@ export class PedidoListarPageComponent implements OnInit, OnChanges {
       : this.pedidoService.obtenerTodos();
 
     obs.subscribe({
-      next: (data) => {
-        this.pedidos = data;
-        this.cargando = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar pedidos:', err);
-        this.cargando = false;
-      },
+      next: (data) => { this.pedidos = data; this.cargando = false; },
+      error: (err) => { console.error('Error al cargar pedidos:', err); this.cargando = false; },
     });
   }
 
@@ -50,26 +44,22 @@ export class PedidoListarPageComponent implements OnInit, OnChanges {
     if (!id) return;
     if (!confirm('¿Desea cancelar este ítem del pedido?')) return;
     this.pedidoService.cancelarItem(id).subscribe({
-      next: () => {
-        alert('Ítem cancelado');
-        this.cargarPedidos();
-      },
-      error: (err) => {
-        console.error('Error al cancelar ítem:', err);
-        alert('Error: ' + (err.error?.error || 'No se pudo cancelar el ítem'));
-      },
+      next: () => { alert('Ítem cancelado'); this.cargarPedidos(); },
+      error: (err) => { alert('Error: ' + (err.error?.error || 'No se pudo cancelar el ítem')); },
     });
   }
 
-  /** Calcula el subtotal de un pedido */
   subtotal(pedido: Pedido): number {
     return (pedido.cantidad ?? 0) * (pedido.producto?.precio ?? 0);
   }
 
-  /** Calcula el total general de los pedidos activos */
   totalGeneral(): number {
     return this.pedidos
-      .filter((p) => p.activo)
+      .filter(p => p.activo)
       .reduce((acc, p) => acc + this.subtotal(p), 0);
   }
+
+  get totalItems(): number     { return this.pedidos.length; }
+  get itemsActivos(): number   { return this.pedidos.filter(p => p.activo).length; }
+  get itemsCancelados(): number { return this.pedidos.filter(p => !p.activo).length; }
 }

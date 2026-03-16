@@ -1,0 +1,330 @@
+/* =============================================
+   SYNTHAX POS — Mesas (mesa-listar)
+   ============================================= */
+
+:host, .spx-mesa {
+  --spx-bg:      #101922;
+  --spx-surface: #1a242f;
+  --spx-surface2:#1e2d3d;
+  --spx-border:  #283543;
+  --spx-text:    #f1f5f9;
+  --spx-muted:   #64748b;
+  --spx-primary: #0d7ff2;
+  --spx-ok:      #22c55e;
+  --spx-off:     #ef4444;
+  --spx-radius:  0.75rem;
+  display: block;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.spx-mesa {
+  padding: 1.75rem 2rem;
+  background: var(--spx-bg);
+  min-height: 100%;
+  color: var(--spx-text);
+}
+
+/* ── Header ──────────────────────────────── */
+.spx-mesa-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.spx-mesa-header__title {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: var(--spx-text);
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.02em;
+}
+.spx-mesa-header__sub {
+  font-size: 0.875rem;
+  color: var(--spx-muted);
+  margin: 0;
+}
+.spx-mesa-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: var(--spx-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--spx-radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(13,127,242,0.25);
+  transition: background 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+.spx-mesa-btn-primary:hover {
+  background: #0b6fd4;
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(13,127,242,0.35);
+}
+
+/* ── Stats ───────────────────────────────── */
+.spx-mesa-stats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.spx-mesa-stat {
+  flex: 1;
+  min-width: 130px;
+  background: var(--spx-surface);
+  border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+.spx-mesa-stat__icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  background: rgba(13,127,242,0.12);
+  color: var(--spx-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.spx-mesa-stat__icon--ok  { background: rgba(34,197,94,0.12);  color: var(--spx-ok); }
+.spx-mesa-stat__icon--off { background: rgba(239,68,68,0.12);  color: var(--spx-off); }
+.spx-mesa-stat > div { display: flex; flex-direction: column; gap: 0.1rem; }
+.spx-mesa-stat__value {
+  font-size: 1.5rem; font-weight: 800; color: var(--spx-text); line-height: 1;
+}
+.spx-mesa-stat__value--ok  { color: var(--spx-ok); }
+.spx-mesa-stat__value--off { color: var(--spx-off); }
+.spx-mesa-stat__label {
+  font-size: 0.7rem; color: var(--spx-muted);
+  font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+/* ── Filters ─────────────────────────────── */
+.spx-mesa-filters {
+  display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.75rem;
+}
+.spx-mesa-search { position: relative; max-width: 36rem; }
+.spx-mesa-search__icon {
+  position: absolute; left: 0.875rem; top: 50%;
+  transform: translateY(-50%); color: var(--spx-muted);
+  font-size: 0.8rem; pointer-events: none;
+}
+.spx-mesa-search__input {
+  width: 100%; background: var(--spx-surface); border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius); color: var(--spx-text);
+  font-family: 'Inter', system-ui, sans-serif; font-size: 0.875rem;
+  padding: 0.625rem 1rem 0.625rem 2.5rem; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;
+}
+.spx-mesa-search__input::placeholder { color: var(--spx-muted); }
+.spx-mesa-search__input:focus {
+  border-color: var(--spx-primary); box-shadow: 0 0 0 3px rgba(13,127,242,0.15);
+}
+.spx-mesa-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.spx-mesa-pill {
+  display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 1rem;
+  border-radius: 999px; border: 1px solid var(--spx-border); background: var(--spx-surface);
+  color: var(--spx-muted); font-size: 0.8rem; font-weight: 500;
+  cursor: pointer; transition: all 0.15s; font-family: inherit;
+}
+.spx-mesa-pill:hover { border-color: var(--spx-primary); color: var(--spx-text); }
+.spx-mesa-pill--active { background: var(--spx-primary); border-color: var(--spx-primary); color: #fff !important; }
+.spx-mesa-pill--off { color: var(--spx-off); }
+.spx-mesa-pill--off.spx-mesa-pill--active { background: var(--spx-off); border-color: var(--spx-off); }
+
+/* ── Loading / Empty ─────────────────────── */
+.spx-mesa-loading {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 1rem; padding: 5rem 0; color: var(--spx-muted);
+}
+.spx-mesa-spinner {
+  width: 2.5rem; height: 2.5rem; border: 3px solid var(--spx-border);
+  border-top-color: var(--spx-primary); border-radius: 50%;
+  animation: spx-spin 0.7s linear infinite;
+}
+@keyframes spx-spin { to { transform: rotate(360deg); } }
+.spx-mesa-empty {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.5rem; padding: 5rem 0; text-align: center;
+}
+.spx-mesa-empty__icon { font-size: 3rem; color: var(--spx-border); margin-bottom: 0.5rem; }
+.spx-mesa-empty__msg  { font-size: 1.125rem; font-weight: 600; color: var(--spx-text); margin: 0; }
+.spx-mesa-empty__sub  { font-size: 0.875rem; color: var(--spx-muted); margin: 0; }
+
+/* ── Card Grid ───────────────────────────── */
+.spx-mesa-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.25rem;
+}
+@media (max-width: 1400px) { .spx-mesa-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 1100px) { .spx-mesa-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px)  { .spx-mesa-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px)  { .spx-mesa-grid { grid-template-columns: 1fr; } }
+
+/* ── Mesa Card ───────────────────────────── */
+.spx-mesa-card {
+  background: var(--spx-surface);
+  border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.15s;
+}
+.spx-mesa-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  border-color: rgba(13,127,242,0.3);
+  transform: translateY(-2px);
+}
+.spx-mesa-card--inactive { opacity: 0.6; }
+
+/* Top / visual */
+.spx-mesa-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem 1rem 0.5rem;
+}
+
+.spx-mesa-card__table-visual {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, rgba(13,127,242,0.2) 0%, rgba(13,127,242,0.08) 100%);
+  border: 1px solid rgba(13,127,242,0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  position: relative;
+}
+.spx-mesa-card__table-visual--inactive {
+  background: rgba(40,53,67,0.5);
+  border-color: var(--spx-border);
+}
+.spx-mesa-card__table-icon {
+  font-size: 1.125rem;
+  color: var(--spx-primary);
+  opacity: 0.8;
+}
+.spx-mesa-card__table-visual--inactive .spx-mesa-card__table-icon {
+  color: var(--spx-muted);
+}
+.spx-mesa-card__table-num {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--spx-primary);
+  line-height: 1;
+}
+.spx-mesa-card__table-visual--inactive .spx-mesa-card__table-num {
+  color: var(--spx-muted);
+}
+
+.spx-mesa-card__badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: var(--spx-border);
+  color: var(--spx-muted);
+}
+.spx-mesa-card__badge--active   { background: rgba(34,197,94,0.15);  color: var(--spx-ok); }
+.spx-mesa-card__badge--inactive { background: rgba(239,68,68,0.12);  color: var(--spx-off); }
+
+/* Body */
+.spx-mesa-card__body {
+  padding: 0.5rem 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+.spx-mesa-card__name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--spx-text);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.spx-mesa-card__codigo {
+  font-size: 0.72rem;
+  color: var(--spx-muted);
+  background: rgba(40,53,67,0.7);
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.25rem;
+  align-self: flex-start;
+}
+
+/* Actions */
+.spx-mesa-card__actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 1rem 1rem;
+}
+.spx-mesa-card__btn-edit {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  background: var(--spx-surface2);
+  border: 1px solid var(--spx-border);
+  border-radius: 0.5rem;
+  color: var(--spx-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  font-family: inherit;
+}
+.spx-mesa-card__btn-edit:hover {
+  background: var(--spx-primary);
+  border-color: var(--spx-primary);
+  color: #fff;
+}
+.spx-mesa-card__btn-deact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 0.5rem;
+  color: var(--spx-off);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+.spx-mesa-card__btn-deact:hover {
+  background: var(--spx-off);
+  border-color: var(--spx-off);
+  color: #fff;
+}
+
+/* ── Responsive ──────────────────────────── */
+@media (max-width: 767px) {
+  .spx-mesa { padding: 1.25rem 1rem; }
+  .spx-mesa-header { flex-direction: column; align-items: flex-start; }
+}

@@ -1,63 +1,142 @@
-<div class="container-fluid px-4">
-  <h2 class="mb-2">Lista de Productos</h2>
-  <hr class="mb-4">
+<div class="spx-prod">
 
-  @if (cargando) {
-    <div class="d-flex justify-content-center align-items-center py-5">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Cargando...</span>
+  <!-- Page Header -->
+  <div class="spx-prod-header">
+    <div class="spx-prod-header__left">
+      <h1 class="spx-prod-header__title">Productos</h1>
+      <p class="spx-prod-header__sub">Administra el catálogo de productos de tu restaurante</p>
+    </div>
+    <a routerLink="/synthax-pos/producto/registrar" class="spx-prod-btn-primary">
+      <i class="fa-solid fa-plus"></i>
+      Nuevo Producto
+    </a>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="spx-prod-stats">
+    <div class="spx-prod-stat">
+      <div class="spx-prod-stat__icon"><i class="fa-solid fa-box-open"></i></div>
+      <div>
+        <span class="spx-prod-stat__value">{{ productos.length }}</span>
+        <span class="spx-prod-stat__label">Total</span>
       </div>
     </div>
-  }
+    <div class="spx-prod-stat">
+      <div class="spx-prod-stat__icon spx-prod-stat__icon--ok"><i class="fa-solid fa-circle-check"></i></div>
+      <div>
+        <span class="spx-prod-stat__value spx-prod-stat__value--ok">{{ totalActivos }}</span>
+        <span class="spx-prod-stat__label">Activos</span>
+      </div>
+    </div>
+    <div class="spx-prod-stat">
+      <div class="spx-prod-stat__icon spx-prod-stat__icon--out"><i class="fa-solid fa-circle-xmark"></i></div>
+      <div>
+        <span class="spx-prod-stat__value spx-prod-stat__value--out">{{ totalInactivos }}</span>
+        <span class="spx-prod-stat__label">Inactivos</span>
+      </div>
+    </div>
+    <div class="spx-prod-stat">
+      <div class="spx-prod-stat__icon spx-prod-stat__icon--price"><i class="fa-solid fa-tag"></i></div>
+      <div>
+        <span class="spx-prod-stat__value spx-prod-stat__value--price">$ {{ precioPromedio | number:'1.0-0' }}</span>
+        <span class="spx-prod-stat__label">Precio promedio</span>
+      </div>
+    </div>
+  </div>
 
-  @if (!cargando) {
-    <div class="table-responsive">
-      <table class="table table-striped table-hover table-bordered">
-        <thead class="table-light">
-          <tr>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Precio</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (producto of productos; track producto.id) {
-            <tr>
-              <td>{{ producto.codigo }}</td>
-              <td>{{ producto.nombre }}</td>
-              <td>{{ producto.descripcion }}</td>
-              <td>$ {{ producto.precio | number:'1.0-2' }}</td>
-              <td>
-                <span [class]="producto.activo ? 'badge bg-success' : 'badge bg-danger'">
-                  {{ producto.activo ? 'Activo' : 'Inactivo' }}
-                </span>
-              </td>
-              <td>
-                <button class="btn btn-info btn-sm me-1" (click)="editar(producto.id)">
-                  Editar
-                </button>
-                <button
-                  class="btn btn-warning btn-sm"
-                  (click)="desactivar(producto.id)"
-                  [disabled]="!producto.activo"
-                >
-                  Desactivar
-                </button>
-              </td>
-            </tr>
-          }
-          @empty {
-            <tr>
-              <td colspan="6" class="text-center text-muted py-4">
-                No hay productos registrados
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+  <!-- Filter Bar -->
+  <div class="spx-prod-filters">
+    <div class="spx-prod-search">
+      <i class="fa-solid fa-magnifying-glass spx-prod-search__icon"></i>
+      <input
+        type="text"
+        class="spx-prod-search__input"
+        placeholder="Buscar por nombre, código o descripción..."
+        [(ngModel)]="searchTerm"
+      />
+    </div>
+    <div class="spx-prod-pills">
+      <button class="spx-prod-pill" [class.spx-prod-pill--active]="filtroEstado === 'todos'"
+        (click)="setFiltroEstado('todos')">Todos</button>
+      <button class="spx-prod-pill" [class.spx-prod-pill--active]="filtroEstado === 'activo'"
+        (click)="setFiltroEstado('activo')">Activos</button>
+      <button class="spx-prod-pill spx-prod-pill--danger" [class.spx-prod-pill--active]="filtroEstado === 'inactivo'"
+        (click)="setFiltroEstado('inactivo')">Inactivos</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (cargando) {
+    <div class="spx-prod-loading">
+      <div class="spx-prod-spinner"></div>
+      <p>Cargando productos...</p>
     </div>
   }
+
+  <!-- Grid -->
+  @if (!cargando) {
+    @if (productosFiltrados.length === 0) {
+      <div class="spx-prod-empty">
+        <i class="fa-solid fa-store-slash spx-prod-empty__icon"></i>
+        <p class="spx-prod-empty__msg">No se encontraron productos</p>
+        <p class="spx-prod-empty__sub">Ajusta los filtros o registra un nuevo producto</p>
+      </div>
+    } @else {
+      <div class="spx-prod-grid">
+        @for (p of productosFiltrados; track p.id) {
+          <div class="spx-prod-card" [class.spx-prod-card--inactive]="!p.activo">
+
+            <!-- Image area -->
+            <div class="spx-prod-card__img-wrap">
+              @if (p.imagen) {
+                <img [src]="p.imagen" [alt]="p.nombre" class="spx-prod-card__img" />
+              } @else {
+                <div class="spx-prod-card__img-placeholder">
+                  <span class="spx-prod-card__initials">{{ getInitials(p.nombre) }}</span>
+                </div>
+              }
+              <!-- Inactive overlay -->
+              @if (!p.activo) {
+                <div class="spx-prod-card__overlay">
+                  <span class="spx-prod-card__overlay-label">Inactivo</span>
+                </div>
+              }
+            </div>
+
+            <!-- Body -->
+            <div class="spx-prod-card__body">
+              <div class="spx-prod-card__meta">
+                <code class="spx-prod-card__codigo">{{ p.codigo }}</code>
+                <span class="spx-prod-card__status" [class.spx-prod-card__status--active]="p.activo">
+                  {{ p.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </div>
+
+              <h3 class="spx-prod-card__name">{{ p.nombre }}</h3>
+              <p class="spx-prod-card__desc">{{ p.descripcion }}</p>
+
+              <div class="spx-prod-card__price-row">
+                <span class="spx-prod-card__price">$ {{ p.precio | number:'1.0-2' }}</span>
+              </div>
+
+              <!-- Actions -->
+              <div class="spx-prod-card__actions">
+                <button class="spx-prod-card__btn-edit" (click)="editar(p.id)">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                  Editar
+                </button>
+                @if (p.activo) {
+                  <button class="spx-prod-card__btn-deact" (click)="desactivar(p.id)" title="Desactivar">
+                    <i class="fa-solid fa-ban"></i>
+                  </button>
+                }
+              </div>
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+  }
+
 </div>

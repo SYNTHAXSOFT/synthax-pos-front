@@ -17,6 +17,7 @@ import { VentaListarPageComponent } from '../venta-listar/venta-listar';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, VentaListarPageComponent],
   templateUrl: './venta-registrar.html',
+  styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
 export class VentaRegistrarPageComponent implements OnInit {
   private readonly fb               = inject(FormBuilder);

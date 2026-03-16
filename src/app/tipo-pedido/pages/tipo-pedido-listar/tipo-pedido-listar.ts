@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TipoPedidoService } from '../../services/tipo-pedido.service';
 import { TipoPedido } from '../../interfaces/tipo-pedido.interface';
@@ -8,8 +9,9 @@ import { AuthService } from '../../../auth/services/auth.service';
 @Component({
   selector: 'app-tipo-pedido-listar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './tipo-pedido-listar.html',
+  styleUrls: ['../../../shared/styles/spx-geo.css'],
 })
 export class TipoPedidoListarPageComponent implements OnInit {
   private readonly tipoPedidoService = inject(TipoPedidoService);
@@ -19,6 +21,24 @@ export class TipoPedidoListarPageComponent implements OnInit {
   public tiposPedido: TipoPedido[] = [];
   public cargando: boolean = false;
   public restauranteId?: number;
+  public searchTerm: string = '';
+
+  get tiposPedidoFiltrados(): TipoPedido[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) return this.tiposPedido;
+    return this.tiposPedido.filter(t =>
+      t.nombre.toLowerCase().includes(term) ||
+      t.codigo.toLowerCase().includes(term)
+    );
+  }
+
+  get totalActivos(): number {
+    return this.tiposPedido.filter(t => t.activo).length;
+  }
+
+  get totalInactivos(): number {
+    return this.tiposPedido.filter(t => !t.activo).length;
+  }
 
   ngOnInit(): void {
     this.restauranteId = this.authService.getRestauranteId() ?? undefined;

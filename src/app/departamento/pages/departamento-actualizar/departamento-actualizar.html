@@ -1,46 +1,66 @@
-<div class="container">
-  <h2>Actualizar Departamento</h2>
-  <hr>
+<div class="spx-form-page">
+  <div class="spx-form-card">
 
-  @if (cargando) {
-    <div class="text-center">
-      <div class="spinner-border" role="status">
-        <span class="visually-hidden">Cargando...</span>
+    <div class="spx-form-card__header">
+      <div class="spx-form-card__header-icon">
+        <i class="fa-solid fa-map-location-dot"></i>
+      </div>
+      <div>
+        <h2 class="spx-form-card__title">Actualizar Departamento</h2>
+        <p class="spx-form-card__subtitle">Modifica los datos del departamento</p>
       </div>
     </div>
-  }
 
-  @if (!cargando) {
-    <form (ngSubmit)="actualizarDepartamento()">
-
-      <div class="mb-3 row">
-        <label class="col-sm-3 col-form-label">Código</label>
-        <div class="col-sm-9">
-          <input type="text" class="form-control" [(ngModel)]="departamento.id" name="id" readonly>
-        </div>
+    @if (cargando) {
+      <div class="spx-form-loading">
+        <div class="spx-form-spinner"></div>
+        <p>Cargando datos...</p>
       </div>
+    }
 
-      <div class="mb-3 row">
-        <label class="col-sm-3 col-form-label">Nombre</label>
-        <div class="col-sm-9">
-          <input type="text" class="form-control" [(ngModel)]="departamento.nombre" name="nombre" required>
+    @if (!cargando) {
+      <form (ngSubmit)="actualizarDepartamento()" class="spx-form-body">
+        <div class="spx-form-grid spx-form-grid--3">
+
+          <div class="spx-form-field">
+            <label class="spx-form-label">Código</label>
+            <input type="text" class="spx-form-input spx-form-input--readonly"
+                   [(ngModel)]="departamento.id" name="id" readonly>
+            <span class="spx-form-hint-text">El código no puede modificarse.</span>
+          </div>
+
+          <div class="spx-form-field spx-form-col-span-2">
+            <label class="spx-form-label">
+              Nombre <span class="spx-form-required">*</span>
+            </label>
+            <input type="text" class="spx-form-input"
+                   [(ngModel)]="departamento.nombre" name="nombre" required
+                   placeholder="Nombre del departamento">
+          </div>
+
         </div>
-      </div>
 
-      <div class="mb-3 row">
-        <label class="col-sm-3 col-form-label">Activo</label>
-        <div class="col-sm-9">
-          <input type="checkbox" class="form-check-input" [(ngModel)]="departamento.activo" name="activo">
+        <div class="spx-form-check">
+          <input type="checkbox" class="spx-form-check__input" id="activoActDepto"
+                 [(ngModel)]="departamento.activo" name="activo">
+          <label class="spx-form-check__label" for="activoActDepto">
+            <i class="fa-solid fa-circle-check"></i>
+            Departamento activo
+          </label>
         </div>
-      </div>
 
-      <div class="row">
-        <div class="col">
-          <button type="button" class="btn btn-secondary me-2" (click)="cancelar()">Cancelar</button>
-          <button type="submit" class="btn btn-primary float-end">Actualizar</button>
+        <div class="spx-form-actions">
+          <button type="button" class="spx-form-btn-cancel" (click)="cancelar()">
+            <i class="fa-solid fa-arrow-left"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="spx-form-btn-submit">
+            <i class="fa-solid fa-floppy-disk"></i>
+            Actualizar
+          </button>
         </div>
-      </div>
 
-    </form>
-  }
+      </form>
+    }
+  </div>
 </div>

@@ -9,6 +9,7 @@ import { Restaurante } from '../../interfaces/restaurante.interface';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './restaurante-listar.html',
+  styleUrls: ['./restaurante-listar.css'],
 })
 export class RestauranteListarPageComponent implements OnInit {
   private readonly restauranteService = inject(RestauranteService);
@@ -16,6 +17,9 @@ export class RestauranteListarPageComponent implements OnInit {
 
   public restaurantes: Restaurante[] = [];
   public cargando: boolean = false;
+
+  get totalActivos(): number   { return this.restaurantes.filter(r => r.activo).length; }
+  get totalInactivos(): number { return this.restaurantes.filter(r => !r.activo).length; }
 
   ngOnInit(): void {
     this.cargarRestaurantes();

@@ -1,40 +1,87 @@
-<div id="nav" class="w-100 px-3">
+<nav class="spx-nav">
+
+  <p class="spx-nav__label">Navegación</p>
 
   @for (item of menuOptions; track item.route) {
     <a
       [routerLink]="item.route"
-      routerLinkActive="bg-primary"
-      class="w-100 d-flex align-items-center text-decoration-none text-white border-bottom border-secondary py-3 px-2"
-      style="transition: background-color 0.15s ease-in-out;"
+      routerLinkActive="spx-nav__item--active"
+      class="spx-nav__item"
       (click)="onSelect()"
     >
-      <div class="me-2">
-        <i [class]="item.icon"></i>
-      </div>
-      <div class="d-flex flex-column">
-        <span class="fs-6 fw-bold">{{ item.label }}</span>
-        <span class="small text-white-50 d-none d-md-block">{{ item.subLabel }}</span>
-      </div>
+      <i [class]="item.icon + ' spx-nav__icon'"></i>
+      <span class="spx-nav__text">{{ item.label }}</span>
     </a>
   }
 
-  <button
-    (click)="logout()"
-    class="w-100 d-flex align-items-center border-0 border-bottom border-secondary py-3 px-2 mt-3 bg-secondary text-white rounded"
-    style="transition: background-color 0.15s ease-in-out; cursor: pointer;"
-  >
-    <div class="me-2">
-      <i class="fa-solid fa-right-from-bracket text-danger"></i>
-    </div>
-    <div class="d-flex flex-column">
-      <span class="fs-6 fw-bold">Cerrar Sesión</span>
-    </div>
+  <div class="spx-nav__divider"></div>
+
+  <button class="spx-nav__item spx-nav__item--logout" (click)="logout()">
+    <i class="fa-solid fa-right-from-bracket spx-nav__icon"></i>
+    <span class="spx-nav__text">Cerrar Sesión</span>
   </button>
 
-</div>
+</nav>
 
 <style>
-  a:hover, button:hover {
-    background-color: rgba(255, 255, 255, 0.05) !important;
-  }
+.spx-nav {
+  flex: 1;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.spx-nav__label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #475569;
+  padding: 0 0.75rem;
+  margin: 0.25rem 0 0.5rem;
+}
+.spx-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  border-radius: 0.625rem;
+  text-decoration: none;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+  margin-bottom: 0.125rem;
+  border: none;
+  width: 100%;
+  background: none;
+  text-align: left;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.spx-nav__item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+}
+.spx-nav__item--active {
+  background: rgba(13, 127, 242, 0.14) !important;
+  color: #0d7ff2 !important;
+}
+.spx-nav__icon {
+  width: 1.125rem;
+  text-align: center;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+.spx-nav__text { flex: 1; }
+.spx-nav__divider {
+  height: 1px;
+  background: #283543;
+  margin: 0.75rem 0;
+}
+.spx-nav__item--logout { color: #f87171; }
+.spx-nav__item--logout:hover {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #ef4444 !important;
+}
 </style>

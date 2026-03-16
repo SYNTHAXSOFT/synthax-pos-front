@@ -1,0 +1,315 @@
+/* =============================================
+   SYNTHAX POS — Ventas (venta-listar)
+   ============================================= */
+
+:host, .spx-venta {
+  --spx-bg:      #101922;
+  --spx-surface: #1a242f;
+  --spx-surface2:#1e2d3d;
+  --spx-border:  #283543;
+  --spx-text:    #f1f5f9;
+  --spx-muted:   #64748b;
+  --spx-primary: #0d7ff2;
+  --spx-open:    #22c55e;
+  --spx-paid:    #3b82f6;
+  --spx-void:    #ef4444;
+  --spx-radius:  0.75rem;
+  display: block;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.spx-venta {
+  padding: 1.75rem 2rem;
+  background: var(--spx-bg);
+  min-height: 100%;
+  color: var(--spx-text);
+}
+
+/* ── Header ──────────────────────────────── */
+.spx-venta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.spx-venta-header__title {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: var(--spx-text);
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.02em;
+}
+.spx-venta-header__sub {
+  font-size: 0.875rem;
+  color: var(--spx-muted);
+  margin: 0;
+}
+.spx-venta-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: var(--spx-surface);
+  border: 1px solid var(--spx-border);
+  color: var(--spx-text);
+  border-radius: var(--spx-radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.spx-venta-btn-primary:hover { background: var(--spx-surface2); border-color: var(--spx-primary); }
+
+/* ── Stats ───────────────────────────────── */
+.spx-venta-stats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+.spx-venta-stat {
+  flex: 1;
+  min-width: 130px;
+  background: var(--spx-surface);
+  border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+.spx-venta-stat__icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  background: rgba(13,127,242,0.12);
+  color: var(--spx-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.spx-venta-stat__icon--open { background: rgba(34,197,94,0.12);  color: var(--spx-open); }
+.spx-venta-stat__icon--paid { background: rgba(59,130,246,0.12);  color: var(--spx-paid); }
+.spx-venta-stat__icon--void { background: rgba(239,68,68,0.12);  color: var(--spx-void); }
+.spx-venta-stat > div { display: flex; flex-direction: column; gap: 0.1rem; }
+.spx-venta-stat__value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--spx-text);
+  line-height: 1;
+}
+.spx-venta-stat__value--open { color: var(--spx-open); }
+.spx-venta-stat__value--paid { color: var(--spx-paid); }
+.spx-venta-stat__value--void { color: var(--spx-void); }
+.spx-venta-stat__label {
+  font-size: 0.7rem;
+  color: var(--spx-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Pills ───────────────────────────────── */
+.spx-venta-pills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.spx-venta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--spx-border);
+  background: var(--spx-surface);
+  color: var(--spx-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.spx-venta-pill:hover { border-color: var(--spx-primary); color: var(--spx-text); }
+.spx-venta-pill--active { background: var(--spx-primary); border-color: var(--spx-primary); color: #fff !important; }
+.spx-venta-pill--open  { color: var(--spx-open); }
+.spx-venta-pill--paid  { color: var(--spx-paid); }
+.spx-venta-pill--void  { color: var(--spx-void); }
+.spx-venta-pill--open.spx-venta-pill--active  { background: var(--spx-open);  border-color: var(--spx-open); }
+.spx-venta-pill--paid.spx-venta-pill--active  { background: var(--spx-paid);  border-color: var(--spx-paid); }
+.spx-venta-pill--void.spx-venta-pill--active  { background: var(--spx-void);  border-color: var(--spx-void); }
+
+/* ── Loading / Empty ─────────────────────── */
+.spx-venta-loading {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 1rem; padding: 5rem 0; color: var(--spx-muted);
+}
+.spx-venta-spinner {
+  width: 2.5rem; height: 2.5rem;
+  border: 3px solid var(--spx-border);
+  border-top-color: var(--spx-primary);
+  border-radius: 50%;
+  animation: spx-spin 0.7s linear infinite;
+}
+@keyframes spx-spin { to { transform: rotate(360deg); } }
+.spx-venta-empty {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.5rem; padding: 5rem 0; text-align: center;
+}
+.spx-venta-empty__icon { font-size: 3rem; color: var(--spx-border); margin-bottom: 0.5rem; }
+.spx-venta-empty__msg  { font-size: 1.125rem; font-weight: 600; color: var(--spx-text); margin: 0; }
+.spx-venta-empty__sub  { font-size: 0.875rem; color: var(--spx-muted); margin: 0; }
+
+/* ── Table ───────────────────────────────── */
+.spx-venta-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--spx-radius);
+  border: 1px solid var(--spx-border);
+  background: var(--spx-surface);
+}
+.spx-venta-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.spx-venta-table thead tr {
+  border-bottom: 1px solid var(--spx-border);
+}
+.spx-venta-table thead th {
+  padding: 0.875rem 1rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--spx-muted);
+  white-space: nowrap;
+  background: transparent;
+  text-align: left;
+}
+.spx-venta-row {
+  border-bottom: 1px solid var(--spx-border);
+  transition: background 0.12s;
+}
+.spx-venta-row:last-child { border-bottom: none; }
+.spx-venta-row:hover { background: rgba(13,127,242,0.05); }
+.spx-venta-row--void { opacity: 0.6; }
+.spx-venta-td {
+  padding: 0.875rem 1rem;
+  color: var(--spx-text);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.spx-venta-td--id   { color: var(--spx-muted); font-variant-numeric: tabular-nums; }
+.spx-venta-td--date { color: var(--spx-muted); font-size: 0.8rem; }
+.spx-venta-td--center { text-align: center; }
+
+/* Status badges */
+.spx-venta-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--spx-border);
+  color: var(--spx-muted);
+}
+.spx-venta-badge--open { background: rgba(34,197,94,0.15);  color: var(--spx-open); }
+.spx-venta-badge--paid { background: rgba(59,130,246,0.15);  color: var(--spx-paid); }
+.spx-venta-badge--void { background: rgba(239,68,68,0.15);  color: var(--spx-void); }
+
+/* Misc cell elements */
+.spx-venta-mesa {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--spx-muted);
+}
+.spx-venta-anon { color: var(--spx-muted); font-style: italic; font-size: 0.8rem; }
+.spx-venta-factura {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+/* Action buttons in table */
+.spx-venta-actions { display: flex; gap: 0.375rem; align-items: center; }
+.spx-venta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.spx-venta-btn--info {
+  background: rgba(13,127,242,0.12);
+  border-color: rgba(13,127,242,0.25);
+  color: var(--spx-primary);
+}
+.spx-venta-btn--info:hover { background: var(--spx-primary); color: #fff; border-color: var(--spx-primary); }
+.spx-venta-btn--success {
+  background: rgba(34,197,94,0.12);
+  border-color: rgba(34,197,94,0.25);
+  color: var(--spx-open);
+}
+.spx-venta-btn--success:hover { background: var(--spx-open); color: #000; border-color: var(--spx-open); }
+.spx-venta-btn--danger {
+  background: rgba(239,68,68,0.1);
+  border-color: rgba(239,68,68,0.25);
+  color: var(--spx-void);
+  padding: 0.375rem 0.5rem;
+}
+.spx-venta-btn--danger:hover { background: var(--spx-void); color: #fff; border-color: var(--spx-void); }
+
+/* ── Footer Total ────────────────────────── */
+.spx-venta-total {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0.875rem 1rem;
+  background: var(--spx-surface);
+  border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius);
+}
+.spx-venta-total__label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  color: var(--spx-muted);
+  font-weight: 500;
+}
+.spx-venta-total__value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--spx-paid);
+}
+
+/* ── Responsive ──────────────────────────── */
+@media (max-width: 767px) {
+  .spx-venta { padding: 1.25rem 1rem; }
+  .spx-venta-header { flex-direction: column; align-items: flex-start; }
+  .spx-venta-stats { gap: 0.5rem; }
+  .spx-venta-stat { min-width: 100px; padding: 0.75rem 1rem; }
+}

@@ -11,6 +11,7 @@ import { ProductoListarPageComponent } from '../producto-listar/producto-listar'
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ProductoListarPageComponent],
   templateUrl: './producto-registrar.html',
+  styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
 export class ProductoRegistrarPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);

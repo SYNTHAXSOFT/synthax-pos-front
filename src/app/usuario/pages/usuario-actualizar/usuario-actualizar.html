@@ -1,91 +1,113 @@
-<div class="container-fluid px-4">
-  <h2 class="mb-2">Actualizar Usuario</h2>
-  <hr class="mb-4">
+<div class="spx-form-page">
+  <div class="spx-form-card spx-form-card--wide">
 
-  @if (cargando) {
-    <div class="d-flex justify-content-center align-items-center py-5">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Cargando...</span>
+    <div class="spx-form-card__header">
+      <div class="spx-form-card__header-icon">
+        <i class="fa-solid fa-user-pen"></i>
+      </div>
+      <div>
+        <h2 class="spx-form-card__title">Actualizar Usuario</h2>
+        <p class="spx-form-card__subtitle">Modifica los datos del usuario</p>
       </div>
     </div>
-  }
 
-  @if (!cargando) {
-    <form (ngSubmit)="actualizarUsuario()">
-
-      <div class="row mb-3">
-        <label class="col-sm-3 col-form-label">Cédula <span class="text-danger">*</span></label>
-        <div class="col-sm-9">
-          <input type="text" class="form-control"
-                 [(ngModel)]="usuario.cedula" name="cedula" required />
-        </div>
+    @if (cargando) {
+      <div class="spx-form-loading">
+        <div class="spx-form-spinner"></div>
+        <p>Cargando datos del usuario...</p>
       </div>
+    }
 
-      <div class="row mb-3">
-        <label class="col-sm-3 col-form-label">Nombre <span class="text-danger">*</span></label>
-        <div class="col-sm-9">
-          <input type="text" class="form-control"
-                 [(ngModel)]="usuario.nombre" name="nombre" required />
-        </div>
-      </div>
+    @if (!cargando) {
+      <form (ngSubmit)="actualizarUsuario()" class="spx-form-body">
 
-      <div class="row mb-3">
-        <label class="col-sm-3 col-form-label">Apellido</label>
-        <div class="col-sm-9">
-          <input type="text" class="form-control"
-                 [(ngModel)]="usuario.apellido" name="apellido" />
-        </div>
-      </div>
-
-      <div class="row mb-3">
-        <label class="col-sm-3 col-form-label">Email</label>
-        <div class="col-sm-9">
-          <input type="email" class="form-control"
-                 [(ngModel)]="usuario.email" name="email" />
-        </div>
-      </div>
-
-      <div class="row mb-3">
-        <label class="col-sm-3 col-form-label">Contraseña</label>
-        <div class="col-sm-9">
-          <input type="password" class="form-control"
-                 [(ngModel)]="usuario.password" name="password"
-                 placeholder="Dejar en blanco para no cambiar" />
-        </div>
-      </div>
-
-      <div class="row mb-3">
-        <label class="col-sm-3 col-form-label">Rol</label>
-        <div class="col-sm-9">
-          <select class="form-select" [(ngModel)]="usuario.rol" name="rol">
-            <option value="">Seleccione un rol</option>
-            @for (rol of rolesPOS; track rol) {
-              <option [value]="rol">{{ rol }}</option>
-            }
-          </select>
-        </div>
-      </div>
-
-      <div class="row mb-3">
-        <label class="col-sm-3 col-form-label">Activo</label>
-        <div class="col-sm-9">
-          <div class="form-check mt-2">
-            <input type="checkbox" class="form-check-input" id="activoAct"
-                   [(ngModel)]="usuario.activo" name="activo" />
-            <label class="form-check-label" for="activoAct">Usuario activo</label>
+        <!-- Información personal -->
+        <div class="spx-form-section">
+          <p class="spx-form-section__title">
+            <i class="fa-solid fa-id-card"></i>
+            Información Personal
+          </p>
+          <div class="spx-form-grid spx-form-grid--2">
+            <div class="spx-form-field">
+              <label class="spx-form-label">
+                Cédula <span class="spx-form-required">*</span>
+              </label>
+              <input type="text" class="spx-form-input"
+                     [(ngModel)]="usuario.cedula" name="cedula" required
+                     placeholder="12345678" />
+            </div>
+            <div class="spx-form-field">
+              <label class="spx-form-label">
+                Nombre <span class="spx-form-required">*</span>
+              </label>
+              <input type="text" class="spx-form-input"
+                     [(ngModel)]="usuario.nombre" name="nombre" required
+                     placeholder="Nombre" />
+            </div>
+            <div class="spx-form-field">
+              <label class="spx-form-label">Apellido</label>
+              <input type="text" class="spx-form-input"
+                     [(ngModel)]="usuario.apellido" name="apellido"
+                     placeholder="Apellido" />
+            </div>
+            <div class="spx-form-field">
+              <label class="spx-form-label">Email</label>
+              <input type="email" class="spx-form-input"
+                     [(ngModel)]="usuario.email" name="email"
+                     placeholder="correo@ejemplo.com" />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="d-flex justify-content-between">
-        <button type="button" class="btn btn-secondary" (click)="cancelar()">
-          Cancelar
-        </button>
-        <button type="submit" class="btn btn-primary">
-          Actualizar
-        </button>
-      </div>
+        <!-- Acceso -->
+        <div class="spx-form-section">
+          <p class="spx-form-section__title">
+            <i class="fa-solid fa-lock"></i>
+            Acceso y Seguridad
+          </p>
+          <div class="spx-form-grid spx-form-grid--2">
+            <div class="spx-form-field">
+              <label class="spx-form-label">Contraseña</label>
+              <input type="password" class="spx-form-input"
+                     [(ngModel)]="usuario.password" name="password"
+                     placeholder="Dejar en blanco para no cambiar" />
+              <span class="spx-form-hint-text">
+                Solo completa si deseas cambiar la contraseña actual.
+              </span>
+            </div>
+            <div class="spx-form-field">
+              <label class="spx-form-label">Rol</label>
+              <select class="spx-form-select" [(ngModel)]="usuario.rol" name="rol">
+                <option value="">Seleccione un rol</option>
+                @for (rol of rolesPOS; track rol) {
+                  <option [value]="rol">{{ rol }}</option>
+                }
+              </select>
+            </div>
+          </div>
+          <div class="spx-form-check">
+            <input type="checkbox" class="spx-form-check__input" id="activoAct"
+                   [(ngModel)]="usuario.activo" name="activo" />
+            <label class="spx-form-check__label" for="activoAct">
+              <i class="fa-solid fa-circle-check"></i>
+              Usuario activo en el sistema
+            </label>
+          </div>
+        </div>
 
-    </form>
-  }
+        <!-- Actions -->
+        <div class="spx-form-actions">
+          <button type="button" class="spx-form-btn-cancel" (click)="cancelar()">
+            <i class="fa-solid fa-arrow-left"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="spx-form-btn-submit">
+            <i class="fa-solid fa-floppy-disk"></i>
+            Actualizar Usuario
+          </button>
+        </div>
+
+      </form>
+    }
+  </div>
 </div>

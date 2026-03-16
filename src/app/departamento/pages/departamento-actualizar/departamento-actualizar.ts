@@ -9,7 +9,8 @@ import { Departamento } from '../../interfaces/departamento.interface';
   selector: 'app-actualizar-departamento',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './departamento-actualizar.html'
+  templateUrl: './departamento-actualizar.html',
+  styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
 export class ActualizarDepartamentoPageComponent implements OnInit {
 

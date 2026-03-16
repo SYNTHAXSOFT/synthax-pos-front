@@ -1,63 +1,159 @@
-<div class="container-fluid px-4">
-  <h2 class="mb-2">Lista de Insumos</h2>
-  <hr class="mb-3">
+<div class="spx-inv">
 
+  <!-- Page Header -->
+  <div class="spx-inv-header">
+    <div class="spx-inv-header__left">
+      <h1 class="spx-inv-header__title">Inventario</h1>
+      <p class="spx-inv-header__sub">Gestiona tu stock, unidades y materias primas</p>
+    </div>
+    <a routerLink="/synthax-pos/insumo/registrar" class="spx-inv-btn-primary">
+      <i class="fa-solid fa-plus"></i>
+      Nuevo Insumo
+    </a>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="spx-inv-stats">
+    <div class="spx-inv-stat">
+      <span class="spx-inv-stat__value">{{ insumos.length }}</span>
+      <span class="spx-inv-stat__label">Total Insumos</span>
+    </div>
+    <div class="spx-inv-stat">
+      <span class="spx-inv-stat__value spx-inv-stat__value--ok">{{ totalActivos }}</span>
+      <span class="spx-inv-stat__label">Activos</span>
+    </div>
+    <div class="spx-inv-stat">
+      <span class="spx-inv-stat__value spx-inv-stat__value--low">{{ totalBajoStock }}</span>
+      <span class="spx-inv-stat__label">Bajo Stock</span>
+    </div>
+    <div class="spx-inv-stat">
+      <span class="spx-inv-stat__value spx-inv-stat__value--out">{{ totalSinStock }}</span>
+      <span class="spx-inv-stat__label">Sin Stock</span>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="spx-inv-filters">
+    <!-- Search -->
+    <div class="spx-inv-search">
+      <i class="fa-solid fa-magnifying-glass spx-inv-search__icon"></i>
+      <input
+        type="text"
+        class="spx-inv-search__input"
+        placeholder="Buscar por descripción, código o medida..."
+        [(ngModel)]="searchTerm"
+      />
+    </div>
+
+    <!-- Filter Pills -->
+    <div class="spx-inv-pills">
+      <button
+        class="spx-inv-pill"
+        [class.spx-inv-pill--active]="filtroEstado === 'todos'"
+        (click)="setFiltroEstado('todos')"
+      >Todos</button>
+      <button
+        class="spx-inv-pill"
+        [class.spx-inv-pill--active]="filtroEstado === 'ok'"
+        (click)="setFiltroEstado('ok')"
+      >En Stock</button>
+      <button
+        class="spx-inv-pill spx-inv-pill--warn"
+        [class.spx-inv-pill--active]="filtroEstado === 'bajo'"
+        (click)="setFiltroEstado('bajo')"
+      ><i class="fa-solid fa-triangle-exclamation"></i> Bajo Stock</button>
+      <button
+        class="spx-inv-pill spx-inv-pill--danger"
+        [class.spx-inv-pill--active]="filtroEstado === 'sin'"
+        (click)="setFiltroEstado('sin')"
+      >Sin Stock</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
   @if (cargando) {
-    <div class="d-flex justify-content-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
+    <div class="spx-inv-loading">
+      <div class="spx-inv-spinner"></div>
+      <p>Cargando inventario...</p>
     </div>
   }
 
+  <!-- Card Grid -->
   @if (!cargando) {
-    <div class="table-responsive">
-      <table class="table table-striped table-hover table-bordered">
-        <thead class="table-light">
-          <tr>
-            <th>#</th>
-            <th>Código</th>
-            <th>Descripción</th>
-            <th>Stock</th>
-            <th>Medida</th>
-            <th>Restaurante</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (i of insumos; track i.id) {
-            <tr>
-              <td>{{ i.id }}</td>
-              <td><code>{{ i.codigo }}</code></td>
-              <td>{{ i.descripcion }}</td>
-              <td [class]="getStockClass(i.stock)">{{ i.stock ?? 0 }}</td>
-              <td><span class="badge bg-info text-dark">{{ i.medida }}</span></td>
-              <td>{{ i.restaurante?.nombre ?? '—' }}</td>
-              <td>
-                <span [class]="i.activo ? 'badge bg-success' : 'badge bg-secondary'">
-                  {{ i.activo ? 'Activo' : 'Inactivo' }}
+    @if (insumosFiltrados.length === 0) {
+      <div class="spx-inv-empty">
+        <i class="fa-solid fa-box-open spx-inv-empty__icon"></i>
+        <p class="spx-inv-empty__msg">No se encontraron insumos</p>
+        <p class="spx-inv-empty__sub">Intenta ajustar los filtros o registra un nuevo insumo</p>
+      </div>
+    } @else {
+      <div class="spx-inv-grid">
+        @for (item of insumosFiltrados; track item.id) {
+          <div class="spx-inv-card" [class.spx-inv-card--inactive]="!item.activo">
+
+            <!-- Card Image / Icon Area -->
+            <div class="spx-inv-card__img-wrap" [class.spx-inv-card__img-wrap--out]="(item.stock ?? 0) === 0">
+              <div class="spx-inv-card__icon-bg">
+                <i [class]="getMedidaIcon(item.medida) + ' spx-inv-card__icon'"></i>
+              </div>
+              <!-- Out of stock overlay -->
+              @if ((item.stock ?? 0) === 0) {
+                <div class="spx-inv-card__out-overlay">
+                  <span class="spx-inv-card__out-label">Sin Stock</span>
+                </div>
+              }
+              <!-- Low stock badge -->
+              @if ((item.stock ?? 0) > 0 && (item.stock ?? 0) <= 5) {
+                <span class="spx-inv-card__badge spx-inv-card__badge--low">Bajo Stock</span>
+              }
+              <!-- Inactive badge -->
+              @if (!item.activo) {
+                <span class="spx-inv-card__badge spx-inv-card__badge--inactive">Inactivo</span>
+              }
+            </div>
+
+            <!-- Card Body -->
+            <div class="spx-inv-card__body">
+              <div class="spx-inv-card__meta">
+                <span class="spx-inv-card__medida">
+                  <i class="fa-solid fa-ruler spx-inv-card__medida-icon"></i>
+                  {{ item.medida ?? '—' }}
                 </span>
-              </td>
-              <td class="text-nowrap">
-                <button class="btn btn-warning btn-sm me-1" (click)="editar(i.id)">
-                  <i class="fas fa-edit"></i> Editar
+                <code class="spx-inv-card__codigo">{{ item.codigo ?? '—' }}</code>
+              </div>
+
+              <h3 class="spx-inv-card__name">{{ item.descripcion ?? 'Sin descripción' }}</h3>
+
+              <div class="spx-inv-card__stock-row">
+                <div class="spx-inv-card__stock-info">
+                  <span class="spx-inv-card__stock-label">Stock</span>
+                  <span class="spx-inv-card__stock-val" [class]="getStockClass(item.stock)">
+                    {{ item.stock ?? 0 }} {{ item.medida ?? '' }}
+                  </span>
+                </div>
+                <span class="spx-inv-card__status" [class.spx-inv-card__status--active]="item.activo">
+                  {{ item.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </div>
+
+              <!-- Actions -->
+              <div class="spx-inv-card__actions">
+                <button class="spx-inv-card__btn-edit" (click)="editar(item.id)" title="Editar">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                  Editar
                 </button>
-                @if (i.activo) {
-                  <button class="btn btn-danger btn-sm" (click)="desactivar(i.id)">
-                    Desactivar
+                @if (item.activo) {
+                  <button class="spx-inv-card__btn-deact" (click)="desactivar(item.id)" title="Desactivar">
+                    <i class="fa-solid fa-ban"></i>
                   </button>
                 }
-              </td>
-            </tr>
-          }
-          @empty {
-            <tr>
-              <td colspan="8" class="text-center text-muted py-4">
-                No hay insumos registrados
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+              </div>
+            </div>
+
+          </div>
+        }
+      </div>
+    }
   }
+
 </div>

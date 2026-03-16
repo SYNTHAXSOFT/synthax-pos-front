@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { VentaService } from '../../services/venta.service';
 import { Venta } from '../../interfaces/venta.interface';
@@ -9,8 +10,9 @@ import { AuthService } from '../../../auth/services/auth.service';
 @Component({
   selector: 'app-venta-listar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './venta-listar.html',
+  styleUrls: ['./venta-listar.css'],
 })
 export class VentaListarPageComponent implements OnInit {
   private readonly ventaService = inject(VentaService);
@@ -35,20 +37,23 @@ export class VentaListarPageComponent implements OnInit {
       : this.ventaService.obtenerTodos();
 
     obs.subscribe({
-      next: (data) => {
-        this.ventas = data;
-        this.cargando = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar ventas:', err);
-        this.cargando = false;
-      },
+      next: (data) => { this.ventas = data; this.cargando = false; },
+      error: (err) => { console.error('Error al cargar ventas:', err); this.cargando = false; },
     });
   }
 
   filtrarPorEstado(estado: string): void {
     this.estadoFiltro = estado;
     this.cargarVentas();
+  }
+
+  get totalAbiertas(): number  { return this.ventas.filter(v => v.estado === 'ABIERTA').length; }
+  get totalPagadas(): number   { return this.ventas.filter(v => v.estado === 'PAGADA').length; }
+  get totalAnuladas(): number  { return this.ventas.filter(v => v.estado === 'ANULADA').length; }
+  get totalIngresos(): number  {
+    return this.ventas
+      .filter(v => v.estado === 'PAGADA')
+      .reduce((sum, v) => sum + (v.valorTotal ?? 0), 0);
   }
 
   verPedidos(ventaId?: number): void {
@@ -60,14 +65,8 @@ export class VentaListarPageComponent implements OnInit {
     if (!id) return;
     if (!confirm('¿Desea anular esta venta? Esta acción no se puede revertir.')) return;
     this.ventaService.anularVenta(id).subscribe({
-      next: () => {
-        alert('Venta anulada');
-        this.cargarVentas();
-      },
-      error: (err) => {
-        console.error('Error al anular:', err);
-        alert('Error: ' + (err.error?.error || 'No se pudo anular la venta'));
-      },
+      next: () => { alert('Venta anulada'); this.cargarVentas(); },
+      error: (err) => { alert('Error: ' + (err.error?.error || 'No se pudo anular la venta')); },
     });
   }
 
@@ -76,28 +75,19 @@ export class VentaListarPageComponent implements OnInit {
     const totalStr = prompt('Ingrese el valor total de la venta:');
     if (totalStr === null) return;
     const total = parseFloat(totalStr);
-    if (isNaN(total) || total < 0) {
-      alert('Valor inválido');
-      return;
-    }
+    if (isNaN(total) || total < 0) { alert('Valor inválido'); return; }
     this.ventaService.cerrarVenta(id, total).subscribe({
-      next: () => {
-        alert('Venta cerrada exitosamente');
-        this.cargarVentas();
-      },
-      error: (err) => {
-        console.error('Error al cerrar:', err);
-        alert('Error: ' + (err.error?.error || 'No se pudo cerrar la venta'));
-      },
+      next: () => { alert('Venta cerrada exitosamente'); this.cargarVentas(); },
+      error: (err) => { alert('Error: ' + (err.error?.error || 'No se pudo cerrar la venta')); },
     });
   }
 
   getBadgeClass(estado?: string): string {
     switch (estado) {
-      case 'ABIERTA': return 'badge bg-success';
-      case 'PAGADA':  return 'badge bg-primary';
-      case 'ANULADA': return 'badge bg-danger';
-      default:        return 'badge bg-secondary';
+      case 'ABIERTA': return 'spx-venta-badge spx-venta-badge--open';
+      case 'PAGADA':  return 'spx-venta-badge spx-venta-badge--paid';
+      case 'ANULADA': return 'spx-venta-badge spx-venta-badge--void';
+      default:        return 'spx-venta-badge';
     }
   }
 }

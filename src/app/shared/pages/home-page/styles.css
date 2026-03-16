@@ -1,220 +1,313 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Inter", system-ui, sans-serif;
+/* =============================================
+   SYNTHAX POS — Login Page (Dark Theme)
+   Primary: #0d7ff2  |  Background: #101922
+   ============================================= */
+
+/* ── Variables (scoped al componente) ───────── */
+:host, .spx-login-wrapper {
+  --spx-primary:      #0d7ff2;
+  --spx-primary-dim:  rgba(13, 127, 242, 0.12);
+  --spx-primary-glow: rgba(13, 127, 242, 0.25);
+  --spx-bg:           #101922;
+  --spx-card:         #1b252f;
+  --spx-input-bg:     #111922;
+  --spx-border:       #1e293b;
+  --spx-text:         #f1f5f9;
+  --spx-text-muted:   #64748b;
+  --spx-text-sub:     #94a3b8;
+  --spx-error:        #ef4444;
+  --spx-radius:       0.75rem;
+  --spx-radius-sm:    0.5rem;
 }
 
-body {
+/* ── Wrapper full-screen ────────────────────── */
+.spx-login-wrapper {
+  font-family: 'Inter', system-ui, sans-serif;
   min-height: 100vh;
-  position: relative;
-  overflow-x: hidden;
-}
-
-
-
-/* Overlay oscuro encima de la imagen */
-.hero-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6); /* ⬅️ Ajusta la opacidad aquí */
-  z-index: -1;
-}
-
-/* Contenedor principal */
-.hero-content {
-  min-height: 100vh;
+  background-color: var(--spx-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
   position: relative;
+  overflow: hidden;
+}
+
+/* ── Blobs decorativos ──────────────────────── */
+.spx-blob {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(120px);
+}
+.spx-blob--tl {
+  width: 45vw;
+  height: 45vw;
+  top: -15%;
+  left: -15%;
+  background: var(--spx-primary-dim);
+}
+.spx-blob--br {
+  width: 45vw;
+  height: 45vw;
+  bottom: -15%;
+  right: -15%;
+  background: rgba(13, 127, 242, 0.08);
+}
+
+/* ── Contenedor principal ───────────────────── */
+.spx-login-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Branding ───────────────────────────────── */
+.spx-branding {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.spx-logo-box {
+  background: var(--spx-primary-dim);
+  border: 1px solid rgba(13, 127, 242, 0.25);
+  border-radius: var(--spx-radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spx-logo-icon {
+  width: 3rem;
+  height: 3rem;
+  color: var(--spx-primary);
+}
+
+.spx-brand-name {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--spx-text);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.spx-brand-name span {
+  color: var(--spx-primary);
+}
+
+.spx-brand-sub {
+  color: var(--spx-text-sub);
+  font-size: 0.9rem;
+  margin: 0.35rem 0 0;
+  text-align: center;
+}
+
+/* ── Tarjeta ────────────────────────────────── */
+.spx-card {
+  width: 100%;
+  background: var(--spx-card);
+  border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius);
+  padding: 2rem;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(13, 127, 242, 0.04);
+}
+
+.spx-card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--spx-text);
+  text-align: center;
+  margin: 0 0 1.75rem;
+}
+
+/* ── Campos ─────────────────────────────────── */
+.spx-field {
+  margin-bottom: 1.25rem;
+}
+
+.spx-field label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--spx-text-sub);
+  margin-bottom: 0.5rem;
+}
+
+.spx-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+.spx-field-header label {
+  margin-bottom: 0;
+}
+
+.spx-forgot {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--spx-primary);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.spx-forgot:hover { opacity: 0.8; text-decoration: underline; }
+
+/* ── Input wrapper ──────────────────────────── */
+.spx-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.spx-input-icon {
+  position: absolute;
+  left: 0.875rem;
+  color: var(--spx-text-muted);
+  font-size: 0.9rem;
+  pointer-events: none;
   z-index: 1;
 }
 
-.content-wrapper {
+.spx-input {
   width: 100%;
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
-}
-
-/* Logo */
-.logo {
-  width: 120px;
-  height: auto;
-  margin-bottom: 1.5rem;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.2));
-}
-
-/* Sección del título */
-.titulo {
-  text-align: center;
-  color: white;
-}
-
-.titulo h1 {
-  font-size: 3.5rem;
-  margin-bottom: 1.5rem;
-  line-height: 1.1;
-  font-weight: 800;
-  color: white;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* ⬅️ Sombra para legibilidad */
-}
-
-.titulo span {
-  color: #818cf8; /* ⬅️ Color morado más claro para contrastar */
-}
-
-.titulo p {
-  font-size: 1.05rem;
-  color: rgba(255, 255, 255, 0.9);
-  line-height: 1.6;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-/* Tarjeta del formulario con backdrop blur */
-.formulario {
-  background: rgba(31, 41, 55, 0.85); /* ⬅️ Semi-transparente */
-  backdrop-filter: blur(10px); /* ⬅️ Efecto glassmorphism */
-  padding: 2.5rem 2rem;
-  border-radius: 1rem;
-  width: 100%;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.formulario h2 {
-  text-align: center;
-  font-size: 1.8rem;
-  margin-bottom: 2rem;
-  font-weight: 700;
-  color: white;
-}
-
-/* Formulario */
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.3rem;
-}
-
-label {
-  font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 0.4rem;
-  font-weight: 500;
-}
-
-input {
-  padding: 1rem 1.1rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 0.6rem;
-  background-color: rgba(17, 24, 39, 0.6);
-  color: white;
-  font-size: 1.05rem;
-  width: 100%;
-  transition: all 0.3s ease;
-}
-
-input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
-}
-
-input:focus {
+  background: var(--spx-input-bg);
+  border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius-sm);
+  color: var(--spx-text);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.9375rem;
+  padding: 0.875rem 1rem 0.875rem 2.75rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
-  border-color: #818cf8;
-  background-color: rgba(17, 24, 39, 0.8);
-  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.3);
 }
+.spx-input::placeholder { color: var(--spx-text-muted); }
+.spx-input:focus {
+  border-color: var(--spx-primary);
+  box-shadow: 0 0 0 3px var(--spx-primary-glow);
+}
+.spx-input--padded-right { padding-right: 3rem; }
 
-button {
-  padding: 1.1rem;
-  margin-top: 0.8rem;
+/* ── Toggle contraseña ──────────────────────── */
+.spx-toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
   border: none;
-  border-radius: 0.6rem;
-  background-color: #6366f1;
-  color: white;
-  font-size: 1.1rem;
-  font-weight: 700;
   cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
+  color: var(--spx-text-muted);
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+.spx-toggle-password:hover { color: var(--spx-text-sub); }
+
+/* ── Error ──────────────────────────────────── */
+.spx-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--spx-radius-sm);
+  color: #fca5a5;
+  font-size: 0.85rem;
+  padding: 0.6rem 0.875rem;
+  margin-bottom: 1rem;
 }
 
-button:hover {
-  background-color: #818cf8;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+/* ── Botón ingresar ─────────────────────────── */
+.spx-btn-login {
+  width: 100%;
+  background: var(--spx-primary);
+  border: none;
+  border-radius: var(--spx-radius-sm);
+  color: #fff;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.9375rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 14px var(--spx-primary-glow);
+  letter-spacing: 0.01em;
+}
+.spx-btn-login:hover:not(:disabled) {
+  background: #0a6fd8;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(13, 127, 242, 0.4);
+}
+.spx-btn-login:active:not(:disabled) { transform: translateY(0); }
+.spx-btn-login:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
-button:active {
-  transform: translateY(0);
+/* ── Spinner ────────────────────────────────── */
+.spx-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spx-spin 0.7s linear infinite;
 }
+@keyframes spx-spin { to { transform: rotate(360deg); } }
 
-/* ======== DESKTOP ======== */
-@media (min-width: 769px) {
-  .hero-content {
-    padding: 3rem;
-  }
-
-  .content-wrapper {
-    max-width: 1200px;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: 4rem;
-  }
-
-  .logo {
-    width: 160px;
-    margin-bottom: 2rem;
-    margin-left: 0;
-  }
-
-  .titulo {
-    flex: 1;
-    text-align: left;
-  }
-
-  .titulo h1 {
-    font-size: 3.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .titulo p {
-    font-size: 1.2rem;
-  }
-
-  .formulario {
-    width: 420px;
-    flex-shrink: 0;
-    padding: 2.5rem;
-  }
-
-  .formulario h2 {
-    font-size: 1.9rem;
-  }
-
-  label {
-    font-size: 1rem;
-  }
-
-  input {
-    padding: 0.85rem 1rem;
-    font-size: 1rem;
-  }
-
-  button {
-    padding: 1rem;
-    font-size: 1rem;
-  }
+/* ── Footer tarjeta ─────────────────────────── */
+.spx-card-footer {
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--spx-border);
+  text-align: center;
 }
+.spx-card-footer p {
+  font-size: 0.875rem;
+  color: var(--spx-text-sub);
+  margin: 0;
+}
+.spx-card-footer a {
+  color: var(--spx-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+.spx-card-footer a:hover { text-decoration: underline; }
+
+/* ── Copyright ──────────────────────────────── */
+.spx-copyright {
+  margin-top: 2rem;
+  text-align: center;
+}
+.spx-copyright p {
+  font-size: 0.75rem;
+  color: #475569;
+  margin: 0 0 0.5rem;
+}
+.spx-copyright-links {
+  display: flex;
+  gap: 1.25rem;
+  justify-content: center;
+}
+.spx-copyright-links a {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #475569;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.spx-copyright-links a:hover { color: var(--spx-primary); }

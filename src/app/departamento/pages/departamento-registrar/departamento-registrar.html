@@ -1,68 +1,69 @@
-<h2 class="mb-2">Registrar Departamento</h2>
-<hr class="mb-4">
+<div class="spx-form-page">
 
-<div class="container" style="max-width: 88rem;">
-  <div class="card shadow-sm">
-    <div class="card-body p-4">
-      <form [formGroup]="myForm" (ngSubmit)="onSave()">
+  <!-- Form card -->
+  <div class="spx-form-card">
 
-        <!-- ID -->
-        <div class="mb-3">
-          <label class="form-label">Código</label>
-          <input
-            type="number"
-            placeholder="ID del departamento"
-            formControlName="id"
-            class="form-control"
-          />
-          @if (isValidField('id')) {
-            <div class="text-danger small mt-1">
-              {{ getFieldError('id') }}
-            </div>
-          }
-        </div>
-
-        <!-- Nombre -->
-        <div class="mb-3">
-          <label class="form-label">Nombre</label>
-          <input
-            type="text"
-            placeholder="Nombre del departamento"
-            formControlName="nombre"
-            class="form-control"
-          />
-          @if (isValidField('nombre')) {
-            <div class="text-danger small mt-1">
-              {{ getFieldError('nombre') }}
-            </div>
-          }
-        </div>
-
-        <!-- Activo -->
-        <div class="form-check mb-3">
-          <input
-            type="checkbox"
-            formControlName="activo"
-            class="form-check-input"
-            id="activoDepto"
-          />
-          <label class="form-check-label" for="activoDepto">
-            Activo
-          </label>
-        </div>
-
-        <!-- Botón -->
-        <div class="d-flex justify-content-end">
-          <button type="submit" class="btn btn-primary px-4">
-            Guardar
-          </button>
-        </div>
-      </form>
+    <div class="spx-form-card__header">
+      <div class="spx-form-card__header-icon">
+        <i class="fa-solid fa-map"></i>
+      </div>
+      <div>
+        <h2 class="spx-form-card__title">Registrar Departamento</h2>
+        <p class="spx-form-card__subtitle">Agrega un nuevo departamento al sistema</p>
+      </div>
     </div>
+
+    <form [formGroup]="myForm" (ngSubmit)="onSave()" class="spx-form-body">
+      <div class="spx-form-grid spx-form-grid--3">
+
+        <div class="spx-form-field">
+          <label class="spx-form-label">
+            Código <span class="spx-form-required">*</span>
+          </label>
+          <input type="number" formControlName="id" class="spx-form-input"
+                 placeholder="Ej: 5"
+                 [class.spx-form-input--error]="isValidField('id')">
+          @if (isValidField('id')) {
+            <span class="spx-form-error">{{ getFieldError('id') }}</span>
+          }
+        </div>
+
+        <div class="spx-form-field spx-form-col-span-2">
+          <label class="spx-form-label">
+            Nombre <span class="spx-form-required">*</span>
+          </label>
+          <input type="text" formControlName="nombre" class="spx-form-input"
+                 placeholder="Nombre del departamento"
+                 [class.spx-form-input--error]="isValidField('nombre')">
+          @if (isValidField('nombre')) {
+            <span class="spx-form-error">{{ getFieldError('nombre') }}</span>
+          }
+        </div>
+
+      </div>
+
+      <div class="spx-form-check">
+        <input type="checkbox" class="spx-form-check__input" id="activoDepto"
+               formControlName="activo">
+        <label class="spx-form-check__label" for="activoDepto">
+          <i class="fa-solid fa-circle-check"></i>
+          Departamento activo
+        </label>
+      </div>
+
+      <div class="spx-form-actions">
+        <button type="submit" class="spx-form-btn-submit">
+          <i class="fa-solid fa-floppy-disk"></i>
+          Guardar Departamento
+        </button>
+      </div>
+
+    </form>
   </div>
 
-  <!-- Tabla de departamentos -->
-  <div class="mt-4">
+  <!-- Lista embebida -->
+  <div class="spx-form-embedded">
     <app-listar-page></app-listar-page>
   </div>
+
 </div>

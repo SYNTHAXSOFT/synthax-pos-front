@@ -1,0 +1,502 @@
+/* =============================================
+   SYNTHAX POS — Shared Form Styles (spx-form-*)
+   Applies to all registrar/actualizar pages
+   ============================================= */
+
+.spx-form-page {
+  padding: 1.75rem 2rem;
+  background: #101922;
+  min-height: 100%;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #f1f5f9;
+}
+
+/* ── Form Card ───────────────────────────── */
+.spx-form-card {
+  background: #1a242f;
+  border: 1px solid #283543;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  max-width: 52rem;
+}
+
+.spx-form-card--wide {
+  max-width: 100%;
+}
+
+.spx-form-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #283543;
+  background: rgba(13,127,242,0.04);
+}
+
+.spx-form-card__icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  background: rgba(13,127,242,0.15);
+  color: #0d7ff2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.spx-form-card__title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.spx-form-card__subtitle {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.spx-form-card__body {
+  padding: 1.5rem;
+}
+
+/* ── Page title (above card) ─────────────── */
+.spx-form-title {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.02em;
+}
+.spx-form-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0 0 1.5rem 0;
+}
+
+/* ── Grid ────────────────────────────────── */
+.spx-form-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 1fr;
+}
+.spx-form-grid--2 { grid-template-columns: repeat(2, 1fr); }
+.spx-form-grid--3 { grid-template-columns: repeat(3, 1fr); }
+.spx-form-grid--4 { grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 640px) {
+  .spx-form-grid--2,
+  .spx-form-grid--3,
+  .spx-form-grid--4 { grid-template-columns: 1fr; }
+}
+
+.spx-form-col-span-2 { grid-column: span 2; }
+.spx-form-col-span-3 { grid-column: span 3; }
+.spx-form-col-span-4 { grid-column: span 4; }
+@media (max-width: 640px) {
+  .spx-form-col-span-2,
+  .spx-form-col-span-3,
+  .spx-form-col-span-4 { grid-column: span 1; }
+}
+
+/* ── Field group ─────────────────────────── */
+.spx-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.spx-form-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.spx-form-required {
+  color: #ef4444;
+  margin-left: 0.2rem;
+}
+
+/* ── Inputs ──────────────────────────────── */
+.spx-form-input,
+.spx-form-select,
+.spx-form-textarea {
+  width: 100%;
+  background: #101922;
+  border: 1px solid #283543;
+  border-radius: 0.5rem;
+  color: #f1f5f9;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.9rem;
+  padding: 0.625rem 0.875rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.spx-form-input::placeholder,
+.spx-form-textarea::placeholder { color: #475569; }
+.spx-form-input:focus,
+.spx-form-select:focus,
+.spx-form-textarea:focus {
+  border-color: #0d7ff2;
+  box-shadow: 0 0 0 3px rgba(13,127,242,0.15);
+}
+.spx-form-input.is-invalid,
+.spx-form-select.is-invalid,
+.spx-form-textarea.is-invalid,
+.spx-form-input--error {
+  border-color: #ef4444 !important;
+  box-shadow: none;
+}
+.spx-form-input--readonly {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.spx-form-input:disabled,
+.spx-form-select:disabled,
+.spx-form-textarea:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Select arrow */
+.spx-form-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.875rem center;
+  padding-right: 2.5rem;
+}
+.spx-form-select option {
+  background: #1a242f;
+  color: #f1f5f9;
+}
+
+/* Textarea */
+.spx-form-textarea { resize: vertical; min-height: 5rem; }
+
+/* Input with prefix (e.g. $ symbol) */
+.spx-form-input-group {
+  display: flex;
+  align-items: stretch;
+}
+.spx-form-input-group .spx-form-input {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  flex: 1;
+}
+.spx-form-input-prefix {
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  background: #283543;
+  border: 1px solid #283543;
+  border-right: none;
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Checkbox / Switch ───────────────────── */
+.spx-form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  cursor: pointer;
+  padding: 0.75rem 1rem;
+  background: rgba(40,53,67,0.4);
+  border: 1px solid #283543;
+  border-radius: 0.5rem;
+  transition: background 0.15s;
+}
+.spx-form-check:hover { background: rgba(13,127,242,0.07); }
+.spx-form-check__input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: #0d7ff2;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.spx-form-check__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #cbd5e1;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ── Errors ──────────────────────────────── */
+.spx-form-error {
+  font-size: 0.75rem;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.1rem;
+}
+
+/* ── Section divider ─────────────────────── */
+.spx-form-section {
+  background: rgba(40,53,67,0.35);
+  border: 1px solid #283543;
+  border-radius: 0.625rem;
+  padding: 1rem 1.25rem;
+}
+.spx-form-section__title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #0d7ff2;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ── Info / hint box ─────────────────────── */
+.spx-form-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  background: rgba(13,127,242,0.08);
+  border: 1px solid rgba(13,127,242,0.2);
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+.spx-form-hint i { color: #0d7ff2; margin-top: 0.1rem; flex-shrink: 0; }
+.spx-form-hint strong { color: #f1f5f9; }
+
+/* ── Subtotal display box ────────────────── */
+.spx-form-total-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.2);
+  border-radius: 0.5rem;
+  text-align: center;
+  height: 100%;
+  min-height: 3.5rem;
+}
+.spx-form-total-box__label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin-bottom: 0.15rem;
+}
+.spx-form-total-box__value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #22c55e;
+  letter-spacing: -0.02em;
+}
+
+/* ── Form actions (button row) ───────────── */
+.spx-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #283543;
+}
+
+.spx-form-btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.5rem;
+  background: #0d7ff2;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 14px rgba(13,127,242,0.3);
+  transition: background 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+.spx-form-btn-submit:hover {
+  background: #0b6fd4;
+  box-shadow: 0 6px 20px rgba(13,127,242,0.4);
+}
+
+.spx-form-btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid #283543;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.spx-form-btn-cancel:hover {
+  background: rgba(40,53,67,0.5);
+  border-color: #64748b;
+  color: #f1f5f9;
+}
+
+/* ── Button aliases: spx-form-btn --primary / --secondary ── */
+.spx-form-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid transparent;
+  transition: background 0.2s, box-shadow 0.2s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.spx-form-btn--primary {
+  background: #0d7ff2;
+  color: #fff;
+  border-color: #0d7ff2;
+  box-shadow: 0 4px 14px rgba(13,127,242,0.3);
+  padding: 0.625rem 1.5rem;
+}
+.spx-form-btn--primary:hover {
+  background: #0b6fd4;
+  border-color: #0b6fd4;
+  box-shadow: 0 6px 20px rgba(13,127,242,0.4);
+}
+.spx-form-btn--secondary {
+  background: transparent;
+  color: #94a3b8;
+  border-color: #283543;
+}
+.spx-form-btn--secondary:hover {
+  background: rgba(40,53,67,0.5);
+  border-color: #64748b;
+  color: #f1f5f9;
+}
+
+/* ── Section divider between form and list ─ */
+.spx-form-divider {
+  margin: 2rem 0 0 0;
+}
+
+/* ── Header icon alias (some forms use this) */
+.spx-form-card__header-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  background: rgba(13,127,242,0.15);
+  color: #0d7ff2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* ── Embedded sub-component (e.g. restaurante-listar inside registrar) ─ */
+.spx-form-embedded {
+  margin-top: 1.5rem;
+}
+
+/* ── Loading state ───────────────────────── */
+.spx-form-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 3rem;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+.spx-form-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid #283543;
+  border-top-color: #0d7ff2;
+  border-radius: 50%;
+  animation: spx-form-spin 0.7s linear infinite;
+}
+@keyframes spx-form-spin { to { transform: rotate(360deg); } }
+
+/* ── Inline hint next to label ───────────── */
+.spx-form-hint-inline {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 400;
+  margin-left: 0.25rem;
+}
+
+/* ── Helper text below input ─────────────── */
+.spx-form-hint-text {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.3rem;
+}
+
+/* ── Responsive ──────────────────────────── */
+@media (max-width: 767px) {
+  .spx-form-page { padding: 1.25rem 1rem; }
+  .spx-form-card__body { padding: 1rem; }
+  .spx-form-actions { flex-direction: column-reverse; }
+  .spx-form-btn-submit,
+  .spx-form-btn-cancel { width: 100%; justify-content: center; }
+}
+
+/* ── Tax quick-pick buttons (impuesto) ───── */
+.spx-tax-quick-btns {
+  display: flex;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+.spx-tax-quick-btn {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.73rem;
+  font-weight: 600;
+  border-radius: 0.375rem;
+  border: 1px solid #283543;
+  background: #1a242f;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  line-height: 1.5;
+}
+.spx-tax-quick-btn:hover {
+  border-color: #0d7ff2;
+  color: #0d7ff2;
+  background: rgba(13,127,242,0.08);
+}
+.spx-tax-quick-btn--active {
+  border-color: #0d7ff2 !important;
+  background: rgba(13,127,242,0.18) !important;
+  color: #0d7ff2 !important;
+}

@@ -1,66 +1,105 @@
-<div class="min-vh-100 d-flex align-items-center justify-content-center position-relative" 
-     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-  
-  <!-- Overlay oscuro -->
-  <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50"></div>
-  
-  <!-- Contenido principal -->
-  <div class="position-relative text-center text-white" style="max-width: 28rem; width: 100%; padding: 1rem;">
-    
-    <img src="/assets/img/logo.png" alt="Logo Synthax Votos" class="mb-4 mx-auto" style="width: 12rem;" />
-    
-    <h1 class="mb-3 fw-bold" style="font-size: 3rem;">SYNTHAX POS</h1>
-    
-    <p class="mb-4 opacity-75" style="font-size: 0.875rem;">
-      Gestiona tu negocio de forma facil, legal y segura.<br>
-      Inicia sesión para gestionartus ventas, inventarios y registros ante la DIAN .
-    </p>
+<div class="spx-login-wrapper">
 
-    <form (ngSubmit)="onLogin()" class="bg-white bg-opacity-10 p-4 rounded-3 shadow-lg" 
-          style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
-      
-      <!-- Campo Cédula -->
-      <div class="mb-3">
-        <input 
-          type="text" 
-          placeholder="Cedula" 
-          [(ngModel)]="credentials.cedula"
-          name="cedula"
-          class="form-control form-control-lg bg-white bg-opacity-90"
-          style="color: #1f2937;"
-          required>
+  <!-- Fondo: blobs de luz -->
+  <div class="spx-blob spx-blob--tl"></div>
+  <div class="spx-blob spx-blob--br"></div>
+
+  <!-- Contenedor centrado -->
+  <div class="spx-login-container">
+
+    <!-- Logo & Branding -->
+    <div class="spx-branding">
+      <div class="spx-logo-box">
+        <svg class="spx-logo-icon" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"/>
+          <path clip-rule="evenodd" d="M39.998 35.764C39.9875 35.7155 39.9748 35.6706C39.9436 35.5601 39.8949 35.4259 39.8346 35.2825C38.5103 34.2887 35.9788 33.0607 33.7095 32.5189C30.9875 31.8691 27.6413 31.4783 24 31.4783C20.3587 31.4783 17.0125 31.8691 14.2905 32.5189C12.0012 33.0654 9.44505 34.3104 8.18538 35.1832C8.09919 35.3751 8.05721 35.4886 8.02977 35.589C8.00004 35.7641 8.0104 36.0767 8.68485 36.6314C9.34546 37.1746 10.4222 37.7531 11.9291 38.2772C14.9242 39.319 19.1919 40 24 40C28.8081 40 33.0758 39.319 36.0709 38.2772C37.5778 37.7531 38.6545 37.1746 39.3151 36.6314C39.9006 36.1499 39.9857 35.8511 39.998 35.764ZM4.95178 32.7688L21.4543 6.30267C22.6288 4.4191 25.3712 4.41909 26.5457 6.30267L43.0534 32.777L41.8558 39.7209C40.6947 40.6757 39.1354 41.4464 37.385 42.0552C33.8654 43.2794 29.133 44 24 44C18.867 44 14.1346 43.2794 10.615 42.0552C8.86463 41.4464 7.30529 40.6757 6.14419 39.7209C4.99695 38.7775 3.99999 37.4427 3.99999 35.7391C3.99999 34.8725 4.29264 34.0922 4.49321 33.6393C4.60375 33.3898 4.79687 33.0311L4.95178 32.7688Z" fill="currentColor" fill-rule="evenodd"/>
+        </svg>
       </div>
+      <h1 class="spx-brand-name">SYNTHAX<span>POS</span></h1>
+      <p class="spx-brand-sub">Gestión inteligente para tu negocio</p>
+    </div>
 
-      <!-- Campo Contraseña -->
-      <div class="mb-4">
-        <input 
-          type="password" 
-          placeholder="Contraseña" 
-          [(ngModel)]="credentials.password"
-          name="password"
-          class="form-control form-control-lg bg-white bg-opacity-90"
-          style="color: #1f2937;"
-          required>
-      </div>
+    <!-- Tarjeta Login -->
+    <div class="spx-card">
+      <h2 class="spx-card-title">Bienvenido de nuevo</h2>
 
-      <!-- Mensaje de error -->
-      @if (errorMessage) {
-        <div class="alert alert-danger mb-3 py-2" role="alert" style="font-size: 0.875rem;">
-          <span>{{ errorMessage }}</span>
+      <form (ngSubmit)="onLogin()" autocomplete="off">
+
+        <!-- Usuario / Cédula -->
+        <div class="spx-field">
+          <label for="cedula">Usuario o Cédula</label>
+          <div class="spx-input-wrapper">
+            <i class="fa fa-user spx-input-icon"></i>
+            <input
+              id="cedula"
+              type="text"
+              [(ngModel)]="credentials.cedula"
+              name="cedula"
+              placeholder="Tu cédula o usuario"
+              class="spx-input"
+            />
+          </div>
         </div>
-      }
 
-      <!-- Botón de ingreso -->
-      <button 
-        type="submit" 
-        class="btn btn-primary btn-lg w-100"
-        [disabled]="cargando">
-        @if (cargando) {
-          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        <!-- Contraseña -->
+        <div class="spx-field">
+          <div class="spx-field-header">
+            <label for="password">Contraseña</label>
+            <a href="#" class="spx-forgot">¿Olvidaste tu contraseña?</a>
+          </div>
+          <div class="spx-input-wrapper">
+            <i class="fa fa-lock spx-input-icon"></i>
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="credentials.password"
+              name="password"
+              placeholder="••••••••"
+              class="spx-input spx-input--padded-right"
+              autocomplete="current-password"
+            />
+            <button type="button" class="spx-toggle-password" (click)="showPassword = !showPassword">
+              <i class="fa" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Error -->
+        @if (errorMessage) {
+          <div class="spx-error">
+            <i class="fa fa-circle-exclamation"></i>
+            <span>{{ errorMessage }}</span>
+          </div>
         }
-        {{ cargando ? 'Ingresando...' : 'Ingresar' }}
-      </button>
 
-    </form>
+        <!-- Botón -->
+        <button type="submit" class="spx-btn-login" [disabled]="cargando">
+          @if (cargando) {
+            <span class="spx-spinner"></span>
+            <span>Ingresando...</span>
+          } @else {
+            <span>Ingresar</span>
+            <i class="fa fa-right-to-bracket"></i>
+          }
+        </button>
+
+      </form>
+
+      <!-- Footer de tarjeta -->
+      <div class="spx-card-footer">
+        <p>¿No tienes una cuenta? <a href="#">Contactar soporte</a></p>
+      </div>
+    </div>
+
+    <!-- Copyright -->
+    <div class="spx-copyright">
+      <p>© 2024 SYNTHAX POS. Todos los derechos reservados.</p>
+      <div class="spx-copyright-links">
+        <a href="#">Términos</a>
+        <a href="#">Privacidad</a>
+        <a href="#">Estado del Sistema</a>
+      </div>
+    </div>
+
   </div>
 </div>

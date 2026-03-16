@@ -1,287 +1,279 @@
-<!-- ══════════════════════════════════════════════════════════════════════
-     CONFIGURACIÓN DE MARCA — Identidad Visual del Restaurante
-     ══════════════════════════════════════════════════════════════════════ -->
+<div class="spx-brand">
 
-<div class="container-fluid py-4 fade-in">
-
-  <!-- ── Encabezado ──────────────────────────────────────────────────────── -->
-  <div class="d-flex align-items-center mb-4 gap-3">
-    <div class="d-flex align-items-center justify-content-center rounded-3"
-         style="width:3rem;height:3rem;background:var(--primary-color);">
-      <i class="fa-solid fa-palette text-white fs-5"></i>
+  <!-- Header -->
+  <div class="spx-brand-header">
+    <div class="spx-brand-header__icon">
+      <i class="fa-solid fa-palette"></i>
     </div>
     <div>
-      <h2 class="mb-0">Identidad Visual</h2>
-      <p class="text-muted mb-0 small">
+      <h1 class="spx-brand-header__title">Identidad Visual</h1>
+      <p class="spx-brand-header__sub">
         Personaliza los colores y el logo de
         <strong>{{ restaurante?.nombre ?? 'tu restaurante' }}</strong>
       </p>
     </div>
   </div>
 
-  <!-- ── Spinner de carga ─────────────────────────────────────────────────── -->
+  <!-- Loading -->
   @if (cargando) {
-    <div class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
-      <p class="text-muted mt-2">Cargando información...</p>
+    <div class="spx-brand-loading">
+      <div class="spx-brand-spinner"></div>
+      <p>Cargando información...</p>
     </div>
   }
 
-  @if (!cargando && restaurante) {
-    <div class="row g-4">
+  <!-- Sin restaurante -->
+  @if (!cargando && !restaurante) {
+    <div class="spx-brand-alert">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <div>
+        <strong>Sin restaurante asociado</strong>
+        <p>Selecciona un restaurante desde la lista para configurar su marca.</p>
+      </div>
+    </div>
+  }
 
-      <!-- ── Columna izquierda: Formulario ─────────────────────────────── -->
-      <div class="col-12 col-lg-7">
-        <div class="card">
-          <div class="card-header d-flex align-items-center gap-2">
+  <!-- Main content -->
+  @if (!cargando && restaurante) {
+    <div class="spx-brand-layout">
+
+      <!-- ── Columna izquierda: formulario ── -->
+      <div class="spx-brand-col-form">
+
+        <!-- Colores -->
+        <div class="spx-brand-card" [formGroup]="brandingForm">
+          <div class="spx-brand-card__header">
             <i class="fa-solid fa-brush"></i>
             Colores del Restaurante
           </div>
+          <div class="spx-brand-card__body">
 
-          <div class="card-body" [formGroup]="brandingForm">
-
-            <!-- Color Primario -->
-            <div class="mb-4">
-              <label class="form-label d-flex align-items-center gap-2">
-                <span class="rounded-circle border"
-                      style="width:1.25rem;height:1.25rem;display:inline-block;"
+            <!-- Color primario -->
+            <div class="spx-brand-color-row">
+              <div class="spx-brand-color-info">
+                <span class="spx-brand-color-swatch"
                       [style.background]="brandingForm.get('colorPrimario')?.value">
                 </span>
-                Color Primario
-                <span class="text-muted small">(navegación, encabezados, botones)</span>
-              </label>
-              <div class="input-group">
-                <input type="color" class="form-control form-control-color"
-                       formControlName="colorPrimario" style="max-width:4rem;">
-                <input type="text"  class="form-control font-monospace"
+                <div>
+                  <span class="spx-brand-color-label">Color Primario</span>
+                  <span class="spx-brand-color-hint">Navegación, encabezados, botones</span>
+                </div>
+              </div>
+              <div class="spx-brand-color-inputs">
+                <input type="color" class="spx-brand-color-picker"
+                       formControlName="colorPrimario">
+                <input type="text" class="spx-brand-color-hex"
                        formControlName="colorPrimario"
                        placeholder="#059669" maxlength="7">
               </div>
             </div>
 
-            <!-- Color Secundario -->
-            <div class="mb-4">
-              <label class="form-label d-flex align-items-center gap-2">
-                <span class="rounded-circle border"
-                      style="width:1.25rem;height:1.25rem;display:inline-block;"
+            <!-- Color secundario -->
+            <div class="spx-brand-color-row">
+              <div class="spx-brand-color-info">
+                <span class="spx-brand-color-swatch"
                       [style.background]="brandingForm.get('colorSecundario')?.value">
                 </span>
-                Color Secundario
-                <span class="text-muted small">(botones secundarios, acentos)</span>
-              </label>
-              <div class="input-group">
-                <input type="color" class="form-control form-control-color"
-                       formControlName="colorSecundario" style="max-width:4rem;">
-                <input type="text"  class="form-control font-monospace"
+                <div>
+                  <span class="spx-brand-color-label">Color Secundario</span>
+                  <span class="spx-brand-color-hint">Botones secundarios, acentos</span>
+                </div>
+              </div>
+              <div class="spx-brand-color-inputs">
+                <input type="color" class="spx-brand-color-picker"
+                       formControlName="colorSecundario">
+                <input type="text" class="spx-brand-color-hex"
                        formControlName="colorSecundario"
                        placeholder="#f97316" maxlength="7">
               </div>
             </div>
 
-            <!-- Color del Texto -->
-            <div class="mb-4">
-              <label class="form-label d-flex align-items-center gap-2">
-                <span class="rounded-circle border"
-                      style="width:1.25rem;height:1.25rem;display:inline-block;"
+            <!-- Color de texto -->
+            <div class="spx-brand-color-row">
+              <div class="spx-brand-color-info">
+                <span class="spx-brand-color-swatch"
                       [style.background]="brandingForm.get('colorTexto')?.value">
                 </span>
-                Color de Texto
-                <span class="text-muted small">(texto sobre fondo primario)</span>
-              </label>
-              <div class="input-group">
-                <input type="color" class="form-control form-control-color"
-                       formControlName="colorTexto" style="max-width:4rem;">
-                <input type="text"  class="form-control font-monospace"
+                <div>
+                  <span class="spx-brand-color-label">Color de Texto</span>
+                  <span class="spx-brand-color-hint">Texto sobre fondo primario</span>
+                </div>
+              </div>
+              <div class="spx-brand-color-inputs">
+                <input type="color" class="spx-brand-color-picker"
+                       formControlName="colorTexto">
+                <input type="text" class="spx-brand-color-hex"
                        formControlName="colorTexto"
                        placeholder="#ffffff" maxlength="7">
               </div>
             </div>
 
-            <!-- Color de Fondo -->
-            <div class="mb-4">
-              <label class="form-label d-flex align-items-center gap-2">
-                <span class="rounded-circle border"
-                      style="width:1.25rem;height:1.25rem;display:inline-block;"
+            <!-- Color de fondo -->
+            <div class="spx-brand-color-row">
+              <div class="spx-brand-color-info">
+                <span class="spx-brand-color-swatch spx-brand-color-swatch--light"
                       [style.background]="brandingForm.get('colorFondo')?.value">
                 </span>
-                Color de Fondo
-                <span class="text-muted small">(fondo general de la app)</span>
-              </label>
-              <div class="input-group">
-                <input type="color" class="form-control form-control-color"
-                       formControlName="colorFondo" style="max-width:4rem;">
-                <input type="text"  class="form-control font-monospace"
+                <div>
+                  <span class="spx-brand-color-label">Color de Fondo</span>
+                  <span class="spx-brand-color-hint">Fondo general de la aplicación</span>
+                </div>
+              </div>
+              <div class="spx-brand-color-inputs">
+                <input type="color" class="spx-brand-color-picker"
+                       formControlName="colorFondo">
+                <input type="text" class="spx-brand-color-hex"
                        formControlName="colorFondo"
                        placeholder="#f0fdf4" maxlength="7">
               </div>
             </div>
 
-          </div><!-- /card-body -->
-        </div><!-- /card -->
-
-        <!-- ── Logo ─────────────────────────────────────────────────────── -->
-        <div class="card mt-4">
-          <div class="card-header d-flex align-items-center gap-2">
-            <i class="fa-solid fa-image"></i>
-            Logo del Restaurante
-          </div>
-          <div class="card-body">
-
-            <!-- Preview del logo -->
-            <div class="d-flex align-items-center gap-3 mb-3">
-              @if (logoPreview) {
-                <img [src]="logoPreview"
-                     alt="Logo"
-                     class="rounded border"
-                     style="width:5rem;height:5rem;object-fit:contain;background:#f8f9fa;padding:0.5rem;">
-                <button type="button" class="btn btn-sm btn-danger"
-                        (click)="eliminarLogo()">
-                  <i class="fa-solid fa-trash me-1"></i>Quitar logo
-                </button>
-              } @else {
-                <div class="rounded border d-flex align-items-center justify-content-center"
-                     style="width:5rem;height:5rem;background:#f8f9fa;">
-                  <i class="fa-solid fa-store text-muted fs-3"></i>
-                </div>
-                <span class="text-muted small">Sin logo asignado</span>
-              }
-            </div>
-
-            <label class="form-label">Subir imagen (PNG, JPG, SVG — máx. 2 MB)</label>
-            <input type="file"
-                   class="form-control"
-                   accept="image/*"
-                   (change)="onLogoSeleccionado($event)">
-            <div class="form-text">
-              El logo se guarda en Base64 en la base de datos.
-              Se muestra en el menú lateral para todos los usuarios del restaurante.
-            </div>
           </div>
         </div>
 
-      </div><!-- /col -->
+        <!-- Logo -->
+        <div class="spx-brand-card spx-brand-card--logo">
+          <div class="spx-brand-card__header">
+            <i class="fa-solid fa-image"></i>
+            Logo del Restaurante
+          </div>
+          <div class="spx-brand-card__body">
 
-      <!-- ── Columna derecha: Preview en vivo ──────────────────────────── -->
-      <div class="col-12 col-lg-5">
-        <div class="card sticky-top" style="top:1rem;">
-          <div class="card-header d-flex align-items-center gap-2">
+            <div class="spx-brand-logo-preview">
+              @if (logoPreview) {
+                <img [src]="logoPreview" alt="Logo" class="spx-brand-logo-img">
+                <button type="button" class="spx-brand-logo-remove"
+                        (click)="eliminarLogo()">
+                  <i class="fa-solid fa-trash"></i>
+                  Quitar logo
+                </button>
+              } @else {
+                <div class="spx-brand-logo-empty">
+                  <i class="fa-solid fa-store"></i>
+                </div>
+                <span class="spx-brand-logo-none">Sin logo asignado</span>
+              }
+            </div>
+
+            <label class="spx-brand-upload-label">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              Seleccionar imagen (PNG, JPG, SVG — máx. 2 MB)
+            </label>
+            <input type="file" class="spx-brand-upload-input"
+                   accept="image/*"
+                   (change)="onLogoSeleccionado($event)">
+            <p class="spx-brand-upload-hint">
+              El logo se guarda en Base64 y se muestra en el menú lateral para todos los usuarios del restaurante.
+            </p>
+          </div>
+        </div>
+
+        <!-- Guardar -->
+        <div class="spx-brand-save-row">
+          <button class="spx-brand-btn-save"
+                  (click)="guardar()"
+                  [disabled]="guardando">
+            @if (guardando) {
+              <div class="spx-brand-save-spinner"></div>
+            } @else {
+              <i class="fa-solid fa-floppy-disk"></i>
+            }
+            {{ guardando ? 'Guardando...' : 'Guardar Configuración' }}
+          </button>
+
+          @if (exito) {
+            <div class="spx-brand-success">
+              <i class="fa-solid fa-circle-check"></i>
+              ¡Branding actualizado correctamente!
+            </div>
+          }
+        </div>
+
+      </div><!-- /col-form -->
+
+      <!-- ── Columna derecha: preview ── -->
+      <div class="spx-brand-col-preview">
+        <div class="spx-brand-preview-card">
+          <div class="spx-brand-preview-card__header">
             <i class="fa-solid fa-eye"></i>
             Vista Previa en Vivo
           </div>
 
-          <!-- Simulación del menú lateral -->
-          <div class="card-body p-0 overflow-hidden rounded-bottom-3">
+          <div class="spx-brand-preview-body">
 
-            <!-- Barra de navegación simulada -->
-            <div class="px-3 py-2 d-flex align-items-center gap-2"
+            <!-- Navbar simulado -->
+            <div class="spx-brand-preview-nav"
                  [style.background]="brandingForm.get('colorPrimario')?.value">
               @if (logoPreview) {
-                <img [src]="logoPreview" alt="Logo" class="rounded"
-                     style="width:2rem;height:2rem;object-fit:contain;background:white;padding:2px;">
+                <img [src]="logoPreview" alt="Logo" class="spx-brand-preview-logo">
               } @else {
                 <i class="fa-solid fa-store"
                    [style.color]="brandingForm.get('colorTexto')?.value"></i>
               }
-              <span class="fw-bold small"
+              <span class="spx-brand-preview-app-name"
                     [style.color]="brandingForm.get('colorTexto')?.value">
                 {{ restaurante?.nombre }}
               </span>
             </div>
 
             <!-- Contenido simulado -->
-            <div class="p-3" [style.background]="brandingForm.get('colorFondo')?.value">
+            <div class="spx-brand-preview-content"
+                 [style.background]="brandingForm.get('colorFondo')?.value">
 
-              <!-- Simulación de card -->
-              <div class="p-3 rounded-3 mb-3 shadow-sm" style="background:white;">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <span class="fw-semibold" style="font-size:0.85rem;">Ventas del día</span>
-                  <span class="badge"
+              <!-- Tarjeta simulada -->
+              <div class="spx-brand-preview-widget">
+                <div class="spx-brand-preview-widget__row">
+                  <span class="spx-brand-preview-widget__label">Ventas del día</span>
+                  <span class="spx-brand-preview-badge"
                         [style.background]="brandingForm.get('colorPrimario')?.value"
                         [style.color]="brandingForm.get('colorTexto')?.value">
                     Activo
                   </span>
                 </div>
-                <p style="font-size:1.4rem;font-weight:700;margin:0;"
+                <p class="spx-brand-preview-amount"
                    [style.color]="brandingForm.get('colorPrimario')?.value">
                   $1.250.000
                 </p>
-                <p class="text-muted mb-0" style="font-size:0.75rem;">
-                  12 ventas procesadas hoy
-                </p>
+                <p class="spx-brand-preview-sub">12 ventas procesadas hoy</p>
               </div>
 
               <!-- Botones simulados -->
-              <div class="d-flex gap-2 flex-wrap mb-3">
-                <button class="btn btn-sm px-3"
+              <div class="spx-brand-preview-btns">
+                <button class="spx-brand-preview-btn"
                         [style.background]="brandingForm.get('colorPrimario')?.value"
                         [style.color]="brandingForm.get('colorTexto')?.value">
-                  <i class="fa-solid fa-plus me-1"></i>Nueva Venta
+                  <i class="fa-solid fa-plus"></i> Nueva Venta
                 </button>
-                <button class="btn btn-sm px-3"
+                <button class="spx-brand-preview-btn"
                         [style.background]="brandingForm.get('colorSecundario')?.value"
-                        style="color:white;">
-                  <i class="fa-solid fa-receipt me-1"></i>Facturar
+                        style="color:#fff;">
+                  <i class="fa-solid fa-receipt"></i> Facturar
                 </button>
               </div>
 
-              <!-- Simulación de fila de tabla -->
-              <div class="rounded-2 overflow-hidden" style="border:1px solid #dee2e6;">
-                <div class="d-flex align-items-center px-3 py-2"
+              <!-- Mini tabla simulada -->
+              <div class="spx-brand-preview-table">
+                <div class="spx-brand-preview-table__head"
                      [style.background]="brandingForm.get('colorPrimario')?.value">
-                  <span class="small fw-semibold me-auto"
-                        [style.color]="brandingForm.get('colorTexto')?.value">Producto</span>
-                  <span class="small fw-semibold"
-                        [style.color]="brandingForm.get('colorTexto')?.value">Precio</span>
+                  <span [style.color]="brandingForm.get('colorTexto')?.value">Producto</span>
+                  <span [style.color]="brandingForm.get('colorTexto')?.value">Precio</span>
                 </div>
-                <div class="d-flex align-items-center px-3 py-2"
-                     style="background:white;border-bottom:1px solid #f0f0f0;">
-                  <span class="me-auto" style="font-size:0.8rem;">Bandeja Paisa</span>
-                  <span style="font-size:0.8rem;">$25.000</span>
+                <div class="spx-brand-preview-table__row spx-brand-preview-table__row--a">
+                  <span>Bandeja Paisa</span>
+                  <span>$25.000</span>
                 </div>
-                <div class="d-flex align-items-center px-3 py-2"
-                     style="font-size:0.8rem;background:#f9f9f9;">
-                  <span class="me-auto">Limonada Natural</span>
+                <div class="spx-brand-preview-table__row spx-brand-preview-table__row--b">
+                  <span>Limonada Natural</span>
                   <span>$8.000</span>
                 </div>
               </div>
 
-            </div><!-- /fondo simulado -->
-          </div><!-- /card-body preview -->
-        </div><!-- /card preview -->
-      </div><!-- /col preview -->
+            </div><!-- /preview-content -->
+          </div><!-- /preview-body -->
+        </div><!-- /preview-card -->
+      </div><!-- /col-preview -->
 
-    </div><!-- /row -->
-
-    <!-- ── Botón guardar ──────────────────────────────────────────────────── -->
-    <div class="d-flex align-items-center gap-3 mt-4">
-      <button class="btn btn-primary btn-lg px-5"
-              (click)="guardar()"
-              [disabled]="guardando">
-        @if (guardando) {
-          <span class="spinner-border spinner-border-sm me-2"></span>
-        }
-        {{ guardando ? 'Guardando...' : 'Guardar Configuración' }}
-      </button>
-
-      @if (exito) {
-        <div class="alert alert-success mb-0 py-2 px-3 d-flex align-items-center gap-2 fade-in">
-          <i class="fa-solid fa-circle-check"></i>
-          ¡Branding actualizado correctamente!
-        </div>
-      }
-    </div>
-
-  }<!-- /if restaurante -->
-
-  <!-- ── Sin restaurante ───────────────────────────────────────────────────── -->
-  @if (!cargando && !restaurante) {
-    <div class="alert alert-warning d-flex align-items-center gap-3">
-      <i class="fa-solid fa-triangle-exclamation fs-4"></i>
-      <div>
-        No se encontró un restaurante asociado a tu cuenta.
-        Selecciona un restaurante desde la lista para configurar su marca.
-      </div>
-    </div>
+    </div><!-- /layout -->
   }
 
 </div>

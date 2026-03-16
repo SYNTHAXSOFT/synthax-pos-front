@@ -15,6 +15,7 @@ import { AuthService } from '../../../auth/services/auth.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, CompraListarPageComponent],
   templateUrl: './compra-registrar.html',
+  styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
 export class CompraRegistrarPageComponent implements OnInit {
   private readonly fb                 = inject(FormBuilder);

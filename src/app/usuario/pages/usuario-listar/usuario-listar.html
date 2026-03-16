@@ -1,76 +1,205 @@
-<div class="container-fluid px-4">
-  <h2 class="mb-2">Lista de Usuarios</h2>
-  <hr class="mb-4">
+<div class="spx-users">
 
+  <!-- ── Page Header ──────────────────────── -->
+  <div class="spx-users__header">
+    <div>
+      <h2 class="spx-users__title">Gestión de Usuarios</h2>
+      <p class="spx-users__subtitle">Configura el acceso, roles y permisos de tu equipo.</p>
+    </div>
+    <a routerLink="/synthax-pos/usuario/registrar" class="spx-btn-primary">
+      <i class="fa-solid fa-user-plus"></i>
+      Nuevo Usuario
+    </a>
+  </div>
+
+  <!-- ── Stats Cards ──────────────────────── -->
+  <div class="spx-users__stats">
+    <div class="spx-ustat">
+      <p class="spx-ustat__label">Total Usuarios</p>
+      <p class="spx-ustat__value">{{ usuariosList().length }}</p>
+    </div>
+    <div class="spx-ustat">
+      <p class="spx-ustat__label">Activos</p>
+      <div class="spx-ustat__row">
+        <span class="spx-ustat__dot spx-ustat__dot--green"></span>
+        <p class="spx-ustat__value">{{ totalActivos }}</p>
+      </div>
+    </div>
+    <div class="spx-ustat">
+      <p class="spx-ustat__label">Inactivos</p>
+      <p class="spx-ustat__value">{{ usuariosList().length - totalActivos }}</p>
+    </div>
+    <div class="spx-ustat">
+      <p class="spx-ustat__label">Seguridad</p>
+      <p class="spx-ustat__value spx-ustat__value--blue">Activa</p>
+    </div>
+  </div>
+
+  <!-- ── Filters ──────────────────────────── -->
+  <div class="spx-users__filters">
+    <div class="spx-search">
+      <i class="fa-solid fa-magnifying-glass spx-search__icon"></i>
+      <input
+        type="text"
+        class="spx-search__input"
+        placeholder="Buscar por nombre, cédula o email..."
+        [(ngModel)]="searchTerm"
+      >
+    </div>
+    <div class="spx-filters-row">
+      <select class="spx-select" [(ngModel)]="filtroRol">
+        <option value="">Todos los roles</option>
+        <option value="ROOT">Root</option>
+        <option value="PROPIETARIO">Propietario</option>
+        <option value="ADMINISTRADOR">Administrador</option>
+        <option value="CAJERO">Cajero</option>
+        <option value="MESERO">Mesero</option>
+        <option value="DOMICILIARIO">Domiciliario</option>
+      </select>
+      <select class="spx-select" [(ngModel)]="filtroEstado">
+        <option value="">Estado: Todos</option>
+        <option value="activo">Activos</option>
+        <option value="inactivo">Inactivos</option>
+      </select>
+      <button class="spx-btn-outline" (click)="listarAction()">
+        <i class="fa-solid fa-rotate-right"></i>
+        Actualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Loading ──────────────────────────── -->
   @if (isLoading()) {
-    <div class="d-flex justify-content-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
+    <div class="spx-users__loading">
+      <div class="spx-spinner"></div>
+      <p>Cargando usuarios...</p>
     </div>
   }
 
-  @if (!isLoading()) {
-    <div class="table-responsive">
-      <table class="table table-striped table-hover table-bordered">
-        <thead class="table-light">
-          <tr>
-            <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Cédula</th>
-            <th>Email</th>
-            <th>Rol</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (usuario of usuariosList(); track usuario.id) {
-            <tr>
-              <td>{{ usuario.nombre }}</td>
-              <td>{{ usuario.apellido }}</td>
-              <td>{{ usuario.cedula }}</td>
-              <td>{{ usuario.email }}</td>
-              <td>
-                <span [class]="
-                  usuario.rol === 'ROOT'          ? 'badge' :
-                  usuario.rol === 'ADMINISTRADOR' ? 'badge bg-primary' :
-                  usuario.rol === 'CAJERO'        ? 'badge bg-success' :
-                  usuario.rol === 'MESERO'        ? 'badge bg-warning text-dark' :
-                  'badge bg-secondary'"
-                  [style.background-color]="usuario.rol === 'ROOT' ? '#6f42c1' : null"
-                >{{ usuario.rol }}</span>
-              </td>
-              <td>
-                <span [class]="usuario.activo ? 'badge bg-success' : 'badge bg-danger'">
-                  {{ usuario.activo ? 'Activo' : 'Inactivo' }}
-                </span>
-              </td>
-              <td>
-                <button class="btn btn-info btn-sm me-1" (click)="editar(usuario.id!)">
-                  Editar
-                </button>
-                <button
-                  [class]="puedeModificar(usuario)
-                    ? (usuario.activo ? 'btn btn-danger btn-sm' : 'btn btn-success btn-sm')
-                    : 'btn btn-secondary btn-sm'"
-                  [disabled]="!puedeModificar(usuario)"
-                  (click)="activarInactivar(usuario)"
-                >
-                  {{ usuario.activo ? 'Desactivar' : 'Activar' }}
-                </button>
-              </td>
-            </tr>
-          }
-          @empty {
-            <tr>
-              <td colspan="7" class="text-center text-muted py-4">No hay usuarios registrados</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  }
-
+  <!-- ── Error ────────────────────────────── -->
   @if (isError()) {
-    <div class="alert alert-danger mt-3">{{ errorMessage() }}</div>
+    <div class="spx-users__error">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      {{ errorMessage() }}
+    </div>
   }
+
+  <!-- ── Table ────────────────────────────── -->
+  @if (!isLoading()) {
+    <div class="spx-table-card">
+      <div class="spx-table-wrap">
+        <table class="spx-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th class="spx-th--cedula">Cédula</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th class="spx-th--right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            @for (u of usuariosPaginados; track u.id) {
+              <tr class="spx-table__row">
+
+                <!-- User cell -->
+                <td>
+                  <div class="spx-user-cell">
+                    <div [class]="'spx-avatar ' + rolColorClass(u.rol)">
+                      {{ iniciales(u) }}
+                    </div>
+                    <div>
+                      <p class="spx-user-cell__name">{{ u.nombre }} {{ u.apellido }}</p>
+                      <p class="spx-user-cell__email">{{ u.email }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Cedula -->
+                <td class="spx-td--cedula spx-td--mono">{{ u.cedula }}</td>
+
+                <!-- Role badge -->
+                <td>
+                  <span [class]="'spx-u-badge ' + rolColorClass(u.rol)">
+                    {{ rolLabel(u.rol) }}
+                  </span>
+                </td>
+
+                <!-- Status -->
+                <td>
+                  <div [class]="u.activo ? 'spx-status spx-status--active' : 'spx-status spx-status--inactive'">
+                    <span class="spx-status__dot"></span>
+                    {{ u.activo ? 'Activo' : 'Inactivo' }}
+                  </div>
+                </td>
+
+                <!-- Actions -->
+                <td class="spx-th--right">
+                  <div class="spx-action-btns">
+                    <button
+                      class="spx-action-btn spx-action-btn--edit"
+                      (click)="editar(u.id!)"
+                      title="Editar"
+                    >
+                      <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button
+                      [class]="puedeModificar(u)
+                        ? (u.activo
+                            ? 'spx-action-btn spx-action-btn--deactivate'
+                            : 'spx-action-btn spx-action-btn--activate')
+                        : 'spx-action-btn spx-action-btn--disabled'"
+                      [disabled]="!puedeModificar(u)"
+                      (click)="activarInactivar(u)"
+                      [title]="u.activo ? 'Desactivar' : 'Activar'"
+                    >
+                      <i [class]="u.activo ? 'fa-solid fa-toggle-on' : 'fa-solid fa-toggle-off'"></i>
+                    </button>
+                  </div>
+                </td>
+
+              </tr>
+            }
+
+            @empty {
+              <tr>
+                <td colspan="5" class="spx-table__empty">
+                  <i class="fa-solid fa-users-slash"></i>
+                  <p>No se encontraron usuarios</p>
+                </td>
+              </tr>
+            }
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div class="spx-table__footer">
+        <p class="spx-table__count">
+          Mostrando <strong>{{ usuariosPaginados.length }}</strong>
+          de <strong>{{ usuariosFiltrados.length }}</strong> usuarios
+        </p>
+        @if (totalPaginas > 1) {
+          <div class="spx-pagination">
+            <button class="spx-page-btn" [disabled]="paginaActual === 1" (click)="paginaAnterior()">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            @for (p of paginas; track p) {
+              <button
+                [class]="paginaActual === p ? 'spx-page-btn spx-page-btn--active' : 'spx-page-btn'"
+                (click)="irAPagina(p)"
+              >{{ p }}</button>
+            }
+            <button class="spx-page-btn" [disabled]="paginaActual === totalPaginas" (click)="paginaSiguiente()">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        }
+      </div>
+
+    </div>
+  }
+
 </div>

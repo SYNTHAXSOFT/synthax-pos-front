@@ -1,38 +1,161 @@
-<div class="vh-100 vw-100 overflow-hidden bg-light">
-  <div class="d-flex flex-column flex-md-row h-100 position-relative">
+<div class="spx-layout">
 
-    <!-- HEADER (visible solo en móvil) -->
-    <header
-      class="d-md-none position-fixed top-0 start-0 w-100 bg-dark text-white d-flex justify-content-between align-items-center px-4 py-3"
-      style="z-index: 1050; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
-    >
-      <div class="d-flex align-items-center">
-        <img src="assets/img/logo.png" alt="Logo" style="width: 2rem; height: 2rem;" />
-        <span class="ms-2 fs-5 fw-bold">Synthax POS</span>
+  <!-- SIDEBAR -->
+  <app-side-menu
+    [isOpen]="isMenuOpen"
+    (closeMenu)="toggleMenu()"
+  ></app-side-menu>
+
+  <!-- Overlay (mobile only) -->
+  @if (isMenuOpen && !isDesktop) {
+    <div class="spx-dash-overlay" (click)="toggleMenu()"></div>
+  }
+
+  <!-- MAIN CONTENT AREA -->
+  <div class="spx-dash-main">
+
+    <!-- Mobile Header -->
+    <header class="spx-dash-mobile-header">
+      <div class="spx-dash-mobile-header__brand">
+        <i class="fa-solid fa-cash-register"></i>
+        <span>SYNTHAX POS</span>
       </div>
-      <button (click)="toggleMenu()" class="btn btn-link text-white p-0">
-        <i class="fa-solid fa-bars fs-4"></i>
+      <button class="spx-dash-mobile-header__toggle" (click)="toggleMenu()">
+        <i class="fa-solid fa-bars"></i>
       </button>
     </header>
 
-    <!-- SIDEBAR -->
-    <app-side-menu
-      [isOpen]="isMenuOpen"
-      (closeMenu)="toggleMenu()"
-    ></app-side-menu>
+    <!-- Top Bar (desktop) -->
+    <header class="spx-dash-topbar">
 
-    <!-- OVERLAY (solo visible cuando el menú está abierto en móvil) -->
-    @if (isMenuOpen) {
-      <div
-        class="position-fixed top-0 start-0 w-100 h-100 d-md-none"
-        style="background-color: rgba(0,0,0,0.5); z-index: 1040;"
-        (click)="toggleMenu()"
-      ></div>
-    }
+      <!-- ── Search ── -->
+      <div class="spx-dash-topbar__search" (click)="$event.stopPropagation()">
+        <i class="fa-solid fa-magnifying-glass spx-dash-topbar__search-icon"></i>
+        <input
+          type="text"
+          class="spx-dash-topbar__search-input"
+          placeholder="Buscar sección, producto o función..."
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchInput()"
+          (keydown.escape)="showSearchDropdown = false"
+          autocomplete="off"
+        />
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <div class="flex-fill d-flex flex-column h-100 overflow-auto px-4 pb-4 pt-5 pt-md-3">
+        <!-- Search Dropdown -->
+        @if (showSearchDropdown) {
+          <div class="spx-search-dropdown">
+            @if (searchResults.length > 0) {
+              <div class="spx-search-dropdown__label">Resultados</div>
+              @for (item of searchResults; track item.route) {
+                <button class="spx-search-item" (click)="navigateTo(item.route)">
+                  <div class="spx-search-item__icon">
+                    <i [class]="'fa-solid ' + item.icon"></i>
+                  </div>
+                  <div class="spx-search-item__text">
+                    <span class="spx-search-item__label">{{ item.label }}</span>
+                    <span class="spx-search-item__sub">{{ item.sub }}</span>
+                  </div>
+                  <i class="fa-solid fa-arrow-right spx-search-item__arrow"></i>
+                </button>
+              }
+            } @else {
+              <div class="spx-search-empty">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span>Sin resultados para "<strong>{{ searchTerm }}</strong>"</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- ── Right side ── -->
+      <div class="spx-dash-topbar__right">
+
+        <!-- Notifications -->
+        <button class="spx-dash-topbar__btn" title="Notificaciones">
+          <i class="fa-solid fa-bell"></i>
+          <span class="spx-dash-topbar__notif-dot"></span>
+        </button>
+
+        <!-- Settings -->
+        <div class="spx-settings-wrap" (click)="$event.stopPropagation()">
+          <button
+            class="spx-dash-topbar__btn"
+            [class.spx-dash-topbar__btn--active]="showSettingsPanel"
+            title="Ajustes"
+            (click)="toggleSettings($event)"
+          >
+            <i class="fa-solid fa-gear"></i>
+          </button>
+
+          <!-- Settings Panel -->
+          @if (showSettingsPanel) {
+            <div class="spx-settings-panel">
+              <div class="spx-settings-panel__header">
+                <i class="fa-solid fa-sliders"></i>
+                Preferencias
+              </div>
+
+              <!-- Theme toggle -->
+              <div class="spx-settings-section">
+                <p class="spx-settings-section__title">Apariencia</p>
+                <div class="spx-theme-options">
+                  <button
+                    class="spx-theme-opt"
+                    [class.spx-theme-opt--active]="themeService.isDark"
+                    (click)="themeService.setTheme('dark')"
+                  >
+                    <div class="spx-theme-opt__preview spx-theme-opt__preview--dark">
+                      <div class="spx-theme-opt__preview-nav"></div>
+                      <div class="spx-theme-opt__preview-row"></div>
+                      <div class="spx-theme-opt__preview-row spx-theme-opt__preview-row--sm"></div>
+                    </div>
+                    <span class="spx-theme-opt__label">
+                      <i class="fa-solid fa-moon"></i>
+                      Oscuro
+                    </span>
+                    @if (themeService.isDark) {
+                      <i class="fa-solid fa-check spx-theme-opt__check"></i>
+                    }
+                  </button>
+
+                  <button
+                    class="spx-theme-opt"
+                    [class.spx-theme-opt--active]="!themeService.isDark"
+                    (click)="themeService.setTheme('light')"
+                  >
+                    <div class="spx-theme-opt__preview spx-theme-opt__preview--light">
+                      <div class="spx-theme-opt__preview-nav"></div>
+                      <div class="spx-theme-opt__preview-row"></div>
+                      <div class="spx-theme-opt__preview-row spx-theme-opt__preview-row--sm"></div>
+                    </div>
+                    <span class="spx-theme-opt__label">
+                      <i class="fa-solid fa-sun"></i>
+                      Claro
+                    </span>
+                    @if (!themeService.isDark) {
+                      <i class="fa-solid fa-check spx-theme-opt__check"></i>
+                    }
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          }
+        </div>
+
+        <div class="spx-dash-topbar__divider"></div>
+        <div class="spx-dash-topbar__branch">
+          <p class="spx-dash-topbar__branch-name">Sucursal Principal</p>
+          <p class="spx-dash-topbar__branch-sub">Terminal #01</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content (router-outlet renders here) -->
+    <div class="spx-dash-content">
       <router-outlet />
     </div>
+
   </div>
 </div>

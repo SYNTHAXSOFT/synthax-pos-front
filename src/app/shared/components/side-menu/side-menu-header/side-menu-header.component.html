@@ -1,48 +1,74 @@
-<!-- ── Logo del restaurante ──────────────────────────────────────── -->
-<div id="logo" class="my-3 px-3 d-flex align-items-center gap-2">
-
-  <!-- Logo personalizado del restaurante -->
+<!-- ── Brand / Restaurant ──────────────────── -->
+<div class="spx-smh-brand">
   @if (restauranteLogo) {
     <img
       [src]="restauranteLogo"
       [alt]="restauranteNombre"
-      class="rounded"
-      style="width: 2.8rem; height: 2.8rem; object-fit: contain; background: white; padding: 3px;">
+      class="spx-smh-brand__logo"
+    >
   } @else {
-    <!-- Ícono genérico cuando no hay logo -->
-    <div
-      class="d-flex align-items-center justify-content-center rounded"
-      style="width: 2.8rem; height: 2.8rem; background: var(--brand-primary, #059669); flex-shrink: 0;">
-      <i class="fa-solid fa-store text-white" style="font-size: 1.1rem;"></i>
+    <div class="spx-smh-brand__icon">
+      <i class="fa-solid fa-store"></i>
     </div>
   }
-
-  <div>
-    <h1 class="fs-6 fw-bold text-white mb-0 lh-sm">
-      {{ restauranteNombre }}
-    </h1>
-    <p class="text-secondary small mb-0" style="font-size: 0.7rem;">SYNTHAX POS</p>
+  <div class="spx-smh-brand__text">
+    <h1 class="spx-smh-brand__name">{{ restauranteNombre }}</h1>
+    <p class="spx-smh-brand__sub">SYNTHAX POS</p>
   </div>
 </div>
 
-<!-- ── Perfil del usuario ─────────────────────────────────────────── -->
-<div id="profile" class="px-3 mb-3">
-  <p class="text-secondary small mb-1 fw-semibold">Bienvenido</p>
-
-  <a [routerLink]="homeRoute" class="d-inline-flex align-items-center text-decoration-none">
+<!-- ── User Profile ───────────────────────── -->
+<div class="spx-smh-user">
+  <a [routerLink]="homeRoute" class="spx-smh-user__link">
     <img
-      class="rounded-circle"
-      style="width: 2rem; height: 2rem; flex-shrink: 0;"
-      [src]="'https://ui-avatars.com/api/?name=' + fullName + '&background=3b82f6&color=fff'"
-      [alt]="fullName">
-    <span class="ms-2 small fw-bold text-white">{{ fullName }}</span>
+      class="spx-smh-user__avatar"
+      [src]="'https://ui-avatars.com/api/?name=' + fullName + '&background=0d7ff2&color=fff&size=40'"
+      [alt]="fullName"
+    >
+    <div>
+      <p class="spx-smh-user__name">{{ fullName }}</p>
+      <p class="spx-smh-user__role">{{ userRole }}</p>
+    </div>
   </a>
-  <p class="text-secondary small mt-1 ms-5 mb-0">{{ userRole }}</p>
 </div>
 
 <style>
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.5; }
-  }
+.spx-smh-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid #283543;
+}
+.spx-smh-brand__logo {
+  width: 2.5rem; height: 2.5rem;
+  object-fit: contain; border-radius: 0.5rem;
+  background: white; padding: 3px; flex-shrink: 0;
+}
+.spx-smh-brand__icon {
+  width: 2.5rem; height: 2.5rem;
+  border-radius: 0.5rem; background: #0d7ff2;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 1rem; flex-shrink: 0;
+}
+.spx-smh-brand__text { min-width: 0; flex: 1; }
+.spx-smh-brand__name {
+  font-size: 0.9rem; font-weight: 700; color: #f1f5f9;
+  margin: 0; line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.spx-smh-brand__sub {
+  font-size: 0.65rem; color: #475569; margin: 0;
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.spx-smh-user {
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid #283543;
+}
+.spx-smh-user__link {
+  display: flex; align-items: center; gap: 0.625rem; text-decoration: none;
+}
+.spx-smh-user__avatar { width: 2rem; height: 2rem; border-radius: 50%; flex-shrink: 0; }
+.spx-smh-user__name { font-size: 0.8rem; font-weight: 600; color: #f1f5f9; margin: 0; line-height: 1.3; }
+.spx-smh-user__role { font-size: 0.68rem; color: #64748b; margin: 0; text-transform: uppercase; letter-spacing: 0.04em; }
 </style>

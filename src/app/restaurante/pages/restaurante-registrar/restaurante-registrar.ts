@@ -13,6 +13,7 @@ import { RestauranteListarPageComponent } from '../restaurante-listar/restaurant
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RestauranteListarPageComponent],
   templateUrl: './restaurante-registrar.html',
+  styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
 export class RestauranteRegistrarPageComponent implements OnInit {
   private readonly fb                 = inject(FormBuilder);

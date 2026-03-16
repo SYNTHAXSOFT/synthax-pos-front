@@ -12,7 +12,8 @@ const ROLES_POS = ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', '
   selector: 'app-actualizar-usuario',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './usuario-actualizar.html'
+  templateUrl: './usuario-actualizar.html',
+  styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
 export class ActualizarUsuarioPageComponent implements OnInit {
 

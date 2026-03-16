@@ -23,6 +23,7 @@ const ROLES_POR_ROL: Record<string, string[]> = {
   selector: 'app-registrar-page',
   imports: [ReactiveFormsModule, CommonModule, ListarPage],
   templateUrl: './usuario-registrar.html',
+  styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
 export class RegistrarPage implements OnInit {
 

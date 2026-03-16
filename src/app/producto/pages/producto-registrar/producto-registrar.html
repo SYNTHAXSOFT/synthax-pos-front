@@ -1,87 +1,97 @@
-<h2 class="mb-2">{{ editando ? 'Editar Producto' : 'Registrar Producto' }}</h2>
-<hr class="mb-4">
+<div class="spx-form-page">
 
-<div class="container" style="max-width: 88rem;">
-  <div class="card shadow-sm">
-    <div class="card-body p-4">
+  <h1 class="spx-form-title">{{ editando ? 'Editar Producto' : 'Registrar Producto' }}</h1>
+  <p class="spx-form-subtitle">Administra el catálogo de productos del restaurante</p>
+
+  <div class="spx-form-card spx-form-card--wide">
+    <div class="spx-form-card__header">
+      <div class="spx-form-card__icon"><i class="fa-solid fa-tag"></i></div>
+      <div>
+        <p class="spx-form-card__title">{{ editando ? 'Actualizar producto' : 'Nuevo producto' }}</p>
+        <p class="spx-form-card__subtitle">Los campos con * son obligatorios</p>
+      </div>
+    </div>
+
+    <div class="spx-form-card__body">
       <form [formGroup]="myForm" (ngSubmit)="onSave()">
 
-        <div class="row g-3">
+        <div class="spx-form-grid spx-form-grid--4" style="margin-bottom:1.25rem">
+
           <!-- Código -->
-          <div class="col-md-4">
-            <label class="form-label">Código <span class="text-danger">*</span></label>
-            <input type="text" formControlName="codigo" class="form-control"
-                   placeholder="Ej: PROD-001" />
+          <div class="spx-form-group">
+            <label class="spx-form-label">Código <span class="spx-form-required">*</span></label>
+            <input type="text" class="spx-form-input" placeholder="PROD-001"
+              formControlName="codigo">
             @if (isValidField('codigo')) {
-              <div class="text-danger small mt-1">{{ getFieldError('codigo') }}</div>
+              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ getFieldError('codigo') }}</span>
             }
           </div>
 
           <!-- Nombre -->
-          <div class="col-md-8">
-            <label class="form-label">Nombre <span class="text-danger">*</span></label>
-            <input type="text" formControlName="nombre" class="form-control"
-                   placeholder="Nombre del producto" />
+          <div class="spx-form-group spx-form-col-span-3">
+            <label class="spx-form-label">Nombre <span class="spx-form-required">*</span></label>
+            <input type="text" class="spx-form-input" placeholder="Nombre del producto"
+              formControlName="nombre">
             @if (isValidField('nombre')) {
-              <div class="text-danger small mt-1">{{ getFieldError('nombre') }}</div>
+              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ getFieldError('nombre') }}</span>
             }
           </div>
 
           <!-- Descripción -->
-          <div class="col-12">
-            <label class="form-label">Descripción <span class="text-danger">*</span></label>
-            <textarea formControlName="descripcion" class="form-control" rows="2"
-                      placeholder="Descripción del producto"></textarea>
+          <div class="spx-form-group spx-form-col-span-4">
+            <label class="spx-form-label">Descripción <span class="spx-form-required">*</span></label>
+            <textarea class="spx-form-textarea" rows="2" placeholder="Descripción del producto"
+              formControlName="descripcion"></textarea>
             @if (isValidField('descripcion')) {
-              <div class="text-danger small mt-1">{{ getFieldError('descripcion') }}</div>
+              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ getFieldError('descripcion') }}</span>
             }
           </div>
 
           <!-- Precio -->
-          <div class="col-md-4">
-            <label class="form-label">Precio <span class="text-danger">*</span></label>
-            <div class="input-group">
-              <span class="input-group-text">$</span>
-              <input type="number" formControlName="precio" class="form-control"
-                     placeholder="0.00" min="0" step="100" />
+          <div class="spx-form-group">
+            <label class="spx-form-label">Precio <span class="spx-form-required">*</span></label>
+            <div class="spx-form-input-group">
+              <span class="spx-form-input-prefix">$</span>
+              <input type="number" class="spx-form-input" placeholder="0" min="0" step="100"
+                formControlName="precio">
             </div>
             @if (isValidField('precio')) {
-              <div class="text-danger small mt-1">{{ getFieldError('precio') }}</div>
+              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ getFieldError('precio') }}</span>
             }
           </div>
 
-          <!-- Imagen (URL opcional) -->
-          <div class="col-md-8">
-            <label class="form-label">URL de imagen (opcional)</label>
-            <input type="text" formControlName="imagen" class="form-control"
-                   placeholder="https://..." />
+          <!-- Imagen URL -->
+          <div class="spx-form-group spx-form-col-span-3">
+            <label class="spx-form-label">URL de imagen <span style="color:#64748b;font-weight:400">(opcional)</span></label>
+            <input type="text" class="spx-form-input" placeholder="https://..."
+              formControlName="imagen">
           </div>
 
           <!-- Activo -->
-          <div class="col-12">
-            <div class="form-check">
-              <input type="checkbox" formControlName="activo" class="form-check-input" id="activoProducto" />
-              <label class="form-check-label" for="activoProducto">Activo</label>
-            </div>
+          <div class="spx-form-group spx-form-col-span-4">
+            <label class="spx-form-check">
+              <input type="checkbox" class="spx-form-check__input" formControlName="activo" id="activoProducto">
+              <span class="spx-form-check__label">Producto activo</span>
+            </label>
           </div>
         </div>
 
-        <div class="d-flex justify-content-end gap-2 mt-4">
+        <div class="spx-form-actions">
           @if (editando) {
-            <button type="button" class="btn btn-secondary px-4" (click)="resetForm()">
-              Cancelar
+            <button type="button" class="spx-form-btn-cancel" (click)="resetForm()">
+              <i class="fa-solid fa-xmark"></i> Cancelar
             </button>
           }
-          <button type="submit" class="btn btn-primary px-4">
-            {{ editando ? 'Actualizar' : 'Guardar' }}
+          <button type="submit" class="spx-form-btn-submit">
+            <i class="fa-solid fa-floppy-disk"></i>
+            {{ editando ? 'Actualizar' : 'Guardar Producto' }}
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Tabla de productos -->
-  <div class="mt-4">
+  <div class="spx-form-divider">
     <app-producto-listar></app-producto-listar>
   </div>
 </div>

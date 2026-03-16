@@ -9,7 +9,8 @@ import { ListarPageComponent } from '../departamento-listar/departamento-listar'
   selector: 'app-registrar-page',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ListarPageComponent],
-  templateUrl: './departamento-registrar.html'
+  templateUrl: './departamento-registrar.html',
+  styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
 export class RegistrarPageComponent {
   

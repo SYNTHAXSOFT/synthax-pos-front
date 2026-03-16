@@ -1,0 +1,432 @@
+/* ══════════════════════════════════════════════════
+   SYNTHAX POS — Catalog / Geo pages (Departamento + Municipio)
+   Prefix: .spx-geo-*
+   ══════════════════════════════════════════════════ */
+
+:host, .spx-geo {
+  --bg:      #101922;
+  --surface: #1a242f;
+  --border:  #283543;
+  --primary: #0d7ff2;
+  --text:    #f1f5f9;
+  --muted:   #64748b;
+  --ok:      #22c55e;
+  --off:     #ef4444;
+  --warn:    #f59e0b;
+  --radius:  0.75rem;
+  display: block;
+}
+
+.spx-geo {
+  padding: 1.75rem 2rem;
+  background: var(--bg);
+  min-height: 100%;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Header ── */
+.spx-geo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.spx-geo-header__title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 0.2rem;
+}
+.spx-geo-header__sub {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0;
+}
+.spx-geo-btn-refresh {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+.spx-geo-btn-refresh:hover {
+  border-color: var(--primary);
+  background: rgba(13,127,242,0.08);
+}
+
+/* ── Stats ── */
+.spx-geo-stats {
+  display: flex;
+  gap: 0.875rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+.spx-geo-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  padding: 0.75rem 1.125rem;
+  flex: 1;
+  min-width: 120px;
+}
+.spx-geo-stat__icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.4rem;
+  background: rgba(100,116,139,0.15);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+.spx-geo-stat__icon--ok  { background: rgba(34,197,94,0.12);  color: var(--ok); }
+.spx-geo-stat__icon--off { background: rgba(239,68,68,0.12);   color: var(--off); }
+.spx-geo-stat__value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.1;
+}
+.spx-geo-stat__value--ok  { color: var(--ok); }
+.spx-geo-stat__value--off { color: var(--off); }
+.spx-geo-stat__label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Search bar ── */
+.spx-geo-search-wrap {
+  margin-bottom: 1.125rem;
+}
+.spx-geo-search {
+  position: relative;
+  max-width: 22rem;
+}
+.spx-geo-search__icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+.spx-geo-search__input {
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+.spx-geo-search__input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(13,127,242,0.12);
+}
+.spx-geo-search__input::placeholder { color: var(--muted); }
+
+/* ── Loading ── */
+.spx-geo-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 3rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.spx-geo-spinner {
+  width: 1.875rem;
+  height: 1.875rem;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spx-geo-spin 0.7s linear infinite;
+}
+@keyframes spx-geo-spin { to { transform: rotate(360deg); } }
+
+/* ── Empty ── */
+.spx-geo-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 3.5rem 2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.spx-geo-empty__icon { font-size: 2.25rem; color: var(--border); }
+.spx-geo-empty__msg  { font-size: 0.95rem; font-weight: 600; color: var(--text); margin: 0; }
+.spx-geo-empty__sub  { font-size: 0.8rem; color: var(--muted); margin: 0; }
+
+/* ── Table ── */
+.spx-geo-table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.spx-geo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.spx-geo-table thead tr {
+  background: rgba(40,53,67,0.6);
+  border-bottom: 1px solid var(--border);
+}
+.spx-geo-table thead th {
+  padding: 0.75rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  text-align: left;
+  white-space: nowrap;
+}
+.spx-geo-row {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.spx-geo-row:last-child { border-bottom: none; }
+.spx-geo-row:hover { background: rgba(13,127,242,0.04); }
+.spx-geo-row--inactive { opacity: 0.55; }
+
+.spx-geo-td {
+  padding: 0.75rem 1rem;
+  color: var(--text);
+  vertical-align: middle;
+}
+.spx-geo-td--actions { white-space: nowrap; }
+
+/* Código badge */
+.spx-geo-code {
+  display: inline-block;
+  background: rgba(40,53,67,0.8);
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: #93c5fd;
+  white-space: nowrap;
+}
+
+/* Nombre */
+.spx-geo-name {
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Departamento chip */
+.spx-geo-dept-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(13,127,242,0.1);
+  border: 1px solid rgba(13,127,242,0.2);
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  color: #93c5fd;
+}
+
+/* Badge estado */
+.spx-geo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.spx-geo-badge--active {
+  background: rgba(34,197,94,0.12);
+  color: var(--ok);
+  border: 1px solid rgba(34,197,94,0.25);
+}
+.spx-geo-badge--inactive {
+  background: rgba(100,116,139,0.1);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+/* Action buttons */
+.spx-geo-btn {
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.72rem;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.2rem;
+  vertical-align: middle;
+}
+.spx-geo-btn--edit {
+  color: #93c5fd;
+}
+.spx-geo-btn--edit:hover {
+  background: rgba(147,197,253,0.1);
+  border-color: #93c5fd;
+}
+.spx-geo-btn--deact {
+  color: var(--warn);
+}
+.spx-geo-btn--deact:hover {
+  background: rgba(245,158,11,0.1);
+  border-color: var(--warn);
+}
+.spx-geo-btn--del {
+  color: var(--off);
+}
+.spx-geo-btn--del:hover {
+  background: rgba(239,68,68,0.1);
+  border-color: var(--off);
+}
+
+/* ── Footer ── */
+.spx-geo-footer {
+  padding: 0.625rem 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--muted);
+  background: rgba(40,53,67,0.3);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .spx-geo { padding: 1rem; }
+  .spx-geo-stats { flex-direction: column; }
+}
+
+/* ══ Aliases / extensiones para páginas tipo-pedido e impuesto ══ */
+
+/* Search bar con icono inline (SVG) */
+.spx-geo-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.875rem;
+  max-width: 22rem;
+  margin-bottom: 1.125rem;
+  transition: border-color 0.2s;
+}
+.spx-geo-search-bar:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(13,127,242,0.12);
+}
+.spx-geo-search-bar svg {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+/* Cuando .spx-geo-search se usa directamente como <input> */
+input.spx-geo-search {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-family: inherit;
+  padding: 0;
+  min-width: 0;
+}
+input.spx-geo-search::placeholder { color: var(--muted); }
+
+/* Badge aliases --ok / --off */
+.spx-geo-badge--ok {
+  background: rgba(34,197,94,0.12);
+  color: var(--ok);
+  border: 1px solid rgba(34,197,94,0.25);
+}
+.spx-geo-badge--off {
+  background: rgba(239,68,68,0.1);
+  color: var(--off);
+  border: 1px solid rgba(239,68,68,0.2);
+}
+
+/* Stat modifiers directos en .spx-geo-stat */
+.spx-geo-stat--ok .spx-geo-stat__value { color: var(--ok); }
+.spx-geo-stat--off .spx-geo-stat__value { color: var(--off); }
+
+/* Botones de acción con texto + icono (variante label) */
+.spx-geo-btn-edit,
+.spx-geo-btn-deact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-family: inherit;
+  font-weight: 500;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.spx-geo-btn-edit {
+  color: #93c5fd;
+}
+.spx-geo-btn-edit:hover {
+  background: rgba(147,197,253,0.1);
+  border-color: #93c5fd;
+}
+.spx-geo-btn-deact {
+  color: var(--warn);
+}
+.spx-geo-btn-deact:hover:not([disabled]) {
+  background: rgba(245,158,11,0.1);
+  border-color: var(--warn);
+}
+.spx-geo-btn-deact[disabled] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Celda de acciones (sin .spx-geo-td) */
+.spx-geo-actions {
+  padding: 0.625rem 1rem;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+/* Padding por defecto en <td> sin clase */
+.spx-geo-table tbody td {
+  padding: 0.75rem 1rem;
+  color: var(--text);
+  vertical-align: middle;
+}

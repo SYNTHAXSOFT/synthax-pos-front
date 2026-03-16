@@ -12,7 +12,8 @@ import { ListarMunicipioPageComponent } from '../municipio-listar/municipio-list
   selector: 'app-registrar-municipio',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ListarMunicipioPageComponent],
-  templateUrl: './municipio-registrar.html'
+  templateUrl: './municipio-registrar.html',
+  styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
 export class RegistrarMunicipioPageComponent implements OnInit {
 

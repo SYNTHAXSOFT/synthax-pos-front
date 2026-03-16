@@ -1,108 +1,240 @@
-<div class="min-vh-100 d-flex flex-column align-items-center justify-content-center px-4" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);">
-  <div class="card shadow-lg text-center hover-lift" style="max-width: 52rem; padding: 3rem;">
-    
-    <!-- Logo/Título -->
-    <div class="mb-4">
-      <h1 class="display-3 fw-bold mb-3">
-        Bienvenido a <span style="color: #059669;">SYNTHAX</span><span class="text-dark">POS</span>
-      </h1>
-      <div class="d-inline-block px-4 py-2 rounded-pill" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">
-        <span class="text-white fw-semibold">
-          <i class="fa-solid fa-cash-register me-2"></i>
-          Sistema de Punto de Venta
-        </span>
+<div class="spx-dashboard">
+
+  <!-- ── Page Header ────────────────────── -->
+  <div class="spx-dashboard__header">
+    <div>
+      <h2 class="spx-dashboard__title">Panel de Control</h2>
+      <p class="spx-dashboard__subtitle">Bienvenido, <strong>{{ userName }}</strong>. {{ todayStr }}.</p>
+    </div>
+    <div class="spx-dashboard__header-actions">
+      <a routerLink="/synthax-pos/venta" class="spx-btn-cta">
+        <i class="fa-solid fa-plus"></i>
+        Nueva Venta
+      </a>
+    </div>
+  </div>
+
+  <!-- ── Metric Cards ───────────────────── -->
+  <div class="spx-metrics">
+
+    <div class="spx-metric">
+      <div class="spx-metric__header">
+        <div class="spx-metric__icon spx-metric__icon--green">
+          <i class="fa-solid fa-coins"></i>
+        </div>
+        <span class="spx-badge spx-badge--green">Hoy</span>
       </div>
+      <p class="spx-metric__label">Ventas del Día</p>
+      <p class="spx-metric__value">$0.00</p>
     </div>
 
-    <!-- Descripción -->
-    <p class="fs-5 text-secondary mb-4 lh-base px-3">
-      Gestiona tu negocio de forma fácil, legal y segura.<br>
-      Administra ventas, inventarios, productos, clientes, reportes 
-      y registros ante la DIAN desde una sola plataforma.
-    </p>
-
-    <!-- Iconos de características -->
-    <div class="row g-4 mb-4 px-3">
-      <div class="col-6 col-md-3">
-        <div class="p-3 rounded hover-glow" style="background-color: #ecfdf5; transition: all 0.3s;">
-          <i class="fa-solid fa-cash-register mb-2" style="font-size: 3rem; color: #059669;"></i>
-          <p class="small fw-semibold mb-0 text-dark">Ventas Rápidas</p>
+    <div class="spx-metric">
+      <div class="spx-metric__header">
+        <div class="spx-metric__icon spx-metric__icon--blue">
+          <i class="fa-solid fa-users"></i>
         </div>
+        <span class="spx-metric__tag">Activos</span>
       </div>
-      <div class="col-6 col-md-3">
-        <div class="p-3 rounded hover-glow" style="background-color: #fff7ed; transition: all 0.3s;">
-          <i class="fa-solid fa-box mb-2" style="font-size: 3rem; color: #f97316;"></i>
-          <p class="small fw-semibold mb-0 text-dark">Inventario</p>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="p-3 rounded hover-glow" style="background-color: #cffafe; transition: all 0.3s;">
-          <i class="fa-solid fa-file-invoice-dollar mb-2" style="font-size: 3rem; color: #0891b2;"></i>
-          <p class="small fw-semibold mb-0 text-dark">Facturación</p>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="p-3 rounded hover-glow" style="background-color: #ecfdf5; transition: all 0.3s;">
-          <i class="fa-solid fa-chart-line mb-2" style="font-size: 3rem; color: #059669;"></i>
-          <p class="small fw-semibold mb-0 text-dark">Reportes</p>
-        </div>
-      </div>
+      <p class="spx-metric__label">Usuarios Activos</p>
+      <p class="spx-metric__value">0</p>
     </div>
 
-    <!-- Características adicionales -->
-    <div class="row g-3 mb-4 text-start">
-      <div class="col-md-6">
-        <div class="d-flex align-items-start p-2">
-          <i class="fa-solid fa-check-circle me-2 mt-1" style="color: #059669; font-size: 1.2rem;"></i>
-          <div>
-            <strong class="d-block">Control de Inventario</strong>
-            <small class="text-secondary">Gestión en tiempo real de stock y productos</small>
-          </div>
+    <div class="spx-metric">
+      <div class="spx-metric__header">
+        <div class="spx-metric__icon spx-metric__icon--amber">
+          <i class="fa-solid fa-receipt"></i>
         </div>
+        <span class="spx-badge spx-badge--amber">Pendientes</span>
       </div>
-      <div class="col-md-6">
-        <div class="d-flex align-items-start p-2">
-          <i class="fa-solid fa-check-circle me-2 mt-1" style="color: #059669; font-size: 1.2rem;"></i>
-          <div>
-            <strong class="d-block">Múltiples Usuarios</strong>
-            <small class="text-secondary">Roles y permisos personalizados</small>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="d-flex align-items-start p-2">
-          <i class="fa-solid fa-check-circle me-2 mt-1" style="color: #059669; font-size: 1.2rem;"></i>
-          <div>
-            <strong class="d-block">Reportes Detallados</strong>
-            <small class="text-secondary">Análisis de ventas y métricas clave</small>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="d-flex align-items-start p-2">
-          <i class="fa-solid fa-check-circle me-2 mt-1" style="color: #059669; font-size: 1.2rem;"></i>
-          <div>
-            <strong class="d-block">Historial Completo</strong>
-            <small class="text-secondary">Seguimiento de todas las transacciones</small>
-          </div>
-        </div>
-      </div>
+      <p class="spx-metric__label">Órdenes Pendientes</p>
+      <p class="spx-metric__value">0</p>
     </div>
 
-    <!-- Alert DIAN -->
-    <div class="alert alert-success d-flex align-items-center mb-0" role="alert">
-      <i class="fa-solid fa-shield-halved me-3" style="font-size: 1.5rem;"></i>
-      <div class="text-start">
-        <strong>Integrado con la DIAN</strong><br>
-        <small>Cumple con todas las regulaciones de facturación electrónica en Colombia</small>
+    <div class="spx-metric">
+      <div class="spx-metric__header">
+        <div class="spx-metric__icon spx-metric__icon--rose">
+          <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
+        <span class="spx-badge spx-badge--rose">Stock</span>
       </div>
+      <p class="spx-metric__label">Artículos en Inventario</p>
+      <p class="spx-metric__value">0</p>
     </div>
 
   </div>
 
-  <!-- Instrucción de navegación -->
-  <p class="text-secondary mt-4 small">
-    <i class="fa-solid fa-arrow-left me-2"></i>
-    Usa el menú lateral para navegar entre las secciones
-  </p>
+  <!-- ── Main Grid ──────────────────────── -->
+  <div class="spx-main-grid">
+
+    <!-- Left Column -->
+    <div class="spx-main-grid__left">
+
+      <!-- Quick Actions -->
+      <h3 class="spx-section-title">Acciones Rápidas</h3>
+      <div class="spx-quick-actions">
+
+        <a routerLink="/synthax-pos/venta" class="spx-qa spx-qa--primary">
+          <div class="spx-qa__icon">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <h4 class="spx-qa__title">Ventas Rápidas</h4>
+          <p class="spx-qa__desc">Registrar una nueva venta al instante.</p>
+        </a>
+
+        <a routerLink="/synthax-pos/insumo" class="spx-qa">
+          <div class="spx-qa__icon spx-qa__icon--neutral">
+            <i class="fa-solid fa-warehouse"></i>
+          </div>
+          <h4 class="spx-qa__title">Inventario</h4>
+          <p class="spx-qa__desc">Gestionar insumos y stock de productos.</p>
+        </a>
+
+        <a routerLink="/synthax-pos/pedido" class="spx-qa">
+          <div class="spx-qa__icon spx-qa__icon--neutral">
+            <i class="fa-solid fa-receipt"></i>
+          </div>
+          <h4 class="spx-qa__title">Pedidos</h4>
+          <p class="spx-qa__desc">Ver y gestionar pedidos activos.</p>
+        </a>
+
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="spx-activity">
+        <div class="spx-activity__header">
+          <h3 class="spx-activity__title">Actividad Reciente</h3>
+          <a routerLink="/synthax-pos/venta" class="spx-link">Ver Todo</a>
+        </div>
+
+        <div class="spx-activity__list">
+
+          <div class="spx-act-item">
+            <div class="spx-act-item__icon spx-act-item__icon--green">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div class="spx-act-item__info">
+              <p class="spx-act-item__title">Sistema listo para operar</p>
+              <p class="spx-act-item__time">Ahora • Todo funcionando correctamente</p>
+            </div>
+            <span class="spx-tag spx-tag--green">OK</span>
+          </div>
+
+          <div class="spx-act-item">
+            <div class="spx-act-item__icon spx-act-item__icon--blue">
+              <i class="fa-solid fa-circle-info"></i>
+            </div>
+            <div class="spx-act-item__info">
+              <p class="spx-act-item__title">Sesión iniciada como {{ userName }}</p>
+              <p class="spx-act-item__time">Ahora • {{ restaurantName }}</p>
+            </div>
+            <span class="spx-tag spx-tag--blue">Info</span>
+          </div>
+
+          <div class="spx-act-item">
+            <div class="spx-act-item__icon spx-act-item__icon--amber">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="spx-act-item__info">
+              <p class="spx-act-item__title">Registra tu primera venta del día</p>
+              <p class="spx-act-item__time">Pendiente • No hay ventas hoy aún</p>
+            </div>
+            <span class="spx-tag spx-tag--amber">Pendiente</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column -->
+    <div class="spx-main-grid__right">
+
+      <!-- Sales Chart -->
+      <h3 class="spx-section-title">Ventas por Hora</h3>
+      <div class="spx-chart-card">
+        <div class="spx-chart">
+          <div class="spx-chart__col">
+            <div class="spx-chart__bar" style="height:40%"></div>
+          </div>
+          <div class="spx-chart__col">
+            <div class="spx-chart__bar" style="height:65%"></div>
+          </div>
+          <div class="spx-chart__col">
+            <div class="spx-chart__bar" style="height:30%"></div>
+          </div>
+          <div class="spx-chart__col">
+            <div class="spx-chart__bar" style="height:90%"></div>
+          </div>
+          <div class="spx-chart__col">
+            <div class="spx-chart__bar" style="height:55%"></div>
+          </div>
+          <div class="spx-chart__col">
+            <div class="spx-chart__bar" style="height:75%"></div>
+          </div>
+        </div>
+        <div class="spx-chart__labels">
+          <span>09:00</span>
+          <span>11:00</span>
+          <span>13:00</span>
+          <span>15:00</span>
+          <span>17:00</span>
+          <span>19:00</span>
+        </div>
+        <p class="spx-chart__caption">Datos de ejemplo — conecta tu backend para datos reales</p>
+      </div>
+
+      <!-- Quick Links -->
+      <h3 class="spx-section-title">Accesos Directos</h3>
+      <div class="spx-shortcuts">
+
+        <a routerLink="/synthax-pos/producto" class="spx-shortcut">
+          <div class="spx-shortcut__icon">
+            <i class="fa-solid fa-box-open"></i>
+          </div>
+          <div class="spx-shortcut__info">
+            <p class="spx-shortcut__name">Productos</p>
+            <p class="spx-shortcut__desc">Gestionar catálogo</p>
+          </div>
+          <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
+        </a>
+
+        <a routerLink="/synthax-pos/usuario" class="spx-shortcut">
+          <div class="spx-shortcut__icon">
+            <i class="fa-solid fa-users"></i>
+          </div>
+          <div class="spx-shortcut__info">
+            <p class="spx-shortcut__name">Usuarios</p>
+            <p class="spx-shortcut__desc">Gestionar personal</p>
+          </div>
+          <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
+        </a>
+
+        <a routerLink="/synthax-pos/mesa" class="spx-shortcut">
+          <div class="spx-shortcut__icon">
+            <i class="fa-solid fa-chair"></i>
+          </div>
+          <div class="spx-shortcut__info">
+            <p class="spx-shortcut__name">Mesas</p>
+            <p class="spx-shortcut__desc">Ver disponibilidad</p>
+          </div>
+          <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
+        </a>
+
+        <a routerLink="/synthax-pos/compra" class="spx-shortcut">
+          <div class="spx-shortcut__icon">
+            <i class="fa-solid fa-cart-flatbed"></i>
+          </div>
+          <div class="spx-shortcut__info">
+            <p class="spx-shortcut__name">Compras</p>
+            <p class="spx-shortcut__desc">Registrar compras de insumos</p>
+          </div>
+          <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
 </div>

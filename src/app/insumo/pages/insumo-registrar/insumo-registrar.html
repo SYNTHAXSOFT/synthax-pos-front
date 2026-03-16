@@ -1,59 +1,68 @@
-<h2 class="mb-2">{{ editando ? 'Editar' : 'Nuevo' }} Insumo</h2>
-<hr class="mb-4">
+<div class="spx-form-page">
 
-<div class="container" style="max-width: 88rem;">
-  <div class="card shadow-sm">
-    <div class="card-body p-4">
+  <h1 class="spx-form-title">{{ editando ? 'Editar' : 'Nuevo' }} Insumo</h1>
+  <p class="spx-form-subtitle">Gestiona los insumos y materias primas del restaurante</p>
+
+  <div class="spx-form-card spx-form-card--wide">
+    <div class="spx-form-card__header">
+      <div class="spx-form-card__icon"><i class="fa-solid fa-box-open"></i></div>
+      <div>
+        <p class="spx-form-card__title">{{ editando ? 'Actualizar insumo' : 'Registrar nuevo insumo' }}</p>
+        <p class="spx-form-card__subtitle">Los campos con * son obligatorios</p>
+      </div>
+    </div>
+
+    <div class="spx-form-card__body">
       <form [formGroup]="myForm" (ngSubmit)="onSave()">
-        <div class="row g-3">
+        <div class="spx-form-grid spx-form-grid--4" style="margin-bottom:1.25rem">
 
           <!-- Código -->
-          <div class="col-md-3">
-            <label class="form-label">Código <span class="text-danger">*</span></label>
-            <input type="text" formControlName="codigo" class="form-control"
-                   placeholder="INS-001" [class.is-invalid]="isValidField('codigo')">
+          <div class="spx-form-group">
+            <label class="spx-form-label">Código <span class="spx-form-required">*</span></label>
+            <input type="text" class="spx-form-input" placeholder="INS-001"
+              formControlName="codigo" [class.is-invalid]="isValidField('codigo')">
             @if (isValidField('codigo')) {
-              <div class="invalid-feedback">Código obligatorio (mín. 2 caracteres)</div>
+              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Código obligatorio (mín. 2 caracteres)</span>
             }
           </div>
 
           <!-- Descripción -->
-          <div class="col-md-6">
-            <label class="form-label">Descripción <span class="text-danger">*</span></label>
-            <input type="text" formControlName="descripcion" class="form-control"
-                   placeholder="Nombre del insumo..." [class.is-invalid]="isValidField('descripcion')">
+          <div class="spx-form-group spx-form-col-span-2">
+            <label class="spx-form-label">Descripción <span class="spx-form-required">*</span></label>
+            <input type="text" class="spx-form-input" placeholder="Nombre del insumo..."
+              formControlName="descripcion" [class.is-invalid]="isValidField('descripcion')">
             @if (isValidField('descripcion')) {
-              <div class="invalid-feedback">Descripción obligatoria</div>
+              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Descripción obligatoria</span>
             }
           </div>
 
           <!-- Restaurante -->
-          <div class="col-md-3">
-            <label class="form-label">Restaurante <span class="text-danger">*</span></label>
-            <select formControlName="restauranteId" class="form-select"
-                    [class.is-invalid]="isValidField('restauranteId')">
+          <div class="spx-form-group">
+            <label class="spx-form-label">Restaurante <span class="spx-form-required">*</span></label>
+            <select class="spx-form-select" formControlName="restauranteId"
+              [class.is-invalid]="isValidField('restauranteId')">
               <option [value]="null">Seleccione...</option>
               @for (r of restaurantes; track r.id) {
                 <option [value]="r.id">{{ r.nombre }}</option>
               }
             </select>
             @if (isValidField('restauranteId')) {
-              <div class="invalid-feedback">Restaurante obligatorio</div>
+              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Restaurante obligatorio</span>
             }
           </div>
 
-          <!-- Stock inicial -->
-          <div class="col-md-3">
-            <label class="form-label">Stock inicial</label>
-            <input type="number" formControlName="stock" class="form-control"
-                   min="0" step="0.01" placeholder="0">
+          <!-- Stock -->
+          <div class="spx-form-group">
+            <label class="spx-form-label">Stock inicial</label>
+            <input type="number" class="spx-form-input" min="0" step="0.01" placeholder="0"
+              formControlName="stock">
           </div>
 
-          <!-- Unidad de medida -->
-          <div class="col-md-3">
-            <label class="form-label">Unidad de medida <span class="text-danger">*</span></label>
-            <select formControlName="medida" class="form-select"
-                    [class.is-invalid]="isValidField('medida')">
+          <!-- Medida -->
+          <div class="spx-form-group">
+            <label class="spx-form-label">Unidad de medida <span class="spx-form-required">*</span></label>
+            <select class="spx-form-select" formControlName="medida"
+              [class.is-invalid]="isValidField('medida')">
               @for (m of medidas; track m) {
                 <option [value]="m">{{ m }}</option>
               }
@@ -61,31 +70,30 @@
           </div>
 
           <!-- Activo -->
-          <div class="col-md-2 d-flex align-items-end">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" formControlName="activo" id="activoInsumo">
-              <label class="form-check-label" for="activoInsumo">Activo</label>
-            </div>
+          <div class="spx-form-group" style="justify-content:flex-end">
+            <label class="spx-form-check">
+              <input type="checkbox" class="spx-form-check__input" formControlName="activo" id="activoInsumo">
+              <span class="spx-form-check__label">Insumo activo</span>
+            </label>
           </div>
-
         </div>
 
-        <div class="d-flex justify-content-end gap-2 mt-4">
+        <div class="spx-form-actions">
           @if (editando) {
-            <button type="button" class="btn btn-secondary" (click)="resetForm()">
-              Cancelar
+            <button type="button" class="spx-form-btn-cancel" (click)="resetForm()">
+              <i class="fa-solid fa-xmark"></i> Cancelar
             </button>
           }
-          <button type="submit" class="btn btn-primary px-4">
-            {{ editando ? 'Actualizar' : 'Crear Insumo' }}
+          <button type="submit" class="spx-form-btn-submit">
+            <i class="fa-solid fa-floppy-disk"></i>
+            {{ editando ? 'Actualizar Insumo' : 'Crear Insumo' }}
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Lista -->
-  <div class="mt-4">
+  <div class="spx-form-divider">
     <app-insumo-listar></app-insumo-listar>
   </div>
 </div>

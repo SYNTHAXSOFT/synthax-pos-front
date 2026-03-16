@@ -1,59 +1,120 @@
-<div class="container-fluid px-4">
-  <h2 class="mb-2">Lista de Impuestos</h2>
-  <hr class="mb-4">
+<div class="spx-geo">
 
+  <!-- Header -->
+  <div class="spx-geo-header">
+    <div>
+      <h2 class="spx-geo-header__title">Impuestos y Tasas</h2>
+      <p class="spx-geo-header__sub">Catálogo de impuestos configurados en el sistema</p>
+    </div>
+    <button class="spx-geo-btn-refresh" (click)="cargarImpuestos()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"/>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg>
+      Actualizar
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="spx-geo-stats">
+    <div class="spx-geo-stat">
+      <span class="spx-geo-stat__value">{{ impuestos.length }}</span>
+      <span class="spx-geo-stat__label">Total</span>
+    </div>
+    <div class="spx-geo-stat spx-geo-stat--ok">
+      <span class="spx-geo-stat__value">{{ totalActivos }}</span>
+      <span class="spx-geo-stat__label">Activos</span>
+    </div>
+    <div class="spx-geo-stat spx-geo-stat--off">
+      <span class="spx-geo-stat__value">{{ totalInactivos }}</span>
+      <span class="spx-geo-stat__label">Inactivos</span>
+    </div>
+  </div>
+
+  <!-- Buscador -->
+  <div class="spx-geo-search-bar">
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input
+      type="text"
+      class="spx-geo-search"
+      [(ngModel)]="searchTerm"
+      placeholder="Buscar por descripción o porcentaje…"
+    />
+  </div>
+
+  <!-- Loading -->
   @if (cargando) {
-    <div class="d-flex justify-content-center align-items-center py-5">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Cargando...</span>
-      </div>
+    <div class="spx-geo-loading">
+      <div class="spx-geo-spinner"></div>
+      <span>Cargando impuestos…</span>
     </div>
   }
 
+  <!-- Tabla -->
   @if (!cargando) {
-    <div class="table-responsive">
-      <table class="table table-striped table-hover table-bordered">
-        <thead class="table-light">
-          <tr>
-            <th>Descripción</th>
-            <th>Porcentaje</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (impuesto of impuestos; track impuesto.id) {
+    @if (impuestosFiltrados.length === 0) {
+      <div class="spx-geo-empty">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="5" x2="5" y2="19"/>
+          <circle cx="6.5" cy="6.5" r="2.5"/>
+          <circle cx="17.5" cy="17.5" r="2.5"/>
+        </svg>
+        <p>{{ searchTerm ? 'Sin resultados para "' + searchTerm + '"' : 'No hay impuestos registrados' }}</p>
+      </div>
+    } @else {
+      <div class="spx-geo-table-wrap">
+        <table class="spx-geo-table">
+          <thead>
             <tr>
-              <td>{{ impuesto.descripcion }}</td>
-              <td>{{ impuesto.porcentajeImpuesto }} %</td>
-              <td>
-                <span [class]="impuesto.estado === 'ACTIVO' ? 'badge bg-success' : 'badge bg-danger'">
-                  {{ impuesto.estado }}
-                </span>
-              </td>
-              <td>
-                <button class="btn btn-info btn-sm me-1" (click)="editar(impuesto.id)">
-                  Editar
-                </button>
-                <button
-                  class="btn btn-warning btn-sm"
-                  (click)="desactivar(impuesto.id)"
-                  [disabled]="impuesto.estado !== 'ACTIVO'"
-                >
-                  Desactivar
-                </button>
-              </td>
+              <th>Descripción</th>
+              <th>Porcentaje</th>
+              <th>Estado</th>
+              <th>Acciones</th>
             </tr>
-          }
-          @empty {
-            <tr>
-              <td colspan="4" class="text-center text-muted py-4">
-                No hay impuestos registrados
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @for (impuesto of impuestosFiltrados; track impuesto.id) {
+              <tr class="spx-geo-row">
+                <td class="spx-geo-name">{{ impuesto.descripcion }}</td>
+                <td>
+                  <span class="spx-geo-code">{{ impuesto.porcentajeImpuesto }}%</span>
+                </td>
+                <td>
+                  <span [class]="impuesto.estado === 'ACTIVO' ? 'spx-geo-badge spx-geo-badge--ok' : 'spx-geo-badge spx-geo-badge--off'">
+                    {{ impuesto.estado }}
+                  </span>
+                </td>
+                <td class="spx-geo-actions">
+                  <button class="spx-geo-btn-edit" title="Editar" (click)="editar(impuesto.id)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Editar
+                  </button>
+                  <button class="spx-geo-btn-deact" title="Desactivar"
+                          (click)="desactivar(impuesto.id)"
+                          [disabled]="impuesto.estado !== 'ACTIVO'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                    </svg>
+                    Desactivar
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   }
+
 </div>

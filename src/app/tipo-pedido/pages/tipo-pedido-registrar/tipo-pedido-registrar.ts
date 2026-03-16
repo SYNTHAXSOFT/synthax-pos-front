@@ -11,6 +11,7 @@ import { TipoPedidoListarPageComponent } from '../tipo-pedido-listar/tipo-pedido
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, TipoPedidoListarPageComponent],
   templateUrl: './tipo-pedido-registrar.html',
+  styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
 export class TipoPedidoRegistrarPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);

@@ -1,0 +1,254 @@
+/* =============================================
+   SYNTHAX POS — Pedidos (pedido-listar)
+   ============================================= */
+
+:host, .spx-ped {
+  --spx-bg:      #101922;
+  --spx-surface: #1a242f;
+  --spx-surface2:#1e2d3d;
+  --spx-border:  #283543;
+  --spx-text:    #f1f5f9;
+  --spx-muted:   #64748b;
+  --spx-primary: #0d7ff2;
+  --spx-ok:      #22c55e;
+  --spx-cancel:  #ef4444;
+  --spx-total:   #a78bfa;
+  --spx-radius:  0.75rem;
+  display: block;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.spx-ped {
+  padding: 1.75rem 2rem;
+  background: var(--spx-bg);
+  min-height: 100%;
+  color: var(--spx-text);
+}
+
+/* ── Header ──────────────────────────────── */
+.spx-ped-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.spx-ped-header__title {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: var(--spx-text);
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.02em;
+}
+.spx-ped-header__sub {
+  font-size: 0.875rem;
+  color: var(--spx-muted);
+  margin: 0;
+}
+.spx-ped-btn-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: var(--spx-surface);
+  border: 1px solid var(--spx-border);
+  color: var(--spx-text);
+  border-radius: var(--spx-radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.spx-ped-btn-refresh:hover {
+  background: var(--spx-surface2);
+  border-color: var(--spx-primary);
+}
+
+/* ── Stats ───────────────────────────────── */
+.spx-ped-stats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.spx-ped-stat {
+  flex: 1;
+  min-width: 130px;
+  background: var(--spx-surface);
+  border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+.spx-ped-stat__icon {
+  width: 2.5rem; height: 2.5rem; border-radius: 0.5rem;
+  background: rgba(13,127,242,0.12); color: var(--spx-primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+.spx-ped-stat__icon--ok     { background: rgba(34,197,94,0.12);   color: var(--spx-ok); }
+.spx-ped-stat__icon--cancel { background: rgba(239,68,68,0.12);   color: var(--spx-cancel); }
+.spx-ped-stat__icon--total  { background: rgba(167,139,250,0.12); color: var(--spx-total); }
+.spx-ped-stat > div { display: flex; flex-direction: column; gap: 0.1rem; }
+.spx-ped-stat__value {
+  font-size: 1.5rem; font-weight: 800; color: var(--spx-text); line-height: 1;
+}
+.spx-ped-stat__value--ok     { color: var(--spx-ok); }
+.spx-ped-stat__value--cancel { color: var(--spx-cancel); }
+.spx-ped-stat__value--total  { color: var(--spx-total); font-size: 1.2rem; }
+.spx-ped-stat__label {
+  font-size: 0.7rem; color: var(--spx-muted); font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+/* ── Loading / Empty ─────────────────────── */
+.spx-ped-loading {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 1rem; padding: 5rem 0; color: var(--spx-muted);
+}
+.spx-ped-spinner {
+  width: 2.5rem; height: 2.5rem; border: 3px solid var(--spx-border);
+  border-top-color: var(--spx-primary); border-radius: 50%;
+  animation: spx-spin 0.7s linear infinite;
+}
+@keyframes spx-spin { to { transform: rotate(360deg); } }
+.spx-ped-empty {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.5rem; padding: 5rem 0; text-align: center;
+}
+.spx-ped-empty__icon { font-size: 3rem; color: var(--spx-border); margin-bottom: 0.5rem; }
+.spx-ped-empty__msg  { font-size: 1.125rem; font-weight: 600; color: var(--spx-text); margin: 0; }
+.spx-ped-empty__sub  { font-size: 0.875rem; color: var(--spx-muted); margin: 0; }
+
+/* ── Table ───────────────────────────────── */
+.spx-ped-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--spx-radius);
+  border: 1px solid var(--spx-border);
+  background: var(--spx-surface);
+}
+.spx-ped-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.spx-ped-table thead tr { border-bottom: 1px solid var(--spx-border); }
+.spx-ped-table thead th {
+  padding: 0.875rem 1rem;
+  font-size: 0.7rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--spx-muted); white-space: nowrap; text-align: left;
+}
+.spx-ped-row {
+  border-bottom: 1px solid var(--spx-border);
+  transition: background 0.12s;
+}
+.spx-ped-row:last-child { border-bottom: none; }
+.spx-ped-row:hover { background: rgba(13,127,242,0.05); }
+.spx-ped-row--cancel { opacity: 0.5; }
+.spx-ped-td {
+  padding: 0.875rem 1rem;
+  color: var(--spx-text);
+  vertical-align: middle;
+}
+.spx-ped-td--id      { color: var(--spx-muted); white-space: nowrap; }
+.spx-ped-td--num     { white-space: nowrap; }
+.spx-ped-td--center  { text-align: center; }
+.spx-ped-td--subtotal { font-weight: 700; white-space: nowrap; color: var(--spx-text); }
+.spx-ped-td--obs     { max-width: 200px; }
+
+/* Producto cell */
+.spx-ped-producto {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  white-space: nowrap;
+}
+.spx-ped-producto__icon {
+  width: 2rem; height: 2rem;
+  border-radius: 0.5rem;
+  background: rgba(13,127,242,0.1);
+  color: var(--spx-primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; flex-shrink: 0;
+}
+.spx-ped-producto__name  { display: block; font-weight: 600; font-size: 0.875rem; }
+.spx-ped-producto__codigo {
+  display: block; font-size: 0.7rem; color: var(--spx-muted);
+  background: rgba(40,53,67,0.7); padding: 0.05rem 0.35rem; border-radius: 0.2rem; margin-top: 0.1rem;
+}
+
+/* Quantity pill */
+.spx-ped-qty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem; height: 2rem;
+  background: rgba(13,127,242,0.12);
+  color: var(--spx-primary);
+  border-radius: 0.5rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0 0.5rem;
+}
+
+/* Observacion */
+.spx-ped-obs {
+  display: flex; align-items: flex-start; gap: 0.35rem;
+  font-size: 0.8rem; color: var(--spx-muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;
+}
+.spx-ped-obs i { flex-shrink: 0; margin-top: 0.1rem; font-size: 0.7rem; color: var(--spx-primary); }
+.spx-ped-no-obs { color: var(--spx-border); }
+
+/* Badges */
+.spx-ped-badge {
+  display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px;
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  background: var(--spx-border); color: var(--spx-muted); white-space: nowrap;
+}
+.spx-ped-badge--active { background: rgba(34,197,94,0.15);  color: var(--spx-ok); }
+.spx-ped-badge--cancel { background: rgba(239,68,68,0.12);  color: var(--spx-cancel); }
+
+/* Cancel button */
+.spx-ped-btn-cancel {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;
+  cursor: pointer; background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25); color: var(--spx-cancel);
+  transition: all 0.15s; font-family: inherit; white-space: nowrap;
+}
+.spx-ped-btn-cancel:hover {
+  background: var(--spx-cancel); border-color: var(--spx-cancel); color: #fff;
+}
+
+/* ── Footer total ────────────────────────── */
+.spx-ped-total {
+  display: flex; justify-content: flex-end; align-items: center;
+  gap: 1rem; margin-top: 1rem;
+  padding: 0.875rem 1rem;
+  background: var(--spx-surface); border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius);
+}
+.spx-ped-total__label {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.875rem; color: var(--spx-muted); font-weight: 500;
+}
+.spx-ped-total__value {
+  font-size: 1.375rem; font-weight: 800; color: var(--spx-total);
+  letter-spacing: -0.02em;
+}
+
+/* ── Responsive ──────────────────────────── */
+@media (max-width: 767px) {
+  .spx-ped { padding: 1.25rem 1rem; }
+  .spx-ped-header { flex-direction: column; align-items: flex-start; }
+  .spx-ped-stats { gap: 0.5rem; }
+  .spx-ped-stat  { min-width: 100px; padding: 0.75rem 1rem; }
+}

@@ -1,5 +1,7 @@
 import { Component, inject, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { CompraService } from '../../services/compra.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Compra } from '../../interfaces/compra.interface';
@@ -7,22 +9,24 @@ import { Compra } from '../../interfaces/compra.interface';
 @Component({
   selector: 'app-compra-listar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './compra-listar.html',
+  styleUrls: ['./compra-listar.css'],
 })
 export class CompraListarPageComponent implements OnInit {
   private readonly compraService = inject(CompraService);
   private readonly authService   = inject(AuthService);
 
-  /** Filtra por restaurante si se provee explicitamente.
-   *  Si no, se auto-completa con el restaurante del usuario logueado. */
   @Input() restauranteId?: number;
 
   public compras: Compra[] = [];
   public cargando: boolean = false;
 
+  // Filters
+  searchTerm: string = '';
+  filtroEstado: 'todos' | 'activa' | 'anulada' = 'todos';
+
   ngOnInit(): void {
-    // Auto-asignar restaurante desde el usuario logueado si no viene como @Input
     if (!this.restauranteId) {
       this.restauranteId = this.authService.getRestauranteId() ?? undefined;
     }
@@ -36,32 +40,52 @@ export class CompraListarPageComponent implements OnInit {
       : this.compraService.obtenerTodas();
 
     obs.subscribe({
-      next: (data) => {
-        this.compras = data;
-        this.cargando = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar compras:', err);
-        this.cargando = false;
-      },
+      next: (data) => { this.compras = data; this.cargando = false; },
+      error: (err) => { console.error('Error al cargar compras:', err); this.cargando = false; },
     });
+  }
+
+  get comprasFiltradas(): Compra[] {
+    return this.compras.filter(c => {
+      const term = this.searchTerm.toLowerCase();
+      const matchSearch = !term ||
+        (c.codigo?.toLowerCase().includes(term) ?? false) ||
+        (c.insumo?.descripcion?.toLowerCase().includes(term) ?? false) ||
+        (c.insumo?.codigo?.toLowerCase().includes(term) ?? false);
+
+      const matchEstado =
+        this.filtroEstado === 'todos'  ? true :
+        this.filtroEstado === 'activa' ? (c.activo === true) :
+        this.filtroEstado === 'anulada'? (c.activo === false) : true;
+
+      return matchSearch && matchEstado;
+    });
+  }
+
+  get totalActivas(): number  { return this.compras.filter(c => c.activo).length; }
+  get totalAnuladas(): number { return this.compras.filter(c => !c.activo).length; }
+  get totalValor(): number {
+    return this.compras
+      .filter(c => c.activo)
+      .reduce((acc, c) => acc + (c.valorTotal ?? 0), 0);
+  }
+
+  setFiltroEstado(f: 'todos' | 'activa' | 'anulada'): void {
+    this.filtroEstado = f;
   }
 
   desactivar(id?: number): void {
     if (!id) return;
     if (!confirm('¿Desea anular esta compra? El stock NO se revertirá automáticamente.')) return;
     this.compraService.desactivar(id).subscribe({
-      next: () => {
-        alert('Compra anulada');
-        this.cargarCompras();
-      },
+      next: () => { alert('Compra anulada'); this.cargarCompras(); },
       error: (err) => alert('Error: ' + (err.error?.error || 'No se pudo anular')),
     });
   }
 
   totalCompras(): number {
     return this.compras
-      .filter((c) => c.activo)
+      .filter(c => c.activo)
       .reduce((acc, c) => acc + (c.valorTotal ?? 0), 0);
   }
 }

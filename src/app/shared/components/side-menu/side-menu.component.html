@@ -1,32 +1,36 @@
 <div
-  id="menu"
-  class="position-fixed top-0 start-0 h-100 bg-dark text-white-50 overflow-auto"
+  id="spx-sidebar"
+  class="spx-sidebar"
   [class.d-none]="!isOpen"
-  style="width: 220px; z-index: 1050; transition: transform 0.3s ease-in-out;"
 >
   <app-side-menu-header></app-side-menu-header>
-
   <app-side-menu-options (optionSelected)="closeSideMenu()"></app-side-menu-options>
-
-  <button
-    class="d-md-none w-100 btn btn-secondary mt-2"
-    (click)="closeSideMenu()"
-  >
-    Cerrar
-  </button>
 </div>
 
 <style>
-  @media (min-width: 768px) {
-    #menu {
-      position: relative !important;
-      display: block !important;
-    }
+.spx-sidebar {
+  width: 256px;
+  min-width: 256px;
+  height: 100vh;
+  background: #1a242f;
+  border-right: 1px solid #283543;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex-shrink: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1050;
+}
+
+/* Desktop: sidebar becomes part of flex layout (relative) */
+@media (min-width: 768px) {
+  #spx-sidebar {
+    position: relative !important;
+    display: flex !important;
   }
-  
-  @media (max-width: 767px) {
-    #menu {
-      transform: translateX(0);
-    }
-  }
+}
 </style>

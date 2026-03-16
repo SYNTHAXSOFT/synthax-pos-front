@@ -1,19 +1,35 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MunicipioService } from '../../service/municipio.service';
 import { Municipio } from '../../interfaces/municipio.interface';
 
 @Component({
   selector: 'app-listar-municipio-page',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './municipio-listar.html'
+  imports: [CommonModule, FormsModule],
+  templateUrl: './municipio-listar.html',
+  styleUrls: ['../../../shared/styles/spx-geo.css'],
 })
 export class ListarMunicipioPageComponent implements OnInit {
 
   private municipioService = inject(MunicipioService);
   public municipios: Municipio[] = [];
   public cargando: boolean = false;
+  public searchTerm: string = '';
+
+  get municipiosFiltrados(): Municipio[] {
+    if (!this.searchTerm.trim()) return this.municipios;
+    const q = this.searchTerm.toLowerCase();
+    return this.municipios.filter(m =>
+      m.nombre?.toLowerCase().includes(q) ||
+      String(m.id).includes(q) ||
+      m.departamento?.nombre?.toLowerCase().includes(q)
+    );
+  }
+
+  get totalActivos(): number   { return this.municipios.filter(m => m.activo).length; }
+  get totalInactivos(): number { return this.municipios.filter(m => !m.activo).length; }
 
   ngOnInit(): void {
     this.cargarMunicipios();

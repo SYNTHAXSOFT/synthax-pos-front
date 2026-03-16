@@ -12,6 +12,7 @@ import { Restaurante } from '../../interfaces/restaurante.interface';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './restaurante-branding.html',
+  styleUrls: ['./restaurante-branding.css'],
 })
 export class RestauranteBrandingComponent implements OnInit {
 

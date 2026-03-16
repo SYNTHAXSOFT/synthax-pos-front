@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ImpuestoService } from '../../services/impuesto.service';
 import { Impuesto } from '../../interfaces/impuesto.interface';
@@ -8,8 +9,9 @@ import { AuthService } from '../../../auth/services/auth.service';
 @Component({
   selector: 'app-impuesto-listar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './impuesto-listar.html',
+  styleUrls: ['../../../shared/styles/spx-geo.css'],
 })
 export class ImpuestoListarPageComponent implements OnInit {
   private readonly impuestoService = inject(ImpuestoService);
@@ -19,6 +21,24 @@ export class ImpuestoListarPageComponent implements OnInit {
   public impuestos: Impuesto[] = [];
   public cargando: boolean = false;
   public restauranteId?: number;
+  public searchTerm: string = '';
+
+  get impuestosFiltrados(): Impuesto[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) return this.impuestos;
+    return this.impuestos.filter(i =>
+      i.descripcion.toLowerCase().includes(term) ||
+      String(i.porcentajeImpuesto).includes(term)
+    );
+  }
+
+  get totalActivos(): number {
+    return this.impuestos.filter(i => i.estado === 'ACTIVO').length;
+  }
+
+  get totalInactivos(): number {
+    return this.impuestos.filter(i => i.estado !== 'ACTIVO').length;
+  }
 
   ngOnInit(): void {
     this.restauranteId = this.authService.getRestauranteId() ?? undefined;

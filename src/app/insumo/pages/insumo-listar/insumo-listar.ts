@@ -1,5 +1,7 @@
 import { Component, inject, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 import { InsumoService } from '../../services/insumo.service';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -8,23 +10,25 @@ import { Insumo } from '../../interfaces/insumo.interface';
 @Component({
   selector: 'app-insumo-listar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './insumo-listar.html',
+  styleUrls: ['./insumo-listar.css'],
 })
 export class InsumoListarPageComponent implements OnInit {
   private readonly insumoService = inject(InsumoService);
   private readonly authService   = inject(AuthService);
   private readonly router = inject(Router);
 
-  /** Si se proporciona explicitamente, filtra los insumos por restaurante.
-   *  Si no, se auto-completa con el restaurante del usuario logueado. */
   @Input() restauranteId?: number;
 
   public insumos: Insumo[] = [];
   public cargando: boolean = false;
 
+  // Filters
+  searchTerm: string = '';
+  filtroEstado: 'todos' | 'ok' | 'bajo' | 'sin' = 'todos';
+
   ngOnInit(): void {
-    // Auto-asignar restaurante desde el usuario logueado si no viene como @Input
     if (!this.restauranteId) {
       this.restauranteId = this.authService.getRestauranteId() ?? undefined;
     }
@@ -49,6 +53,33 @@ export class InsumoListarPageComponent implements OnInit {
     });
   }
 
+  get insumosFiltrados(): Insumo[] {
+    return this.insumos.filter(i => {
+      const term = this.searchTerm.toLowerCase();
+      const matchSearch = !term ||
+        (i.descripcion?.toLowerCase().includes(term) ?? false) ||
+        (i.codigo?.toLowerCase().includes(term) ?? false) ||
+        (i.medida?.toLowerCase().includes(term) ?? false);
+
+      const stock = i.stock ?? 0;
+      const matchEstado =
+        this.filtroEstado === 'todos' ? true :
+        this.filtroEstado === 'ok'   ? stock > 5 :
+        this.filtroEstado === 'bajo' ? (stock > 0 && stock <= 5) :
+        this.filtroEstado === 'sin'  ? stock === 0 : true;
+
+      return matchSearch && matchEstado;
+    });
+  }
+
+  get totalActivos(): number { return this.insumos.filter(i => i.activo).length; }
+  get totalBajoStock(): number { return this.insumos.filter(i => (i.stock ?? 0) > 0 && (i.stock ?? 0) <= 5).length; }
+  get totalSinStock(): number { return this.insumos.filter(i => (i.stock ?? 0) === 0).length; }
+
+  setFiltroEstado(f: 'todos' | 'ok' | 'bajo' | 'sin'): void {
+    this.filtroEstado = f;
+  }
+
   editar(id?: number): void {
     if (!id) return;
     this.router.navigate(['/synthax-pos/insumo/registrar'], { queryParams: { id } });
@@ -66,10 +97,32 @@ export class InsumoListarPageComponent implements OnInit {
     });
   }
 
+  getStockLabel(stock?: number): string {
+    if (stock == null || stock === 0) return 'Sin Stock';
+    if (stock <= 5) return 'Bajo Stock';
+    return 'En Stock';
+  }
+
   getStockClass(stock?: number): string {
-    if (stock == null)  return 'text-muted';
-    if (stock === 0)    return 'text-danger fw-bold';
-    if (stock <= 5)     return 'text-warning fw-bold';
-    return 'text-success fw-bold';
+    if (stock == null || stock === 0) return 'spx-inv-stock--out';
+    if (stock <= 5) return 'spx-inv-stock--low';
+    return 'spx-inv-stock--ok';
+  }
+
+  getBadgeClass(stock?: number): string {
+    if (stock == null || stock === 0) return 'spx-inv-badge--out';
+    if (stock <= 5) return 'spx-inv-badge--low';
+    return '';
+  }
+
+  getMedidaIcon(medida?: string): string {
+    if (!medida) return 'fa-solid fa-box';
+    const m = medida.toLowerCase();
+    if (m === 'kg' || m === 'g' || m === 'gr') return 'fa-solid fa-weight-hanging';
+    if (m === 'l' || m === 'lt' || m === 'ml') return 'fa-solid fa-flask';
+    if (m === 'unidad' || m === 'und' || m === 'u') return 'fa-solid fa-cube';
+    if (m === 'porción' || m === 'porcion') return 'fa-solid fa-utensils';
+    if (m === 'doc' || m === 'docena') return 'fa-solid fa-layer-group';
+    return 'fa-solid fa-box-open';
   }
 }

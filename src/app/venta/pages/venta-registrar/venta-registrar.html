@@ -1,31 +1,39 @@
-<h2 class="mb-2">Nueva Venta</h2>
-<hr class="mb-4">
+<div class="spx-form-page">
 
-<div class="container" style="max-width: 88rem;">
-  <div class="card shadow-sm">
-    <div class="card-body p-4">
+  <h1 class="spx-form-title">Nueva Venta</h1>
+  <p class="spx-form-subtitle">Abre una nueva venta y comienza a agregar pedidos</p>
+
+  <div class="spx-form-card">
+    <div class="spx-form-card__header">
+      <div class="spx-form-card__icon"><i class="fa-solid fa-cash-register"></i></div>
+      <div>
+        <p class="spx-form-card__title">Abrir venta</p>
+        <p class="spx-form-card__subtitle">La venta se creará en estado ABIERTA</p>
+      </div>
+    </div>
+
+    <div class="spx-form-card__body">
       <form [formGroup]="myForm" (ngSubmit)="onSave()">
+        <div class="spx-form-grid spx-form-grid--2" style="margin-bottom:1.25rem">
 
-        <div class="row g-3">
-
-          <!-- Tipo de Pedido -->
-          <div class="col-md-4">
-            <label class="form-label">Tipo de Pedido <span class="text-danger">*</span></label>
-            <select formControlName="tipoPedidoId" class="form-select">
+          <!-- Tipo de pedido -->
+          <div class="spx-form-group">
+            <label class="spx-form-label">Tipo de Pedido <span class="spx-form-required">*</span></label>
+            <select class="spx-form-select" formControlName="tipoPedidoId">
               <option [value]="null" disabled selected>Seleccione un tipo</option>
               @for (tipo of tiposPedido; track tipo.id) {
                 <option [value]="tipo.id">{{ tipo.nombre }}</option>
               }
             </select>
             @if (isValidField('tipoPedidoId')) {
-              <div class="text-danger small mt-1">Este campo es requerido</div>
+              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Este campo es requerido</span>
             }
           </div>
 
-          <!-- Mesa (opcional) -->
-          <div class="col-md-4">
-            <label class="form-label">Mesa <span class="text-muted">(opcional)</span></label>
-            <select formControlName="mesaId" class="form-select">
+          <!-- Mesa -->
+          <div class="spx-form-group">
+            <label class="spx-form-label">Mesa <span style="color:#64748b;font-weight:400">(opcional)</span></label>
+            <select class="spx-form-select" formControlName="mesaId">
               <option [value]="null">Sin mesa asignada</option>
               @for (mesa of mesas; track mesa.id) {
                 <option [value]="mesa.id">{{ mesa.nombre }}</option>
@@ -33,29 +41,26 @@
             </select>
           </div>
 
-          <!-- Factura electrónica DIAN -->
-          <div class="col-12">
-            <div class="form-check form-switch">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                id="solicitaFactura"
-                formControlName="solicitaFacturaElectronica"
-              />
-              <label class="form-check-label fw-semibold" for="solicitaFactura">
-                ¿El cliente solicita factura electrónica DIAN?
-              </label>
-            </div>
+          <!-- Factura DIAN switch -->
+          <div class="spx-form-group spx-form-col-span-2">
+            <label class="spx-form-check">
+              <input type="checkbox" class="spx-form-check__input" id="solicitaFactura"
+                formControlName="solicitaFacturaElectronica">
+              <span class="spx-form-check__label">
+                <i class="fa-solid fa-file-invoice" style="margin-right:0.3rem;color:#f59e0b"></i>
+                El cliente solicita factura electrónica DIAN
+              </span>
+            </label>
           </div>
 
           <!-- Cliente (visible solo si solicita factura) -->
           @if (solicitaFactura) {
-            <div class="col-md-8">
-              <label class="form-label">
-                Cliente <span class="text-danger">*</span>
-                <span class="text-muted small ms-1">(requerido para factura electrónica)</span>
+            <div class="spx-form-group spx-form-col-span-2">
+              <label class="spx-form-label">
+                Cliente <span class="spx-form-required">*</span>
+                <span style="color:#64748b;font-weight:400;margin-left:0.3rem">(requerido para factura electrónica)</span>
               </label>
-              <select formControlName="usuarioClienteId" class="form-select">
+              <select class="spx-form-select" formControlName="usuarioClienteId">
                 <option [value]="null">Seleccione un cliente</option>
                 @for (cliente of clientes; track cliente.id) {
                   <option [value]="cliente.id">
@@ -64,22 +69,22 @@
                   </option>
                 }
               </select>
-              <div class="form-text text-muted">
-                Los datos fiscales del cliente (cédula/NIT y email) se usarán para generar la factura DIAN.
-              </div>
+              <span style="font-size:0.78rem;color:#64748b;margin-top:0.2rem">
+                Los datos fiscales del cliente se usarán para generar la factura DIAN.
+              </span>
             </div>
           }
 
         </div>
 
-        <div class="alert alert-info mt-3 mb-0 py-2 small">
-          <i class="fas fa-info-circle me-1"></i>
-          La venta se creará en estado <strong>ABIERTA</strong> asignada automáticamente
-          al usuario activo como creador.
+        <div class="spx-form-hint">
+          <i class="fa-solid fa-circle-info"></i>
+          La venta se creará en estado <strong>ABIERTA</strong> y se asignará automáticamente al usuario activo como creador.
         </div>
 
-        <div class="d-flex justify-content-end mt-4">
-          <button type="submit" class="btn btn-primary px-4">
+        <div class="spx-form-actions">
+          <button type="submit" class="spx-form-btn-submit">
+            <i class="fa-solid fa-lock-open"></i>
             Abrir Venta
           </button>
         </div>
@@ -87,8 +92,7 @@
     </div>
   </div>
 
-  <!-- Lista de ventas -->
-  <div class="mt-4">
+  <div class="spx-form-divider">
     <app-venta-listar></app-venta-listar>
   </div>
 </div>

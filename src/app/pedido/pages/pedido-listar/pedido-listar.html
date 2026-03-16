@@ -1,67 +1,151 @@
-<div class="container-fluid px-4">
-  <h2 class="mb-2">Ítems del Pedido</h2>
-  <hr class="mb-4">
+<div class="spx-ped">
 
+  <!-- Header -->
+  <div class="spx-ped-header">
+    <div>
+      <h1 class="spx-ped-header__title">Ítems del Pedido</h1>
+      <p class="spx-ped-header__sub">
+        @if (ventaId) { Venta #{{ ventaId }} } @else { Todos los pedidos }
+      </p>
+    </div>
+    <button class="spx-ped-btn-refresh" (click)="cargarPedidos()">
+      <i class="fa-solid fa-rotate-right"></i>
+      Actualizar
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="spx-ped-stats">
+    <div class="spx-ped-stat">
+      <div class="spx-ped-stat__icon"><i class="fa-solid fa-list-ul"></i></div>
+      <div>
+        <span class="spx-ped-stat__value">{{ totalItems }}</span>
+        <span class="spx-ped-stat__label">Ítems total</span>
+      </div>
+    </div>
+    <div class="spx-ped-stat">
+      <div class="spx-ped-stat__icon spx-ped-stat__icon--ok"><i class="fa-solid fa-circle-check"></i></div>
+      <div>
+        <span class="spx-ped-stat__value spx-ped-stat__value--ok">{{ itemsActivos }}</span>
+        <span class="spx-ped-stat__label">Activos</span>
+      </div>
+    </div>
+    <div class="spx-ped-stat">
+      <div class="spx-ped-stat__icon spx-ped-stat__icon--cancel"><i class="fa-solid fa-ban"></i></div>
+      <div>
+        <span class="spx-ped-stat__value spx-ped-stat__value--cancel">{{ itemsCancelados }}</span>
+        <span class="spx-ped-stat__label">Cancelados</span>
+      </div>
+    </div>
+    <div class="spx-ped-stat">
+      <div class="spx-ped-stat__icon spx-ped-stat__icon--total"><i class="fa-solid fa-coins"></i></div>
+      <div>
+        <span class="spx-ped-stat__value spx-ped-stat__value--total">$ {{ totalGeneral() | number:'1.0-0' }}</span>
+        <span class="spx-ped-stat__label">Total activos</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
   @if (cargando) {
-    <div class="d-flex justify-content-center py-4">
-      <div class="spinner-border text-primary" role="status"></div>
+    <div class="spx-ped-loading">
+      <div class="spx-ped-spinner"></div>
+      <p>Cargando pedidos...</p>
     </div>
   }
 
+  <!-- Content -->
   @if (!cargando) {
-    <div class="table-responsive">
-      <table class="table table-striped table-hover table-bordered">
-        <thead class="table-light">
-          <tr>
-            <th>Producto</th>
-            <th>Cantidad</th>
-            <th>Precio Unit.</th>
-            <th>Subtotal</th>
-            <th>Observación</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (pedido of pedidos; track pedido.id) {
-            <tr [class.table-secondary]="!pedido.activo">
-              <td>{{ pedido.producto?.nombre }}</td>
-              <td>{{ pedido.cantidad }}</td>
-              <td>$ {{ pedido.producto?.precio | number:'1.0-2' }}</td>
-              <td>$ {{ subtotal(pedido) | number:'1.0-2' }}</td>
-              <td>{{ pedido.observacion ?? '—' }}</td>
-              <td>
-                <span [class]="pedido.activo ? 'badge bg-success' : 'badge bg-secondary'">
-                  {{ pedido.activo ? 'Activo' : 'Cancelado' }}
-                </span>
-              </td>
-              <td>
-                @if (pedido.activo) {
-                  <button class="btn btn-danger btn-sm" (click)="cancelarItem(pedido.id)">
-                    Cancelar
-                  </button>
-                }
-              </td>
-            </tr>
-          }
-          @empty {
+    @if (pedidos.length === 0) {
+      <div class="spx-ped-empty">
+        <i class="fa-solid fa-bowl-food spx-ped-empty__icon"></i>
+        <p class="spx-ped-empty__msg">No hay ítems en este pedido</p>
+        <p class="spx-ped-empty__sub">Agrega productos desde el formulario de pedido</p>
+      </div>
+    } @else {
+      <div class="spx-ped-table-wrap">
+        <table class="spx-ped-table">
+          <thead>
             <tr>
-              <td colspan="7" class="text-center text-muted py-4">
-                No hay ítems en este pedido
-              </td>
+              <th>#</th>
+              <th>Producto</th>
+              <th>Precio Unit.</th>
+              <th>Cantidad</th>
+              <th>Subtotal</th>
+              <th>Observación</th>
+              <th>Estado</th>
+              <th>Acciones</th>
             </tr>
-          }
-        </tbody>
-        @if (pedidos.length > 0) {
-          <tfoot class="table-light">
-            <tr>
-              <td colspan="3" class="text-end fw-bold">Total:</td>
-              <td class="fw-bold">$ {{ totalGeneral() | number:'1.0-2' }}</td>
-              <td colspan="3"></td>
-            </tr>
-          </tfoot>
-        }
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @for (pedido of pedidos; track pedido.id) {
+              <tr class="spx-ped-row" [class.spx-ped-row--cancel]="!pedido.activo">
+                <td class="spx-ped-td spx-ped-td--id">#{{ pedido.id }}</td>
+
+                <!-- Producto -->
+                <td class="spx-ped-td">
+                  <div class="spx-ped-producto">
+                    <div class="spx-ped-producto__icon">
+                      <i class="fa-solid fa-bowl-food"></i>
+                    </div>
+                    <div>
+                      <span class="spx-ped-producto__name">{{ pedido.producto?.nombre ?? '—' }}</span>
+                      @if (pedido.producto?.codigo) {
+                        <code class="spx-ped-producto__codigo">{{ pedido.producto!.codigo }}</code>
+                      }
+                    </div>
+                  </div>
+                </td>
+
+                <td class="spx-ped-td spx-ped-td--num">
+                  $ {{ pedido.producto?.precio | number:'1.0-2' }}
+                </td>
+                <td class="spx-ped-td spx-ped-td--center">
+                  <span class="spx-ped-qty">{{ pedido.cantidad }}</span>
+                </td>
+                <td class="spx-ped-td spx-ped-td--subtotal">
+                  $ {{ subtotal(pedido) | number:'1.0-2' }}
+                </td>
+                <td class="spx-ped-td spx-ped-td--obs">
+                  @if (pedido.observacion) {
+                    <span class="spx-ped-obs">
+                      <i class="fa-solid fa-comment-dots"></i>
+                      {{ pedido.observacion }}
+                    </span>
+                  } @else {
+                    <span class="spx-ped-no-obs">—</span>
+                  }
+                </td>
+                <td class="spx-ped-td">
+                  <span class="spx-ped-badge"
+                    [class.spx-ped-badge--active]="pedido.activo"
+                    [class.spx-ped-badge--cancel]="!pedido.activo">
+                    {{ pedido.activo ? 'Activo' : 'Cancelado' }}
+                  </span>
+                </td>
+                <td class="spx-ped-td">
+                  @if (pedido.activo) {
+                    <button class="spx-ped-btn-cancel" (click)="cancelarItem(pedido.id)" title="Cancelar ítem">
+                      <i class="fa-solid fa-ban"></i>
+                      Cancelar
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer total -->
+      <div class="spx-ped-total">
+        <span class="spx-ped-total__label">
+          <i class="fa-solid fa-calculator"></i>
+          Total del pedido (ítems activos):
+        </span>
+        <span class="spx-ped-total__value">$ {{ totalGeneral() | number:'1.0-2' }}</span>
+      </div>
+    }
   }
+
 </div>

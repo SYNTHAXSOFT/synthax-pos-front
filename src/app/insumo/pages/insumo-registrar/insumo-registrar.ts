@@ -15,6 +15,7 @@ import { AuthService } from '../../../auth/services/auth.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, InsumoListarPageComponent],
   templateUrl: './insumo-registrar.html',
+  styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
 export class InsumoRegistrarPageComponent implements OnInit {
   private readonly fb                 = inject(FormBuilder);

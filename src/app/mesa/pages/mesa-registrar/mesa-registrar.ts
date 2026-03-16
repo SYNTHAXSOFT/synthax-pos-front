@@ -11,6 +11,7 @@ import { MesaListarPageComponent } from '../mesa-listar/mesa-listar';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MesaListarPageComponent],
   templateUrl: './mesa-registrar.html',
+  styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
 export class MesaRegistrarPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
