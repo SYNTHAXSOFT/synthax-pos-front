@@ -6,6 +6,8 @@ import { VentaService } from '../../services/venta.service';
 import { Venta } from '../../interfaces/venta.interface';
 import { ESTADOS_VENTA } from '../../../utils/constantes-utils';
 import { AuthService } from '../../../auth/services/auth.service';
+import { ToastService } from '../../../shared/services/toast.service';
+import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-venta-listar',
@@ -18,6 +20,8 @@ export class VentaListarPageComponent implements OnInit {
   private readonly ventaService = inject(VentaService);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
 
   public ventas: Venta[] = [];
   public cargando: boolean = false;
@@ -61,12 +65,13 @@ export class VentaListarPageComponent implements OnInit {
     this.router.navigate(['/synthax-pos/pedido/registrar'], { queryParams: { ventaId } });
   }
 
-  anular(id?: number): void {
+  async anular(id?: number): Promise<void> {
     if (!id) return;
-    if (!confirm('¿Desea anular esta venta? Esta acción no se puede revertir.')) return;
+    const ok = await this.confirmService.confirm({ message: '¿Desea anular esta venta? Esta acción no se puede revertir.', type: 'danger' });
+    if (!ok) return;
     this.ventaService.anularVenta(id).subscribe({
-      next: () => { alert('Venta anulada'); this.cargarVentas(); },
-      error: (err) => { alert('Error: ' + (err.error?.error || 'No se pudo anular la venta')); },
+      next: () => { this.toastService.success('Venta anulada'); this.cargarVentas(); },
+      error: (err) => { this.toastService.error('Error: ' + (err.error?.error || 'No se pudo anular la venta')); },
     });
   }
 
@@ -75,10 +80,10 @@ export class VentaListarPageComponent implements OnInit {
     const totalStr = prompt('Ingrese el valor total de la venta:');
     if (totalStr === null) return;
     const total = parseFloat(totalStr);
-    if (isNaN(total) || total < 0) { alert('Valor inválido'); return; }
+    if (isNaN(total) || total < 0) { this.toastService.warning('Valor inválido'); return; }
     this.ventaService.cerrarVenta(id, total).subscribe({
-      next: () => { alert('Venta cerrada exitosamente'); this.cargarVentas(); },
-      error: (err) => { alert('Error: ' + (err.error?.error || 'No se pudo cerrar la venta')); },
+      next: () => { this.toastService.success('Venta cerrada exitosamente'); this.cargarVentas(); },
+      error: (err) => { this.toastService.error('Error: ' + (err.error?.error || 'No se pudo cerrar la venta')); },
     });
   }
 

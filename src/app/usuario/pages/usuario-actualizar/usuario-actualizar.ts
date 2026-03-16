@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UsuarioService } from '../../services/usuario.service';
 import { Usuario } from '../../interfaces/usuario.interface';
+import { ToastService } from '../../../shared/services/toast.service';
 
 // Roles del POS — sincronizados con el enum Rol.java del backend
 const ROLES_POS = ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'DOMICILIARIO'];
@@ -31,6 +32,7 @@ export class ActualizarUsuarioPageComponent implements OnInit {
 
   cargando  = true;
   usuarioId = 0;
+  private readonly toastService = inject(ToastService);
 
   constructor(
     private readonly usuarioService: UsuarioService,
@@ -51,7 +53,7 @@ export class ActualizarUsuarioPageComponent implements OnInit {
         this.cargando = false;
       },
       error: () => {
-        alert('Error al cargar el usuario');
+        this.toastService.error('Error al cargar el usuario');
         this.router.navigate(['/synthax-pos/usuario/listar']);
       },
     });
@@ -59,16 +61,16 @@ export class ActualizarUsuarioPageComponent implements OnInit {
 
   actualizarUsuario(): void {
     if (!this.usuario.nombre || !this.usuario.cedula) {
-      alert('Debe completar todos los campos requeridos');
+      this.toastService.warning('Debe completar todos los campos requeridos');
       return;
     }
     this.usuarioService.actualizar(this.usuarioId, this.usuario).subscribe({
       next: () => {
-        alert('Usuario actualizado exitosamente');
+        this.toastService.success('Usuario actualizado exitosamente');
         this.router.navigate(['/synthax-pos/usuario/listar']);
       },
       error: (err) => {
-        alert('Error al actualizar el usuario: ' + (err.error?.error ?? 'Error desconocido'));
+        this.toastService.error('Error al actualizar el usuario: ' + (err.error?.error ?? 'Error desconocido'));
       },
     });
   }

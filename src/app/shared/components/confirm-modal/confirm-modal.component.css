@@ -1,0 +1,93 @@
+.spx-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(3px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: spx-cfm-bg-in 0.18s ease both;
+}
+@keyframes spx-cfm-bg-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.spx-confirm-modal {
+  background: #1a242f;
+  border: 1px solid #283543;
+  border-radius: 0.875rem;
+  padding: 1.75rem;
+  max-width: 26rem;
+  width: 100%;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+  animation: spx-cfm-in 0.22s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes spx-cfm-in {
+  from { opacity: 0; transform: scale(0.93) translateY(-8px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+/* Icon circle */
+.spx-confirm-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.spx-confirm-modal--danger  .spx-confirm-icon { background: rgba(239,68,68,0.12);  color: #ef4444; }
+.spx-confirm-modal--warning .spx-confirm-icon { background: rgba(245,158,11,0.12); color: #f59e0b; }
+.spx-confirm-modal--info    .spx-confirm-icon { background: rgba(13,127,242,0.12); color: #0d7ff2; }
+
+.spx-confirm-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 0.375rem;
+}
+.spx-confirm-msg {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.spx-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.625rem;
+}
+
+.spx-confirm-btn {
+  padding: 0.55rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.spx-confirm-btn--cancel {
+  background: transparent;
+  color: #94a3b8;
+  border-color: #283543;
+}
+.spx-confirm-btn--cancel:hover {
+  background: rgba(40,53,67,0.5);
+  color: #f1f5f9;
+  border-color: #64748b;
+}
+.spx-confirm-btn--danger  { background: #ef4444; color: #fff; }
+.spx-confirm-btn--danger:hover  { background: #dc2626; }
+.spx-confirm-btn--warning { background: #f59e0b; color: #fff; }
+.spx-confirm-btn--warning:hover { background: #d97706; }
+.spx-confirm-btn--info    { background: #0d7ff2; color: #fff; }
+.spx-confirm-btn--info:hover    { background: #0b6fd4; }

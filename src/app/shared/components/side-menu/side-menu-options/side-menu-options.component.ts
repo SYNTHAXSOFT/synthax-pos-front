@@ -2,6 +2,7 @@ import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { routes } from '../../../../app.routes';
 import { AuthService } from '../../../../auth/services/auth.service';
+import { ConfirmService } from '../../../../shared/services/confirm.service';
 
 interface MenuOption {
   icon: string;
@@ -29,6 +30,7 @@ export class SideMenuOptionsComponent {
   @Output() optionSelected = new EventEmitter<void>();
 
   private authService = inject(AuthService);
+  private readonly confirmService = inject(ConfirmService);
 
   // Genera los ítems del menú desde las rutas, excluyendo comodines y redirects
   reactiveMenu: MenuItem[] = reactiveItems
@@ -53,8 +55,9 @@ export class SideMenuOptionsComponent {
       roles:    item.roles,
     }));
 
-  logout(): void {
-    if (confirm('¿Estás seguro de cerrar sesión?')) {
+  async logout(): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: '¿Estás seguro de cerrar sesión?', type: 'danger' });
+    if (ok) {
       this.authService.logout();
     }
   }

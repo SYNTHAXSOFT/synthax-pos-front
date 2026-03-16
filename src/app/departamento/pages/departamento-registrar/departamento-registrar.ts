@@ -4,6 +4,7 @@ import { DepartamentoService } from '../../services/departamento.service';
 import { Departamento } from '../../interfaces/departamento.interface';
 import { CommonModule } from '@angular/common';
 import { ListarPageComponent } from '../departamento-listar/departamento-listar';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-registrar-page',
@@ -13,9 +14,10 @@ import { ListarPageComponent } from '../departamento-listar/departamento-listar'
   styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
 export class RegistrarPageComponent {
-  
+
   private fb = inject(FormBuilder);
   private departamentoService = inject(DepartamentoService);
+  private readonly toastService = inject(ToastService);
 
   // 👇 referencia al componente hijo para refrescar la tabla
   @ViewChild(ListarPageComponent) listarComponent?: ListarPageComponent;
@@ -36,13 +38,13 @@ export class RegistrarPageComponent {
 
     this.departamentoService.crearDepartamento(departamento).subscribe({
       next: () => {
-        alert('Departamento creado exitosamente');
+        this.toastService.success('Departamento creado exitosamente');
         this.myForm.reset({ activo: true });
         this.listarComponent?.cargarDepartamentos();
       },
       error: (error) => {
         console.error('Error:', error);
-        alert('Error al crear departamento: ' + (error.error?.error || 'Error desconocido'));
+        this.toastService.error('Error al crear departamento: ' + (error.error?.error || 'Error desconocido'));
       }
     });
   }

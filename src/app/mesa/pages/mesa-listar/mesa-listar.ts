@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { MesaService } from '../../services/mesa.service';
 import { Mesa } from '../../interfaces/mesa.interface';
 import { AuthService } from '../../../auth/services/auth.service';
+import { ToastService } from '../../../shared/services/toast.service';
+import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-mesa-listar',
@@ -18,6 +20,8 @@ export class MesaListarPageComponent implements OnInit {
   private readonly mesaService  = inject(MesaService);
   private readonly router       = inject(Router);
   private readonly authService  = inject(AuthService);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
 
   public mesas: Mesa[] = [];
   public cargando: boolean = false;
@@ -61,12 +65,13 @@ export class MesaListarPageComponent implements OnInit {
     this.filtroEstado = f;
   }
 
-  desactivar(id?: number): void {
+  async desactivar(id?: number): Promise<void> {
     if (!id) return;
-    if (!confirm('¿Desea desactivar esta mesa?')) return;
+    const ok = await this.confirmService.confirm({ message: '¿Desea desactivar esta mesa?', type: 'danger' });
+    if (!ok) return;
     this.mesaService.desactivar(id).subscribe({
-      next: () => { alert('Mesa desactivada'); this.cargarMesas(); },
-      error: (err) => { console.error('Error:', err); alert('Error al desactivar la mesa'); },
+      next: () => { this.toastService.success('Mesa desactivada'); this.cargarMesas(); },
+      error: (err) => { console.error('Error:', err); this.toastService.error('Error al desactivar la mesa'); },
     });
   }
 

@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { ImpuestoService } from '../../services/impuesto.service';
 import { Impuesto } from '../../interfaces/impuesto.interface';
 import { AuthService } from '../../../auth/services/auth.service';
+import { ToastService } from '../../../shared/services/toast.service';
+import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-impuesto-listar',
@@ -17,6 +19,8 @@ export class ImpuestoListarPageComponent implements OnInit {
   private readonly impuestoService = inject(ImpuestoService);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
 
   public impuestos: Impuesto[] = [];
   public cargando: boolean = false;
@@ -59,17 +63,18 @@ export class ImpuestoListarPageComponent implements OnInit {
     });
   }
 
-  desactivar(id?: number): void {
+  async desactivar(id?: number): Promise<void> {
     if (!id) return;
-    if (!confirm('¿Desea desactivar este impuesto?')) return;
+    const ok = await this.confirmService.confirm({ message: '¿Desea desactivar este impuesto?', type: 'danger' });
+    if (!ok) return;
     this.impuestoService.desactivar(id).subscribe({
       next: () => {
-        alert('Impuesto desactivado');
+        this.toastService.success('Impuesto desactivado');
         this.cargarImpuestos();
       },
       error: (err) => {
         console.error('Error al desactivar:', err);
-        alert('Error al desactivar el impuesto');
+        this.toastService.error('Error al desactivar el impuesto');
       },
     });
   }

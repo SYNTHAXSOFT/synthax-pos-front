@@ -9,6 +9,7 @@ import { ProductoService } from '../../../producto/services/producto.service';
 import { Venta } from '../../../venta/interfaces/venta.interface';
 import { Producto } from '../../../producto/interfaces/producto.interface';
 import { PedidoListarPageComponent } from '../pedido-listar/pedido-listar';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-pedido-registrar',
@@ -23,6 +24,7 @@ export class PedidoRegistrarPageComponent implements OnInit {
   private readonly ventaService   = inject(VentaService);
   private readonly productoService= inject(ProductoService);
   private readonly route          = inject(ActivatedRoute);
+  private readonly toastService   = inject(ToastService);
 
   @ViewChild(PedidoListarPageComponent) listarComponent?: PedidoListarPageComponent;
 
@@ -84,14 +86,14 @@ export class PedidoRegistrarPageComponent implements OnInit {
 
     this.pedidoService.crear(payload).subscribe({
       next: () => {
-        alert('Ítem agregado al pedido');
+        this.toastService.success('Ítem agregado al pedido');
         // Reseteamos solo producto, cantidad y observación; mantenemos venta
         this.myForm.patchValue({ productoId: null, cantidad: 1, observacion: '' });
         this.listarComponent?.cargarPedidos();
       },
       error: (err) => {
         console.error('Error:', err);
-        alert('Error al agregar ítem: ' + (err.error?.error || 'Error desconocido'));
+        this.toastService.error('Error al agregar ítem: ' + (err.error?.error || 'Error desconocido'));
       },
     });
   }

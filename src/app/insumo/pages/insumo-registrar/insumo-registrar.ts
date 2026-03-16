@@ -9,6 +9,7 @@ import { Restaurante } from '../../../restaurante/interfaces/restaurante.interfa
 import { MEDIDAS_INSUMO } from '../../../utils/constantes-utils';
 import { InsumoListarPageComponent } from '../insumo-listar/insumo-listar';
 import { AuthService } from '../../../auth/services/auth.service';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-insumo-registrar',
@@ -23,6 +24,7 @@ export class InsumoRegistrarPageComponent implements OnInit {
   private readonly restauranteService = inject(RestauranteService);
   private readonly authService        = inject(AuthService);
   private readonly route              = inject(ActivatedRoute);
+  private readonly toastService       = inject(ToastService);
 
   @ViewChild(InsumoListarPageComponent) listarComponent?: InsumoListarPageComponent;
 
@@ -98,20 +100,20 @@ export class InsumoRegistrarPageComponent implements OnInit {
     if (this.editando && this.insumoId) {
       this.insumoService.actualizar(this.insumoId, payload).subscribe({
         next: () => {
-          alert('Insumo actualizado exitosamente');
+          this.toastService.success('Insumo actualizado exitosamente');
           this.resetForm();
           this.listarComponent?.cargarInsumos();
         },
-        error: (err) => alert('Error: ' + (err.error?.error || 'Error desconocido')),
+        error: (err) => this.toastService.error('Error: ' + (err.error?.error || 'Error desconocido')),
       });
     } else {
       this.insumoService.crear(payload).subscribe({
         next: () => {
-          alert('Insumo creado exitosamente');
+          this.toastService.success('Insumo creado exitosamente');
           this.resetForm();
           this.listarComponent?.cargarInsumos();
         },
-        error: (err) => alert('Error: ' + (err.error?.error || 'Error desconocido')),
+        error: (err) => this.toastService.error('Error: ' + (err.error?.error || 'Error desconocido')),
       });
     }
   }

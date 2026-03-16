@@ -5,6 +5,8 @@ import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 import { ProductoService } from '../../services/producto.service';
 import { Producto } from '../../interfaces/producto.interface';
+import { ToastService } from '../../../shared/services/toast.service';
+import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-producto-listar',
@@ -16,6 +18,8 @@ import { Producto } from '../../interfaces/producto.interface';
 export class ProductoListarPageComponent implements OnInit {
   private readonly productoService = inject(ProductoService);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
 
   public productos: Producto[] = [];
   public cargando: boolean = false;
@@ -72,17 +76,18 @@ export class ProductoListarPageComponent implements OnInit {
     this.filtroEstado = f;
   }
 
-  desactivar(id?: number): void {
+  async desactivar(id?: number): Promise<void> {
     if (!id) return;
-    if (!confirm('¿Desea desactivar este producto?')) return;
+    const ok = await this.confirmService.confirm({ message: '¿Desea desactivar este producto?', type: 'danger' });
+    if (!ok) return;
     this.productoService.desactivar(id).subscribe({
       next: () => {
-        alert('Producto desactivado');
+        this.toastService.success('Producto desactivado');
         this.cargarProductos();
       },
       error: (err) => {
         console.error('Error al desactivar:', err);
-        alert('Error al desactivar el producto');
+        this.toastService.error('Error al desactivar el producto');
       },
     });
   }

@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { InsumoService } from '../../services/insumo.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Insumo } from '../../interfaces/insumo.interface';
+import { ToastService } from '../../../shared/services/toast.service';
+import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-insumo-listar',
@@ -18,6 +20,8 @@ export class InsumoListarPageComponent implements OnInit {
   private readonly insumoService = inject(InsumoService);
   private readonly authService   = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
 
   @Input() restauranteId?: number;
 
@@ -85,15 +89,16 @@ export class InsumoListarPageComponent implements OnInit {
     this.router.navigate(['/synthax-pos/insumo/registrar'], { queryParams: { id } });
   }
 
-  desactivar(id?: number): void {
+  async desactivar(id?: number): Promise<void> {
     if (!id) return;
-    if (!confirm('¿Desea desactivar este insumo?')) return;
+    const ok = await this.confirmService.confirm({ message: '¿Desea desactivar este insumo?', type: 'danger' });
+    if (!ok) return;
     this.insumoService.desactivar(id).subscribe({
       next: () => {
-        alert('Insumo desactivado');
+        this.toastService.success('Insumo desactivado');
         this.cargarInsumos();
       },
-      error: (err) => alert('Error: ' + (err.error?.error || 'No se pudo desactivar')),
+      error: (err) => this.toastService.error('Error: ' + (err.error?.error || 'No se pudo desactivar')),
     });
   }
 

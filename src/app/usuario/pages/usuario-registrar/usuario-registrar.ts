@@ -10,6 +10,7 @@ import { MunicipioService } from '../../../municipio/service/municipio.service';
 import { Departamento } from '../../../departamento/interfaces/departamento.interface';
 import { Municipio } from '../../../municipio/interfaces/municipio.interface';
 import { ListarPage } from '../usuario-listar/usuario-listar';
+import { ToastService } from '../../../shared/services/toast.service';
 
 // Roles del POS — sincronizados con el enum Rol.java del backend
 // Cada rol solo puede crear usuarios con roles de menor jerarquía
@@ -32,6 +33,7 @@ export class RegistrarPage implements OnInit {
   private readonly authService        = inject(AuthService);
   private readonly departamentoSvc    = inject(DepartamentoService);
   private readonly municipioSvc       = inject(MunicipioService);
+  private readonly toastService       = inject(ToastService);
 
   formUtils = Formutils;
 
@@ -99,12 +101,12 @@ export class RegistrarPage implements OnInit {
 
     this.usuarioService.crearUsuario(nuevoUsuario).subscribe({
       next: () => {
-        alert('Usuario creado exitosamente');
+        this.toastService.success('Usuario creado exitosamente');
         this.myform.reset({ activo: true });
         this.listarComp?.listarAction();
       },
       error: (err) => {
-        alert('Error: ' + (err.error?.error ?? 'Error desconocido'));
+        this.toastService.error('Error: ' + (err.error?.error ?? 'Error desconocido'));
       },
     });
   }

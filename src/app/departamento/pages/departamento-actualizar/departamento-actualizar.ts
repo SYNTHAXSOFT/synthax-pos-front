@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DepartamentoService } from '../../services/departamento.service';
 import { Departamento } from '../../interfaces/departamento.interface';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-actualizar-departamento',
@@ -31,6 +32,7 @@ export class ActualizarDepartamentoPageComponent implements OnInit {
 
   cargando = true;
   departamentoId = '';
+  private readonly toastService = inject(ToastService);
 
   constructor(
     private departamentoService: DepartamentoService,
@@ -50,7 +52,7 @@ export class ActualizarDepartamentoPageComponent implements OnInit {
         this.cargando = false;
       },
       error: (error) => {
-        alert('Error al cargar el departamento');
+        this.toastService.error('Error al cargar el departamento');
         this.router.navigate(['/departamentos/listar']);
       }
     });
@@ -58,17 +60,17 @@ export class ActualizarDepartamentoPageComponent implements OnInit {
 
   actualizarDepartamento() {
     if (!this.departamento.nombre || !this.departamento.id) {
-      alert('Debe completar todos los campos');
+      this.toastService.warning('Debe completar todos los campos');
       return;
     }
 
     this.departamentoService.actualizar(this.departamentoId, this.departamento).subscribe({
       next: () => {
-        alert('Departamento actualizado exitosamente');
+        this.toastService.success('Departamento actualizado exitosamente');
         this.router.navigate(['/departamentos/registrar']);
       },
       error: (err) => {
-        alert('Error al actualizar la departamento');
+        this.toastService.error('Error al actualizar la departamento');
       }
     });
   }

@@ -5,6 +5,8 @@ import { RouterLink } from '@angular/router';
 import { CompraService } from '../../services/compra.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Compra } from '../../interfaces/compra.interface';
+import { ToastService } from '../../../shared/services/toast.service';
+import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-compra-listar',
@@ -16,6 +18,8 @@ import { Compra } from '../../interfaces/compra.interface';
 export class CompraListarPageComponent implements OnInit {
   private readonly compraService = inject(CompraService);
   private readonly authService   = inject(AuthService);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
 
   @Input() restauranteId?: number;
 
@@ -74,12 +78,13 @@ export class CompraListarPageComponent implements OnInit {
     this.filtroEstado = f;
   }
 
-  desactivar(id?: number): void {
+  async desactivar(id?: number): Promise<void> {
     if (!id) return;
-    if (!confirm('¿Desea anular esta compra? El stock NO se revertirá automáticamente.')) return;
+    const ok = await this.confirmService.confirm({ message: '¿Desea anular esta compra? El stock NO se revertirá automáticamente.', type: 'danger' });
+    if (!ok) return;
     this.compraService.desactivar(id).subscribe({
-      next: () => { alert('Compra anulada'); this.cargarCompras(); },
-      error: (err) => alert('Error: ' + (err.error?.error || 'No se pudo anular')),
+      next: () => { this.toastService.success('Compra anulada'); this.cargarCompras(); },
+      error: (err) => this.toastService.error('Error: ' + (err.error?.error || 'No se pudo anular')),
     });
   }
 

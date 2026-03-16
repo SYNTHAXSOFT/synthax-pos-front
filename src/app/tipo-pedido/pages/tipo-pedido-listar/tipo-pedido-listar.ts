@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { TipoPedidoService } from '../../services/tipo-pedido.service';
 import { TipoPedido } from '../../interfaces/tipo-pedido.interface';
 import { AuthService } from '../../../auth/services/auth.service';
+import { ToastService } from '../../../shared/services/toast.service';
+import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-tipo-pedido-listar',
@@ -17,6 +19,8 @@ export class TipoPedidoListarPageComponent implements OnInit {
   private readonly tipoPedidoService = inject(TipoPedidoService);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
 
   public tiposPedido: TipoPedido[] = [];
   public cargando: boolean = false;
@@ -59,17 +63,18 @@ export class TipoPedidoListarPageComponent implements OnInit {
     });
   }
 
-  desactivar(id?: number): void {
+  async desactivar(id?: number): Promise<void> {
     if (!id) return;
-    if (!confirm('¿Desea desactivar este tipo de pedido?')) return;
+    const ok = await this.confirmService.confirm({ message: '¿Desea desactivar este tipo de pedido?', type: 'danger' });
+    if (!ok) return;
     this.tipoPedidoService.desactivar(id).subscribe({
       next: () => {
-        alert('Tipo de pedido desactivado');
+        this.toastService.success('Tipo de pedido desactivado');
         this.cargarTiposPedido();
       },
       error: (err) => {
         console.error('Error al desactivar:', err);
-        alert('Error al desactivar el tipo de pedido');
+        this.toastService.error('Error al desactivar el tipo de pedido');
       },
     });
   }

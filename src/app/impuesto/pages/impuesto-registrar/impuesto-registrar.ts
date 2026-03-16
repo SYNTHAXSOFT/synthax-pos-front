@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ImpuestoService } from '../../services/impuesto.service';
 import { Impuesto } from '../../interfaces/impuesto.interface';
 import { ImpuestoListarPageComponent } from '../impuesto-listar/impuesto-listar';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-impuesto-registrar',
@@ -17,6 +18,7 @@ export class ImpuestoRegistrarPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly impuestoService = inject(ImpuestoService);
   private readonly route = inject(ActivatedRoute);
+  private readonly toastService = inject(ToastService);
 
   @ViewChild(ImpuestoListarPageComponent) listarComponent?: ImpuestoListarPageComponent;
 
@@ -57,25 +59,25 @@ export class ImpuestoRegistrarPageComponent implements OnInit {
     if (this.editando && this.impuestoId) {
       this.impuestoService.actualizar(this.impuestoId, impuesto).subscribe({
         next: () => {
-          alert('Impuesto actualizado exitosamente');
+          this.toastService.success('Impuesto actualizado exitosamente');
           this.resetForm();
           this.listarComponent?.cargarImpuestos();
         },
         error: (err) => {
           console.error('Error:', err);
-          alert('Error al actualizar: ' + (err.error?.error || 'Error desconocido'));
+          this.toastService.error('Error al actualizar: ' + (err.error?.error || 'Error desconocido'));
         },
       });
     } else {
       this.impuestoService.crear(impuesto).subscribe({
         next: () => {
-          alert('Impuesto creado exitosamente');
+          this.toastService.success('Impuesto creado exitosamente');
           this.resetForm();
           this.listarComponent?.cargarImpuestos();
         },
         error: (err) => {
           console.error('Error:', err);
-          alert('Error al crear: ' + (err.error?.error || 'Error desconocido'));
+          this.toastService.error('Error al crear: ' + (err.error?.error || 'Error desconocido'));
         },
       });
     }

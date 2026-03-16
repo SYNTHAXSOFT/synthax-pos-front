@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DepartamentoService } from '../../services/departamento.service';
 import { Departamento } from '../../interfaces/departamento.interface';
+import { ToastService } from '../../../shared/services/toast.service';
+import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-listar-page',
@@ -15,6 +17,8 @@ import { Departamento } from '../../interfaces/departamento.interface';
 export class ListarPageComponent implements OnInit {
 
   private departamentoService = inject(DepartamentoService);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
   public departamentos: Departamento[] = [];
   public cargando: boolean = false;
   public searchTerm: string = '';
@@ -51,32 +55,32 @@ export class ListarPageComponent implements OnInit {
     });
   }
 
-  eliminar(id?: string): void {
+  async eliminar(id?: string): Promise<void> {
     if (!id) return;
-    if (confirm('¿Está seguro de eliminar este departamento?')) {
-      this.departamentoService.eliminar(id).subscribe({
-        next: () => {
-          alert('Departamento eliminado');
-          this.cargarDepartamentos();
-        },
-        error: (error) => {
-          console.error('Error:', error);
-          alert('Error al eliminar');
-        }
-      });
-    }
+    const ok = await this.confirmService.confirm({ message: '¿Está seguro de eliminar este departamento?', type: 'danger' });
+    if (!ok) return;
+    this.departamentoService.eliminar(id).subscribe({
+      next: () => {
+        this.toastService.success('Departamento eliminado');
+        this.cargarDepartamentos();
+      },
+      error: (error) => {
+        console.error('Error:', error);
+        this.toastService.error('Error al eliminar');
+      }
+    });
   }
 
   desactivar(id?: string): void {
     if (!id) return;
     this.departamentoService.desactivar(id).subscribe({
       next: () => {
-        alert('Departamento desactivado');
+        this.toastService.success('Departamento desactivado');
         this.cargarDepartamentos();
       },
       error: (error) => {
         console.error('Error:', error);
-        alert('Error al desactivar');
+        this.toastService.error('Error al desactivar');
       }
     });
   }

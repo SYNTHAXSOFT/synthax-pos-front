@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MunicipioService } from '../../service/municipio.service';
 import { Municipio } from '../../interfaces/municipio.interface';
+import { ToastService } from '../../../shared/services/toast.service';
+import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-listar-municipio-page',
@@ -14,6 +16,8 @@ import { Municipio } from '../../interfaces/municipio.interface';
 export class ListarMunicipioPageComponent implements OnInit {
 
   private municipioService = inject(MunicipioService);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
   public municipios: Municipio[] = [];
   public cargando: boolean = false;
   public searchTerm: string = '';
@@ -49,30 +53,30 @@ export class ListarMunicipioPageComponent implements OnInit {
     });
   }
 
-  eliminar(id: number): void {
-    if (confirm('¿Está seguro de eliminar este municipio?')) {
-      this.municipioService.eliminar(id.toString()).subscribe({
-        next: () => {
-          alert('Municipio eliminado');
-          this.cargarMunicipios();
-        },
-        error: (error) => {
-          console.error('Error:', error);
-          alert('Error al eliminar');
-        }
-      });
-    }
+  async eliminar(id: number): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: '¿Está seguro de eliminar este municipio?', type: 'danger' });
+    if (!ok) return;
+    this.municipioService.eliminar(id.toString()).subscribe({
+      next: () => {
+        this.toastService.success('Municipio eliminado');
+        this.cargarMunicipios();
+      },
+      error: (error) => {
+        console.error('Error:', error);
+        this.toastService.error('Error al eliminar');
+      }
+    });
   }
 
   desactivar(id: number): void {
     this.municipioService.desactivar(id.toString()).subscribe({
       next: () => {
-        alert('Municipio desactivado');
+        this.toastService.success('Municipio desactivado');
         this.cargarMunicipios();
       },
       error: (error) => {
         console.error('Error:', error);
-        alert('Error al desactivar');
+        this.toastService.error('Error al desactivar');
       }
     });
   }

@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MesaService } from '../../services/mesa.service';
 import { Mesa } from '../../interfaces/mesa.interface';
 import { MesaListarPageComponent } from '../mesa-listar/mesa-listar';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-mesa-registrar',
@@ -17,6 +18,7 @@ export class MesaRegistrarPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly mesaService = inject(MesaService);
   private readonly route = inject(ActivatedRoute);
+  private readonly toastService = inject(ToastService);
 
   @ViewChild(MesaListarPageComponent) listarComponent?: MesaListarPageComponent;
 
@@ -54,25 +56,25 @@ export class MesaRegistrarPageComponent implements OnInit {
     if (this.editando && this.mesaId) {
       this.mesaService.actualizar(this.mesaId, mesa).subscribe({
         next: () => {
-          alert('Mesa actualizada exitosamente');
+          this.toastService.success('Mesa actualizada exitosamente');
           this.resetForm();
           this.listarComponent?.cargarMesas();
         },
         error: (err) => {
           console.error('Error:', err);
-          alert('Error al actualizar: ' + (err.error?.error || 'Error desconocido'));
+          this.toastService.error('Error al actualizar: ' + (err.error?.error || 'Error desconocido'));
         },
       });
     } else {
       this.mesaService.crear(mesa).subscribe({
         next: () => {
-          alert('Mesa creada exitosamente');
+          this.toastService.success('Mesa creada exitosamente');
           this.resetForm();
           this.listarComponent?.cargarMesas();
         },
         error: (err) => {
           console.error('Error:', err);
-          alert('Error al crear: ' + (err.error?.error || 'Error desconocido'));
+          this.toastService.error('Error al crear: ' + (err.error?.error || 'Error desconocido'));
         },
       });
     }

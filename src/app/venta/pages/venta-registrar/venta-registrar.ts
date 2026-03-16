@@ -11,6 +11,7 @@ import { Mesa } from '../../../mesa/interfaces/mesa.interface';
 import { TipoPedido } from '../../../tipo-pedido/interfaces/tipo-pedido.interface';
 import { Usuario } from '../../../usuario/interfaces/usuario.interface';
 import { VentaListarPageComponent } from '../venta-listar/venta-listar';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-venta-registrar',
@@ -26,6 +27,7 @@ export class VentaRegistrarPageComponent implements OnInit {
   private readonly tipoPedidoService= inject(TipoPedidoService);
   private readonly usuarioService   = inject(UsuarioService);
   private readonly authService      = inject(AuthService);
+  private readonly toastService     = inject(ToastService);
 
   @ViewChild(VentaListarPageComponent) listarComponent?: VentaListarPageComponent;
 
@@ -57,7 +59,7 @@ export class VentaRegistrarPageComponent implements OnInit {
   onSave(): void {
     // Si solicitó factura, el cliente es obligatorio
     if (this.solicitaFactura && !this.myForm.value.usuarioClienteId) {
-      alert('Debe seleccionar un cliente cuando se solicita factura electrónica.');
+      this.toastService.warning('Debe seleccionar un cliente cuando se solicita factura electrónica.');
       return;
     }
 
@@ -70,7 +72,7 @@ export class VentaRegistrarPageComponent implements OnInit {
     const currentUserId = this.authService.getUserId();
 
     if (!currentUserId) {
-      alert('No se pudo obtener el usuario activo. Por favor inicie sesión nuevamente.');
+      this.toastService.warning('No se pudo obtener el usuario activo. Por favor inicie sesión nuevamente.');
       return;
     }
 
@@ -86,13 +88,13 @@ export class VentaRegistrarPageComponent implements OnInit {
 
     this.ventaService.crear(payload).subscribe({
       next: () => {
-        alert('Venta creada exitosamente');
+        this.toastService.success('Venta creada exitosamente');
         this.myForm.reset({ solicitaFacturaElectronica: false });
         this.listarComponent?.cargarVentas();
       },
       error: (err) => {
         console.error('Error:', err);
-        alert('Error al crear la venta: ' + (err.error?.error || 'Error desconocido'));
+        this.toastService.error('Error al crear la venta: ' + (err.error?.error || 'Error desconocido'));
       },
     });
   }

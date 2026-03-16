@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TipoPedidoService } from '../../services/tipo-pedido.service';
 import { TipoPedido } from '../../interfaces/tipo-pedido.interface';
 import { TipoPedidoListarPageComponent } from '../tipo-pedido-listar/tipo-pedido-listar';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-tipo-pedido-registrar',
@@ -17,6 +18,7 @@ export class TipoPedidoRegistrarPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly tipoPedidoService = inject(TipoPedidoService);
   private readonly route = inject(ActivatedRoute);
+  private readonly toastService = inject(ToastService);
 
   @ViewChild(TipoPedidoListarPageComponent) listarComponent?: TipoPedidoListarPageComponent;
 
@@ -54,25 +56,25 @@ export class TipoPedidoRegistrarPageComponent implements OnInit {
     if (this.editando && this.tipoPedidoId) {
       this.tipoPedidoService.actualizar(this.tipoPedidoId, tipoPedido).subscribe({
         next: () => {
-          alert('Tipo de pedido actualizado exitosamente');
+          this.toastService.success('Tipo de pedido actualizado exitosamente');
           this.resetForm();
           this.listarComponent?.cargarTiposPedido();
         },
         error: (err) => {
           console.error('Error:', err);
-          alert('Error al actualizar: ' + (err.error?.error || 'Error desconocido'));
+          this.toastService.error('Error al actualizar: ' + (err.error?.error || 'Error desconocido'));
         },
       });
     } else {
       this.tipoPedidoService.crear(tipoPedido).subscribe({
         next: () => {
-          alert('Tipo de pedido creado exitosamente');
+          this.toastService.success('Tipo de pedido creado exitosamente');
           this.resetForm();
           this.listarComponent?.cargarTiposPedido();
         },
         error: (err) => {
           console.error('Error:', err);
-          alert('Error al crear: ' + (err.error?.error || 'Error desconocido'));
+          this.toastService.error('Error al crear: ' + (err.error?.error || 'Error desconocido'));
         },
       });
     }

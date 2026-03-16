@@ -6,6 +6,7 @@ import { RestauranteService } from '../../services/restaurante.service';
 import { BrandingService } from '../../../shared/services/branding.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Restaurante } from '../../interfaces/restaurante.interface';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-restaurante-branding',
@@ -21,6 +22,7 @@ export class RestauranteBrandingComponent implements OnInit {
   private readonly brandingService    = inject(BrandingService);
   private readonly authService        = inject(AuthService);
   private readonly route              = inject(ActivatedRoute);
+  private readonly toastService       = inject(ToastService);
 
   restaurante: Restaurante | null = null;
   cargando     = false;
@@ -78,11 +80,11 @@ export class RestauranteBrandingComponent implements OnInit {
 
     // Validar tipo y tamaño (máx. 2 MB)
     if (!file.type.startsWith('image/')) {
-      alert('Por favor selecciona un archivo de imagen (PNG, JPG, SVG).');
+      this.toastService.warning('Por favor selecciona un archivo de imagen (PNG, JPG, SVG).');
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      alert('El logo no debe superar 2 MB.');
+      this.toastService.warning('El logo no debe superar 2 MB.');
       return;
     }
 
@@ -142,7 +144,7 @@ export class RestauranteBrandingComponent implements OnInit {
         setTimeout(() => this.exito = false, 3000);
       },
       error: (err) => {
-        alert('Error al guardar: ' + (err.error?.error ?? 'Error desconocido'));
+        this.toastService.error('Error al guardar: ' + (err.error?.error ?? 'Error desconocido'));
         this.guardando = false;
       },
     });

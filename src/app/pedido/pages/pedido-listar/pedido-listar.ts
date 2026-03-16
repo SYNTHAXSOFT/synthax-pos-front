@@ -2,6 +2,8 @@ import { Component, inject, Input, OnChanges, OnInit, SimpleChanges } from '@ang
 import { CommonModule } from '@angular/common';
 import { PedidoService } from '../../services/pedido.service';
 import { Pedido } from '../../interfaces/pedido.interface';
+import { ToastService } from '../../../shared/services/toast.service';
+import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-pedido-listar',
@@ -12,6 +14,8 @@ import { Pedido } from '../../interfaces/pedido.interface';
 })
 export class PedidoListarPageComponent implements OnInit, OnChanges {
   private readonly pedidoService = inject(PedidoService);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
 
   @Input() ventaId?: number;
 
@@ -40,12 +44,13 @@ export class PedidoListarPageComponent implements OnInit, OnChanges {
     });
   }
 
-  cancelarItem(id?: number): void {
+  async cancelarItem(id?: number): Promise<void> {
     if (!id) return;
-    if (!confirm('¿Desea cancelar este ítem del pedido?')) return;
+    const ok = await this.confirmService.confirm({ message: '¿Desea cancelar este ítem del pedido?', type: 'danger' });
+    if (!ok) return;
     this.pedidoService.cancelarItem(id).subscribe({
-      next: () => { alert('Ítem cancelado'); this.cargarPedidos(); },
-      error: (err) => { alert('Error: ' + (err.error?.error || 'No se pudo cancelar el ítem')); },
+      next: () => { this.toastService.success('Ítem cancelado'); this.cargarPedidos(); },
+      error: (err) => { this.toastService.error('Error: ' + (err.error?.error || 'No se pudo cancelar el ítem')); },
     });
   }
 

@@ -6,6 +6,7 @@ import { DepartamentoService } from '../../../departamento/services/departamento
 import { Municipio } from '../../interfaces/municipio.interface';
 import { Departamento } from '../../../departamento/interfaces/departamento.interface';
 import { ListarMunicipioPageComponent } from '../municipio-listar/municipio-listar';
+import { ToastService } from '../../../shared/services/toast.service';
 
 
 @Component({
@@ -22,6 +23,7 @@ export class RegistrarMunicipioPageComponent implements OnInit {
   private fb = inject(FormBuilder);
   private municipioService = inject(MunicipioService);
   private departamentoService = inject(DepartamentoService);
+  private readonly toastService = inject(ToastService);
 
   public departamentos: Departamento[] = [];
   public myForm: FormGroup = this.fb.group({
@@ -59,16 +61,16 @@ export class RegistrarMunicipioPageComponent implements OnInit {
 
     this.municipioService.crearMunicipio(municipio).subscribe({
       next: (response) => {
-        alert('Municipio creado exitosamente');
+        this.toastService.success('Municipio creado exitosamente');
         this.myForm.reset({ activo: true });
-        
+
         if (this.listarComponent) {
           this.listarComponent.cargarMunicipios();
         }
       },
       error: (error) => {
         console.error('Error:', error);
-        alert('Error al crear municipio: ' + (error.error?.error || 'Error desconocido'));
+        this.toastService.error('Error al crear municipio: ' + (error.error?.error || 'Error desconocido'));
       }
     });
   }

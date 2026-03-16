@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RestauranteService } from '../../services/restaurante.service';
 import { Restaurante } from '../../interfaces/restaurante.interface';
+import { ToastService } from '../../../shared/services/toast.service';
+import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-restaurante-listar',
@@ -14,6 +16,8 @@ import { Restaurante } from '../../interfaces/restaurante.interface';
 export class RestauranteListarPageComponent implements OnInit {
   private readonly restauranteService = inject(RestauranteService);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
 
   public restaurantes: Restaurante[] = [];
   public cargando: boolean = false;
@@ -49,16 +53,17 @@ export class RestauranteListarPageComponent implements OnInit {
     this.router.navigate(['/synthax-pos/restaurante/branding'], { queryParams: { id } });
   }
 
-  desactivar(id?: number): void {
+  async desactivar(id?: number): Promise<void> {
     if (!id) return;
-    if (!confirm('¿Desea desactivar este restaurante?')) return;
+    const ok = await this.confirmService.confirm({ message: '¿Desea desactivar este restaurante?', type: 'danger' });
+    if (!ok) return;
     this.restauranteService.desactivar(id).subscribe({
       next: () => {
-        alert('Restaurante desactivado');
+        this.toastService.success('Restaurante desactivado');
         this.cargarRestaurantes();
       },
       error: (err) => {
-        alert('Error: ' + (err.error?.error || 'No se pudo desactivar'));
+        this.toastService.error('Error: ' + (err.error?.error || 'No se pudo desactivar'));
       },
     });
   }

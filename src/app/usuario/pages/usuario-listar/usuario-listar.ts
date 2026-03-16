@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { UsuarioService } from '../../services/usuario.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Usuario } from '../../interfaces/usuario.interface';
+import { ToastService } from '../../../shared/services/toast.service';
+import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-listar-page',
@@ -18,6 +20,8 @@ export class ListarPage implements OnInit {
 
   private readonly usuarioService = inject(UsuarioService);
   private readonly authService    = inject(AuthService);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
 
   isLoading    = signal(false);
   isError      = signal(false);
@@ -127,20 +131,21 @@ export class ListarPage implements OnInit {
     return false;
   }
 
-  activarInactivar(usuario: Usuario): void {
+  async activarInactivar(usuario: Usuario): Promise<void> {
     if (!this.puedeModificar(usuario)) {
-      alert('No tienes permisos para modificar este usuario');
+      this.toastService.warning('No tienes permisos para modificar este usuario');
       return;
     }
     const accion = usuario.activo ? 'desactivar' : 'activar';
-    if (!confirm(`¿Seguro de ${accion} este usuario?`)) return;
+    const ok = await this.confirmService.confirm({ message: `¿Seguro de ${accion} este usuario?`, type: 'danger' });
+    if (!ok) return;
 
     usuario.activo = !usuario.activo;
     this.usuarioService.activarInactivar(usuario).subscribe({
       next: () => this.listarAction(),
       error: (err) => {
         usuario.activo = !usuario.activo;
-        alert('Error: ' + (err.error?.error ?? 'Error desconocido'));
+        this.toastService.error('Error: ' + (err.error?.error ?? 'Error desconocido'));
       },
     });
   }

@@ -9,6 +9,7 @@ import { Restaurante } from '../../../restaurante/interfaces/restaurante.interfa
 import { Insumo } from '../../../insumo/interfaces/insumo.interface';
 import { CompraListarPageComponent } from '../compra-listar/compra-listar';
 import { AuthService } from '../../../auth/services/auth.service';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-compra-registrar',
@@ -23,6 +24,7 @@ export class CompraRegistrarPageComponent implements OnInit {
   private readonly restauranteService = inject(RestauranteService);
   private readonly insumoService      = inject(InsumoService);
   private readonly authService        = inject(AuthService);
+  private readonly toastService       = inject(ToastService);
 
   @ViewChild(CompraListarPageComponent) listarComponent?: CompraListarPageComponent;
 
@@ -97,7 +99,7 @@ export class CompraRegistrarPageComponent implements OnInit {
 
     this.compraService.crear(payload).subscribe({
       next: () => {
-        alert('Compra registrada. Stock del insumo actualizado automáticamente.');
+        this.toastService.success('Compra registrada. Stock del insumo actualizado automáticamente.');
         // Mantener el restaurante seleccionado para no-ROOT
         const restauranteId = this.esRoot ? null : (this.authService.getRestauranteId() ?? null);
         this.myForm.reset({ restauranteId });
@@ -111,7 +113,7 @@ export class CompraRegistrarPageComponent implements OnInit {
         }
         this.listarComponent?.cargarCompras();
       },
-      error: (err) => alert('Error: ' + (err.error?.error || 'Error desconocido')),
+      error: (err) => this.toastService.error('Error: ' + (err.error?.error || 'Error desconocido')),
     });
   }
 

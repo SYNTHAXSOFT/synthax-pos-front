@@ -324,9 +324,42 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 640px) {
-  .spx-geo { padding: 1rem; }
-  .spx-geo-stats { flex-direction: column; }
+
+/* Tablet (≤900px) */
+@media (max-width: 900px) {
+  .spx-geo { padding: 1.25rem 1rem; }
+  .spx-geo-search-bar,
+  .spx-geo-search-wrap .spx-geo-search { max-width: 100%; }
+}
+
+/* Mobile (≤600px) */
+@media (max-width: 600px) {
+  .spx-geo { padding: 1rem 0.875rem; }
+
+  /* Header: stack title + button */
+  .spx-geo-header { flex-direction: column; align-items: flex-start; gap: 0.625rem; }
+  .spx-geo-btn-refresh { align-self: flex-start; }
+
+  /* Stats: 3 cols compactos */
+  .spx-geo-stats { gap: 0.5rem; }
+  .spx-geo-stat { padding: 0.625rem 0.875rem; min-width: 0; }
+  .spx-geo-stat__value { font-size: 1.1rem; }
+
+  /* Search: ancho completo */
+  .spx-geo-search-bar { max-width: 100%; }
+  .spx-geo-search-wrap .spx-geo-search { max-width: 100%; }
+
+  /* Tabla: scroll horizontal */
+  .spx-geo-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .spx-geo-table { min-width: 480px; }
+
+  /* Ocultar columnas menos críticas en pantallas muy pequeñas */
+  .spx-geo-table thead th:first-child,
+  .spx-geo-row td:first-child { min-width: 80px; }
+
+  /* Botones de acción: solo icono en mobile */
+  .spx-geo-btn-edit span,
+  .spx-geo-btn-deact span { display: none; }
 }
 
 /* ══ Aliases / extensiones para páginas tipo-pedido e impuesto ══ */
