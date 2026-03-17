@@ -133,7 +133,7 @@
                       Pedidos
                     </button>
                     @if (venta.estado === 'ABIERTA') {
-                      <button class="spx-venta-btn spx-venta-btn--success" (click)="cerrar(venta.id)" title="Cerrar venta">
+                      <button class="spx-venta-btn spx-venta-btn--success" (click)="abrirModalCerrar(venta)" title="Cerrar venta">
                         <i class="fa-solid fa-cash-register"></i>
                         Cerrar
                       </button>
@@ -163,3 +163,119 @@
   }
 
 </div>
+
+<!-- ══ Modal: Cerrar Venta ══════════════════════════════════════════════════ -->
+@if (modalCerrar) {
+  <div class="spx-modal-overlay" (click)="cerrarModal()">
+    <div class="spx-modal" (click)="$event.stopPropagation()">
+
+      <!-- Header del modal -->
+      <div class="spx-modal__header">
+        <div class="spx-modal__icon">
+          <i class="fa-solid fa-cash-register"></i>
+        </div>
+        <div>
+          <p class="spx-modal__title">Cerrar Venta</p>
+          <p class="spx-modal__subtitle">Venta {{ ventaCierreNumero }}</p>
+        </div>
+        <button class="spx-modal__close" (click)="cerrarModal()" title="Cancelar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Cuerpo del modal -->
+      <div class="spx-modal__body">
+
+        <!-- Aviso de descuento de insumos -->
+        <div class="spx-modal__info">
+          <i class="fa-solid fa-flask-vial"></i>
+          <span>Al cerrar, se descontará automáticamente el stock de insumos según la receta de cada producto vendido.</span>
+        </div>
+
+        <!-- Spinner de carga -->
+        @if (cargandoModalData) {
+          <div class="spx-modal__loading">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            <span>Calculando totales...</span>
+          </div>
+        } @else {
+
+          <!-- Impuestos disponibles -->
+          @if (impuestosDisponibles.length > 0) {
+            <div class="spx-modal__section">
+              <p class="spx-modal__section-title">
+                <i class="fa-solid fa-percent"></i>
+                Impuestos aplicables
+              </p>
+              <div class="spx-modal__tax-list">
+                @for (imp of impuestosDisponibles; track imp.id) {
+                  <label class="spx-modal__tax-item"
+                         [class.spx-modal__tax-item--selected]="impuestosSeleccionados.has(imp.id!)">
+                    <input
+                      type="checkbox"
+                      class="spx-modal__tax-check"
+                      [checked]="impuestosSeleccionados.has(imp.id!)"
+                      (change)="toggleImpuesto(imp.id!)"
+                    />
+                    <span class="spx-modal__tax-name">{{ imp.descripcion }}</span>
+                    <span class="spx-modal__tax-pct">{{ imp.porcentajeImpuesto }}%</span>
+                  </label>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Resumen de totales -->
+          <div class="spx-modal__summary">
+            <div class="spx-modal__summary-row">
+              <span class="spx-modal__summary-label">Subtotal</span>
+              <span class="spx-modal__summary-value">$ {{ subtotalCierre | number:'1.0-0' }}</span>
+            </div>
+
+            @for (linea of totalImpuestosAplicados; track linea.impuesto.id) {
+              <div class="spx-modal__summary-row spx-modal__summary-row--tax">
+                <span class="spx-modal__summary-label">
+                  {{ linea.impuesto.descripcion }}
+                  <span class="spx-modal__summary-pct">({{ linea.impuesto.porcentajeImpuesto }}%)</span>
+                </span>
+                <span class="spx-modal__summary-value spx-modal__summary-value--tax">
+                  + $ {{ linea.valor | number:'1.0-0' }}
+                </span>
+              </div>
+            }
+
+            <div class="spx-modal__summary-divider"></div>
+
+            <div class="spx-modal__summary-row spx-modal__summary-row--total">
+              <span class="spx-modal__summary-label--total">
+                <i class="fa-solid fa-coins"></i>
+                Total a cobrar
+              </span>
+              <span class="spx-modal__summary-value--total">
+                $ {{ totalConImpuestos | number:'1.0-0' }}
+              </span>
+            </div>
+          </div>
+
+        }
+      </div>
+
+      <!-- Acciones -->
+      <div class="spx-modal__footer">
+        <button class="spx-venta-btn spx-venta-btn--cancel" (click)="cerrarModal()">
+          <i class="fa-solid fa-xmark"></i> Cancelar
+        </button>
+        <button class="spx-venta-btn spx-venta-btn--confirm"
+                (click)="confirmarCierre()"
+                [disabled]="cerrandoVenta || cargandoModalData">
+          @if (cerrandoVenta) {
+            <i class="fa-solid fa-spinner fa-spin"></i> Cerrando...
+          } @else {
+            <i class="fa-solid fa-lock"></i> Confirmar · $ {{ totalConImpuestos | number:'1.0-0' }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+<!-- ════════════════════════════════════════════════════════════════════════ -->

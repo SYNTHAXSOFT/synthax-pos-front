@@ -60,11 +60,34 @@
             }
           </div>
 
-          <!-- Imagen URL -->
+          <!-- Imagen (subir desde dispositivo) -->
           <div class="spx-form-group spx-form-col-span-3">
-            <label class="spx-form-label">URL de imagen <span style="color:#64748b;font-weight:400">(opcional)</span></label>
-            <input type="text" class="spx-form-input" placeholder="https://..."
-              formControlName="imagen">
+            <label class="spx-form-label">Imagen del producto <span style="color:#64748b;font-weight:400">(opcional · máx. 2 MB)</span></label>
+
+            <!-- Zona de carga / vista previa -->
+            @if (!imagenPreview) {
+              <!-- Botón para seleccionar archivo -->
+              <label class="spx-img-upload-zone" for="fileInputProducto">
+                <i class="fa-solid fa-cloud-arrow-up spx-img-upload-zone__icon"></i>
+                <span class="spx-img-upload-zone__text">Haz clic para seleccionar una imagen</span>
+                <span class="spx-img-upload-zone__hint">PNG, JPG, WEBP — máx. 2 MB</span>
+                <input
+                  id="fileInputProducto"
+                  type="file"
+                  accept="image/*"
+                  style="display:none"
+                  (change)="onFileSelected($event)"
+                />
+              </label>
+            } @else {
+              <!-- Vista previa de la imagen seleccionada -->
+              <div class="spx-img-preview">
+                <img [src]="imagenPreview" alt="Vista previa" class="spx-img-preview__img" />
+                <button type="button" class="spx-img-preview__remove" (click)="quitarImagen()" title="Quitar imagen">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            }
           </div>
 
           <!-- Activo -->
@@ -76,15 +99,88 @@
           </div>
         </div>
 
+        <!-- ══ Sección Receta / Insumos ═══════════════════════════════════ -->
+        <div class="spx-receta">
+          <div class="spx-receta__header">
+            <div class="spx-receta__header-icon"><i class="fa-solid fa-flask-vial"></i></div>
+            <div>
+              <p class="spx-receta__title">Receta del producto</p>
+              <p class="spx-receta__subtitle">Insumos que se descuentan del stock al vender este producto</p>
+            </div>
+          </div>
+
+          <!-- Selector para agregar insumo -->
+          <div class="spx-receta__add-row">
+            <div class="spx-form-group" style="flex:1; min-width:0">
+              <label class="spx-form-label">Insumo</label>
+              <select class="spx-form-select" [(ngModel)]="insumoSeleccionadoId" [ngModelOptions]="{standalone:true}">
+                <option [ngValue]="null" disabled>— Seleccionar insumo —</option>
+                @for (ins of insumos; track ins.id) {
+                  <option [ngValue]="ins.id">{{ ins.descripcion }} ({{ ins.medida }}) · Stock: {{ ins.stock }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="spx-form-group" style="width:9rem; flex-shrink:0">
+              <label class="spx-form-label">Cantidad</label>
+              <input type="number" class="spx-form-input" min="0.001" step="0.001"
+                     [(ngModel)]="cantidadInsumo" [ngModelOptions]="{standalone:true}" placeholder="0">
+            </div>
+
+            <div style="padding-top:1.6rem; flex-shrink:0">
+              <button type="button" class="spx-receta__btn-add" (click)="agregarInsumo()">
+                <i class="fa-solid fa-plus"></i> Agregar
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabla de insumos en la receta -->
+          @if (receta.length > 0) {
+            <div class="spx-receta__table-wrap">
+              <table class="spx-receta__table">
+                <thead>
+                  <tr>
+                    <th>Insumo</th>
+                    <th>Medida</th>
+                    <th class="spx-receta__th-num">Cantidad por unidad</th>
+                    <th style="width:3rem"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (linea of receta; track $index) {
+                    <tr>
+                      <td>{{ linea.insumo.descripcion }}</td>
+                      <td><span class="spx-receta__badge">{{ linea.insumo.medida }}</span></td>
+                      <td class="spx-receta__th-num">{{ linea.cantidad }}</td>
+                      <td>
+                        <button type="button" class="spx-receta__btn-remove" (click)="quitarInsumo($index)" title="Quitar">
+                          <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <p class="spx-receta__empty">Sin insumos configurados — el stock no se descuentará al vender este producto</p>
+          }
+        </div>
+        <!-- ════════════════════════════════════════════════════════════════ -->
+
         <div class="spx-form-actions">
           @if (editando) {
             <button type="button" class="spx-form-btn-cancel" (click)="resetForm()">
               <i class="fa-solid fa-xmark"></i> Cancelar
             </button>
           }
-          <button type="submit" class="spx-form-btn-submit">
-            <i class="fa-solid fa-floppy-disk"></i>
-            {{ editando ? 'Actualizar' : 'Guardar Producto' }}
+          <button type="submit" class="spx-form-btn-submit" [disabled]="guardandoReceta">
+            @if (guardandoReceta) {
+              <i class="fa-solid fa-spinner fa-spin"></i> Guardando...
+            } @else {
+              <i class="fa-solid fa-floppy-disk"></i>
+              {{ editando ? 'Actualizar' : 'Guardar Producto' }}
+            }
           </button>
         </div>
       </form>
