@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CompraService } from '../../services/compra.service';
@@ -10,28 +10,54 @@ import { Insumo } from '../../../insumo/interfaces/insumo.interface';
 import { CompraListarPageComponent } from '../compra-listar/compra-listar';
 import { AuthService } from '../../../auth/services/auth.service';
 import { ToastService } from '../../../shared/services/toast.service';
+import { FormaPagoService } from '../../../forma-pago/services/forma-pago.service';
+import { FormaPago } from '../../../forma-pago/interfaces/forma-pago.interface';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-compra-registrar',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CompraListarPageComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, CompraListarPageComponent],
   templateUrl: './compra-registrar.html',
-  styleUrls: ['../../../shared/styles/spx-forms.css'],
+  styleUrls: [
+    '../../../shared/styles/spx-forms.css',
+    './compra-registrar.css',
+  ],
 })
-export class CompraRegistrarPageComponent implements OnInit {
+export class CompraRegistrarPageComponent implements OnInit, OnDestroy {
   private readonly fb                 = inject(FormBuilder);
   private readonly compraService      = inject(CompraService);
   private readonly restauranteService = inject(RestauranteService);
   private readonly insumoService      = inject(InsumoService);
   private readonly authService        = inject(AuthService);
   private readonly toastService       = inject(ToastService);
+  private readonly formaPagoService   = inject(FormaPagoService);
 
   @ViewChild(CompraListarPageComponent) listarComponent?: CompraListarPageComponent;
 
-  public restaurantes: Restaurante[] = [];
-  public insumos:      Insumo[]      = [];
+  public restaurantes:             Restaurante[] = [];
+  public insumos:                  Insumo[]      = [];
+  public formasPago:               FormaPago[]   = [];
+  public formaPagoSeleccionadaId:  number | null = null;
   /** true si el usuario es ROOT y puede elegir cualquier restaurante */
   public esRoot: boolean = false;
+
+  /** Control de visibilidad del modal */
+  public modalAbierto: boolean = false;
+
+  abrirModal(): void {
+    this.modalAbierto = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  cerrarModal(): void {
+    this.modalAbierto = false;
+    document.body.style.overflow = '';
+  }
+
+  ngOnDestroy(): void {
+    document.body.style.overflow = '';
+  }
 
   public myForm: FormGroup = this.fb.group({
     codigo:        ['', [Validators.required, Validators.minLength(2)]],
@@ -51,6 +77,9 @@ export class CompraRegistrarPageComponent implements OnInit {
   ngOnInit(): void {
     const rol = this.authService.getUserRole();
     this.esRoot = (rol === 'ROOT');
+
+    // Cargar formas de pago siempre
+    this.formaPagoService.obtenerActivas().subscribe({ next: (d) => this.formasPago = d });
 
     if (this.esRoot) {
       // ROOT puede elegir cualquier restaurante
@@ -86,6 +115,10 @@ export class CompraRegistrarPageComponent implements OnInit {
       this.myForm.markAllAsTouched();
       return;
     }
+    if (!this.formaPagoSeleccionadaId) {
+      this.toastService.error('Debe seleccionar una forma de pago.');
+      return;
+    }
     const v = this.myForm.value;
     const payload: CompraRequest = {
       codigo:      v.codigo,
@@ -94,14 +127,17 @@ export class CompraRegistrarPageComponent implements OnInit {
       valorTotal:  this.subtotal,
       insumo:      { id: v.insumoId },
       restaurante: { id: v.restauranteId },
+      formaPago:   { id: this.formaPagoSeleccionadaId },
       activo:      true,
     };
 
     this.compraService.crear(payload).subscribe({
       next: () => {
         this.toastService.success('Compra registrada. Stock del insumo actualizado automáticamente.');
+        this.cerrarModal();
         // Mantener el restaurante seleccionado para no-ROOT
         const restauranteId = this.esRoot ? null : (this.authService.getRestauranteId() ?? null);
+        this.formaPagoSeleccionadaId = null;
         this.myForm.reset({ restauranteId });
         if (!this.esRoot && restauranteId) {
           // Recargar insumos del restaurante
@@ -111,6 +147,8 @@ export class CompraRegistrarPageComponent implements OnInit {
         } else {
           this.insumos = [];
         }
+        // Recargar saldos actualizados de formas de pago
+        this.formaPagoService.obtenerActivas().subscribe({ next: (d) => this.formasPago = d });
         this.listarComponent?.cargarCompras();
       },
       error: (err) => this.toastService.error('Error: ' + (err.error?.error || 'Error desconocido')),

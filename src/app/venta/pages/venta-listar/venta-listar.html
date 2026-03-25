@@ -6,7 +6,7 @@
       <h1 class="spx-venta-header__title">Ventas</h1>
       <p class="spx-venta-header__sub">Historial y gestión de ventas del restaurante</p>
     </div>
-    <button class="spx-venta-btn-primary" (click)="filtrarPorEstado('')">
+    <button class="spx-venta-btn-primary" (click)="actualizar()">
       <i class="fa-solid fa-rotate-right"></i>
       Actualizar
     </button>
@@ -17,7 +17,7 @@
     <div class="spx-venta-stat">
       <div class="spx-venta-stat__icon"><i class="fa-solid fa-receipt"></i></div>
       <div>
-        <span class="spx-venta-stat__value">{{ ventas.length }}</span>
+        <span class="spx-venta-stat__value">{{ ventasMostradas.length }}</span>
         <span class="spx-venta-stat__label">Total</span>
       </div>
     </div>
@@ -44,20 +44,78 @@
     </div>
   </div>
 
-  <!-- Filter Pills -->
-  <div class="spx-venta-pills">
-    <button class="spx-venta-pill" [class.spx-venta-pill--active]="estadoFiltro === ''"
-      (click)="filtrarPorEstado('')">Todas</button>
-    @for (estado of estadosVenta; track estado) {
-      <button class="spx-venta-pill"
-        [class.spx-venta-pill--active]="estadoFiltro === estado"
-        [class.spx-venta-pill--open]="estado === 'ABIERTA'"
-        [class.spx-venta-pill--paid]="estado === 'PAGADA'"
-        [class.spx-venta-pill--void]="estado === 'ANULADA'"
-        (click)="filtrarPorEstado(estado)">
-        {{ estado }}
+  <!-- Barra de filtros -->
+  <div class="spx-venta-filterbar">
+
+    <!-- ─ Tabs de estado (visibles para todos los roles) ─ -->
+    <div class="spx-venta-tabs">
+      <button class="spx-venta-tab"
+        [class.spx-venta-tab--active]="estadoFiltro === ''"
+        (click)="filtrarPorEstado('')">
+        <i class="fa-solid fa-receipt"></i>
+        Todas
+        <span class="spx-venta-tab__badge">{{ ventasFiltradas.length }}</span>
       </button>
-    }
+      <button class="spx-venta-tab spx-venta-tab--open"
+        [class.spx-venta-tab--active]="estadoFiltro === 'ABIERTA'"
+        (click)="filtrarPorEstado('ABIERTA')">
+        <i class="fa-solid fa-lock-open"></i>
+        Abiertas
+        <span class="spx-venta-tab__badge spx-venta-tab__badge--open">{{ totalAbiertas }}</span>
+      </button>
+      <button class="spx-venta-tab spx-venta-tab--paid"
+        [class.spx-venta-tab--active]="estadoFiltro === 'PAGADA'"
+        (click)="filtrarPorEstado('PAGADA')">
+        <i class="fa-solid fa-circle-check"></i>
+        Pagadas
+        <span class="spx-venta-tab__badge spx-venta-tab__badge--paid">{{ totalPagadas }}</span>
+      </button>
+      <button class="spx-venta-tab spx-venta-tab--void"
+        [class.spx-venta-tab--active]="estadoFiltro === 'ANULADA'"
+        (click)="filtrarPorEstado('ANULADA')">
+        <i class="fa-solid fa-ban"></i>
+        Anuladas
+        <span class="spx-venta-tab__badge spx-venta-tab__badge--void">{{ totalAnuladas }}</span>
+      </button>
+    </div>
+
+    <!-- ─ Filtro de fechas ─ -->
+    <div class="spx-venta-dates">
+      @if (soloHoy) {
+        <!-- Badge informativo para roles operativos -->
+        <span class="spx-venta-dates__badge-hoy">
+          <i class="fa-solid fa-calendar-day"></i>
+          Solo ventas de hoy
+        </span>
+      } @else {
+        <!-- Selector de rango para PROPIETARIO / ADMINISTRADOR -->
+        <div class="spx-venta-daterange">
+          <div class="spx-venta-daterange__field">
+            <label class="spx-venta-daterange__label">
+              <i class="fa-solid fa-calendar-days"></i>
+              Desde
+            </label>
+            <input type="date" class="spx-venta-daterange__input"
+              [(ngModel)]="fechaDesde"
+              [max]="fechaHasta || ''">
+          </div>
+          <span class="spx-venta-daterange__sep">→</span>
+          <div class="spx-venta-daterange__field">
+            <label class="spx-venta-daterange__label">Hasta</label>
+            <input type="date" class="spx-venta-daterange__input"
+              [(ngModel)]="fechaHasta"
+              [min]="fechaDesde || ''">
+          </div>
+          @if (fechaDesde || fechaHasta) {
+            <button class="spx-venta-daterange__clear" (click)="limpiarFechas()" title="Limpiar filtro de fechas">
+              <i class="fa-solid fa-xmark"></i>
+              Limpiar
+            </button>
+          }
+        </div>
+      }
+    </div>
+
   </div>
 
   <!-- Loading -->
@@ -70,11 +128,22 @@
 
   <!-- Table -->
   @if (!cargando) {
-    @if (ventas.length === 0) {
+    @if (ventasMostradas.length === 0) {
       <div class="spx-venta-empty">
         <i class="fa-solid fa-receipt spx-venta-empty__icon"></i>
-        <p class="spx-venta-empty__msg">No hay ventas registradas</p>
-        <p class="spx-venta-empty__sub">Las ventas aparecerán aquí una vez creadas</p>
+        @if (soloHoy) {
+          <p class="spx-venta-empty__msg">No hay ventas hoy</p>
+          <p class="spx-venta-empty__sub">Aún no se han registrado ventas en el día de hoy</p>
+        } @else if (fechaDesde || fechaHasta) {
+          <p class="spx-venta-empty__msg">Sin resultados para el rango seleccionado</p>
+          <p class="spx-venta-empty__sub">Intenta ajustar las fechas o limpiar el filtro</p>
+        } @else if (estadoFiltro) {
+          <p class="spx-venta-empty__msg">No hay ventas con estado "{{ estadoFiltro | titlecase }}"</p>
+          <p class="spx-venta-empty__sub">Prueba seleccionando otra pestaña</p>
+        } @else {
+          <p class="spx-venta-empty__msg">No hay ventas registradas</p>
+          <p class="spx-venta-empty__sub">Las ventas aparecerán aquí una vez creadas</p>
+        }
       </div>
     } @else {
       <div class="spx-venta-table-wrap">
@@ -93,7 +162,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (venta of ventas; track venta.id) {
+            @for (venta of ventasMostradas; track venta.id) {
               <tr class="spx-venta-row" [class.spx-venta-row--void]="venta.estado === 'ANULADA'">
                 <td class="spx-venta-td spx-venta-td--id">#{{ venta.id }}</td>
                 <td class="spx-venta-td">
@@ -132,7 +201,7 @@
                       <i class="fa-solid fa-list-ul"></i>
                       Pedidos
                     </button>
-                    @if (venta.estado === 'ABIERTA') {
+                    @if (venta.estado === 'ABIERTA' && !esCocinero) {
                       <button class="spx-venta-btn spx-venta-btn--success" (click)="abrirModalCerrar(venta)" title="Cerrar venta">
                         <i class="fa-solid fa-cash-register"></i>
                         Cerrar
@@ -167,16 +236,21 @@
 <!-- ══ Modal: Cerrar Venta ══════════════════════════════════════════════════ -->
 @if (modalCerrar) {
   <div class="spx-modal-overlay" (click)="cerrarModal()">
-    <div class="spx-modal" (click)="$event.stopPropagation()">
+    <div class="spx-modal spx-modal--cierre" (click)="$event.stopPropagation()">
+
+      <!-- Barra de acento superior -->
+      <div class="spx-modal__accent-bar"></div>
 
       <!-- Header del modal -->
       <div class="spx-modal__header">
         <div class="spx-modal__icon">
           <i class="fa-solid fa-cash-register"></i>
         </div>
-        <div>
+        <div class="spx-modal__header-info">
           <p class="spx-modal__title">Cerrar Venta</p>
-          <p class="spx-modal__subtitle">Venta {{ ventaCierreNumero }}</p>
+          <p class="spx-modal__subtitle">
+            <span class="spx-modal__venta-id">{{ ventaCierreNumero }}</span>
+          </p>
         </div>
         <button class="spx-modal__close" (click)="cerrarModal()" title="Cancelar">
           <i class="fa-solid fa-xmark"></i>
@@ -186,12 +260,6 @@
       <!-- Cuerpo del modal -->
       <div class="spx-modal__body">
 
-        <!-- Aviso de descuento de insumos -->
-        <div class="spx-modal__info">
-          <i class="fa-solid fa-flask-vial"></i>
-          <span>Al cerrar, se descontará automáticamente el stock de insumos según la receta de cada producto vendido.</span>
-        </div>
-
         <!-- Spinner de carga -->
         @if (cargandoModalData) {
           <div class="spx-modal__loading">
@@ -200,7 +268,7 @@
           </div>
         } @else {
 
-          <!-- Impuestos disponibles -->
+          <!-- ── Impuestos ─────────────────────────────── -->
           @if (impuestosDisponibles.length > 0) {
             <div class="spx-modal__section">
               <p class="spx-modal__section-title">
@@ -211,12 +279,17 @@
                 @for (imp of impuestosDisponibles; track imp.id) {
                   <label class="spx-modal__tax-item"
                          [class.spx-modal__tax-item--selected]="impuestosSeleccionados.has(imp.id!)">
-                    <input
-                      type="checkbox"
-                      class="spx-modal__tax-check"
-                      [checked]="impuestosSeleccionados.has(imp.id!)"
-                      (change)="toggleImpuesto(imp.id!)"
-                    />
+                    <span class="spx-modal__tax-check-wrap">
+                      <input
+                        type="checkbox"
+                        class="spx-modal__tax-check"
+                        [checked]="impuestosSeleccionados.has(imp.id!)"
+                        (change)="toggleImpuesto(imp.id!)"
+                      />
+                      <span class="spx-modal__tax-check-icon">
+                        <i class="fa-solid fa-check"></i>
+                      </span>
+                    </span>
                     <span class="spx-modal__tax-name">{{ imp.descripcion }}</span>
                     <span class="spx-modal__tax-pct">{{ imp.porcentajeImpuesto }}%</span>
                   </label>
@@ -225,7 +298,79 @@
             </div>
           }
 
-          <!-- Resumen de totales -->
+          <!-- ── Forma de pago ─────────────────────────── -->
+          <div class="spx-modal__section">
+            <p class="spx-modal__section-title">
+              <i class="fa-solid fa-wallet"></i>
+              Forma de pago
+              <span class="spx-modal__required-dot">*</span>
+            </p>
+            @if (formasPago.length === 0) {
+              <div class="spx-modal__fp-empty">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>No hay formas de pago activas. Crea una en <strong>Formas de Pago</strong> antes de cerrar ventas.</span>
+              </div>
+            } @else {
+              <div class="spx-modal__fp-list">
+                @for (fp of formasPago; track fp.id) {
+                  <label class="spx-modal__fp-item"
+                    [class.spx-modal__fp-item--selected]="formaPagoSeleccionadaId === fp.id">
+                    <input type="radio" name="formaPago"
+                      class="spx-modal__fp-radio"
+                      [value]="fp.id"
+                      [(ngModel)]="formaPagoSeleccionadaId" />
+                    <span class="spx-modal__fp-radio-ui">
+                      <span class="spx-modal__fp-radio-dot"></span>
+                    </span>
+                    <i class="fa-solid fa-wallet spx-modal__fp-icon"></i>
+                    <span class="spx-modal__fp-nombre">{{ fp.nombre }}</span>
+                    <span class="spx-modal__fp-saldo">$ {{ fp.saldoActual | number:'1.0-0' }}</span>
+                  </label>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- ── Descuento ─────────────────────────────── -->
+          <div class="spx-modal__section">
+            <p class="spx-modal__section-title">
+              <i class="fa-solid fa-tag"></i>
+              Descuento
+            </p>
+            <div class="spx-modal__discount-row">
+              <select class="spx-modal__discount-select" [(ngModel)]="descuentoPct">
+                <option [value]="0">Sin descuento</option>
+                <option [value]="5">5%</option>
+                <option [value]="10">10%</option>
+                <option [value]="15">15%</option>
+                <option [value]="20">20%</option>
+                <option [value]="25">25%</option>
+                <option [value]="30">30%</option>
+                <option [value]="40">40%</option>
+                <option [value]="50">50%</option>
+                <option [value]="60">60%</option>
+                <option [value]="70">70%</option>
+                <option [value]="80">80%</option>
+                <option [value]="90">90%</option>
+                <option [value]="100">100%</option>
+              </select>
+              @if (descuentoPct > 0) {
+                <span class="spx-modal__discount-badge">
+                  − $ {{ valorDescuento | number:'1.0-0' }}
+                </span>
+              }
+            </div>
+            @if (descuentoPct > 0) {
+              <textarea
+                class="spx-modal__discount-obs"
+                rows="2"
+                placeholder="Motivo del descuento (requerido) *"
+                [(ngModel)]="motivoDescuento">
+              </textarea>
+            }
+          </div>
+
+          <!-- ── Resumen de totales ─────────────────────── -->
           <div class="spx-modal__summary">
             <div class="spx-modal__summary-row">
               <span class="spx-modal__summary-label">Subtotal</span>
@@ -244,16 +389,24 @@
               </div>
             }
 
-            <div class="spx-modal__summary-divider"></div>
+            @if (descuentoPct > 0) {
+              <div class="spx-modal__summary-row spx-modal__summary-row--discount">
+                <span class="spx-modal__summary-label">
+                  <i class="fa-solid fa-tag"></i>
+                  Descuento ({{ descuentoPct }}%)
+                </span>
+                <span class="spx-modal__summary-value spx-modal__summary-value--discount">
+                  − $ {{ valorDescuento | number:'1.0-0' }}
+                </span>
+              </div>
+            }
 
-            <div class="spx-modal__summary-row spx-modal__summary-row--total">
-              <span class="spx-modal__summary-label--total">
+            <div class="spx-modal__summary-total">
+              <div class="spx-modal__summary-total-left">
                 <i class="fa-solid fa-coins"></i>
-                Total a cobrar
-              </span>
-              <span class="spx-modal__summary-value--total">
-                $ {{ totalConImpuestos | number:'1.0-0' }}
-              </span>
+                <span>Total a cobrar</span>
+              </div>
+              <span class="spx-modal__summary-total-value">$ {{ totalFinal | number:'1.0-0' }}</span>
             </div>
           </div>
 
@@ -262,16 +415,19 @@
 
       <!-- Acciones -->
       <div class="spx-modal__footer">
-        <button class="spx-venta-btn spx-venta-btn--cancel" (click)="cerrarModal()">
-          <i class="fa-solid fa-xmark"></i> Cancelar
+        <button class="spx-modal__btn-cancel" (click)="cerrarModal()">
+          <i class="fa-solid fa-xmark"></i>
+          Cancelar
         </button>
-        <button class="spx-venta-btn spx-venta-btn--confirm"
+        <button class="spx-modal__btn-confirm"
                 (click)="confirmarCierre()"
                 [disabled]="cerrandoVenta || cargandoModalData">
           @if (cerrandoVenta) {
-            <i class="fa-solid fa-spinner fa-spin"></i> Cerrando...
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Procesando...
           } @else {
-            <i class="fa-solid fa-lock"></i> Confirmar · $ {{ totalConImpuestos | number:'1.0-0' }}
+            <i class="fa-solid fa-lock"></i>
+            Cobrar &nbsp;$ {{ totalFinal | number:'1.0-0' }}
           }
         </button>
       </div>
@@ -279,3 +435,29 @@
   </div>
 }
 <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+<!-- ══ Modal: ¿Imprimir tirilla? ═══════════════════════════════════════════ -->
+@if (mostrarModalImprimir) {
+  <div class="spx-modal-overlay" (click)="cerrarModalImprimir()">
+    <div class="spx-modal spx-modal--print" (click)="$event.stopPropagation()">
+      <div class="spx-modal__header">
+        <div class="spx-modal__icon spx-modal__icon--print">
+          <i class="fa-solid fa-receipt"></i>
+        </div>
+        <div>
+          <p class="spx-modal__title">Venta cerrada exitosamente</p>
+          <p class="spx-modal__subtitle">¿Desea imprimir la tirilla?</p>
+        </div>
+      </div>
+      <div class="spx-modal__footer spx-modal__footer--center">
+        <button class="spx-venta-btn spx-venta-btn--cancel" (click)="cerrarModalImprimir()">
+          <i class="fa-solid fa-xmark"></i> No, gracias
+        </button>
+        <button class="spx-venta-btn spx-venta-btn--confirm" (click)="imprimirTirilla()">
+          <i class="fa-solid fa-print"></i> Imprimir tirilla
+        </button>
+      </div>
+    </div>
+  </div>
+}
+

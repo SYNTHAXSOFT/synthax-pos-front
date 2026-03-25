@@ -812,3 +812,87 @@
   margin: 0;
   font-style: italic;
 }
+
+/* ── Forma de pago selector (compra-registrar) ─────────────────────────── */
+.spx-compra-fp {
+  margin-bottom: 1.25rem;
+}
+.spx-compra-fp__title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.spx-compra-fp__title i { color: #3b82f6; }
+.spx-compra-fp__empty {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+.spx-compra-fp__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.spx-compra-fp__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  font-size: 0.875rem;
+  color: #cbd5e1;
+}
+.spx-compra-fp__item input[type="radio"] { display: none; }
+.spx-compra-fp__item i { color: #64748b; font-size: 0.85rem; }
+.spx-compra-fp__item:hover {
+  background: rgba(59,130,246,0.1);
+  border-color: rgba(59,130,246,0.3);
+}
+.spx-compra-fp__item--selected {
+  background: rgba(59,130,246,0.15) !important;
+  border-color: #3b82f6 !important;
+  color: #e2e8f0;
+}
+.spx-compra-fp__item--selected i { color: #3b82f6; }
+.spx-compra-fp__nombre { font-weight: 500; }
+.spx-compra-fp__saldo {
+  font-size: 0.8rem;
+  color: #22c55e;
+  font-weight: 600;
+  margin-left: 0.25rem;
+}
+
+/* ── Radio visual para spx-compra-fp ───────────────── */
+.spx-compra-fp__radio-ui {
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 50%;
+  border: 2px solid #283543;
+  background: #0e1822;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+.spx-compra-fp__item--selected .spx-compra-fp__radio-ui {
+  border-color: #3b82f6;
+}
+.spx-compra-fp__radio-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #3b82f6;
+  transition: opacity 0.15s, transform 0.15s;
+}

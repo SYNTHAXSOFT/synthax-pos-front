@@ -18,7 +18,7 @@ import { ToastService } from '../../../shared/services/toast.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, VentaListarPageComponent],
   templateUrl: './venta-registrar.html',
-  styleUrls: ['../../../shared/styles/spx-forms.css'],
+  styleUrls: ['../../../shared/styles/spx-forms.css', './venta-registrar.css'],
 })
 export class VentaRegistrarPageComponent implements OnInit {
   private readonly fb               = inject(FormBuilder);
@@ -35,19 +35,36 @@ export class VentaRegistrarPageComponent implements OnInit {
   public tiposPedido: TipoPedido[]= [];
   public clientes:    Usuario[]   = [];
 
+  public modalNuevaVenta = false;
+
   public myForm: FormGroup = this.fb.group({
     tipoPedidoId:               [null, [Validators.required]],
     mesaId:                     [null],
     solicitaFacturaElectronica: [false],
     usuarioClienteId:           [null],
+    observacion:                [''],
   });
 
   ngOnInit(): void {
     this.cargarCatalogos();
   }
 
+  get esCocinero(): boolean {
+    return this.authService.getUserRole() === 'COCINERO';
+  }
+
   get solicitaFactura(): boolean {
     return !!this.myForm.get('solicitaFacturaElectronica')?.value;
+  }
+
+  /** Oculta el campo mesa cuando el tipo de pedido es Domicilio o Llevar */
+  get ocultarMesa(): boolean {
+    const id = this.myForm.get('tipoPedidoId')?.value;
+    if (!id) return false;
+    const tipo = this.tiposPedido.find(t => t.id === +id);
+    if (!tipo) return false;
+    const nombre = (tipo.nombre ?? '').toUpperCase();
+    return nombre.includes('DOMICILIO') || nombre.includes('LLEVAR');
   }
 
   cargarCatalogos(): void {
@@ -80,6 +97,7 @@ export class VentaRegistrarPageComponent implements OnInit {
       tipoPedido:                 { id: v.tipoPedidoId },
       usuarioCreador:             { id: currentUserId },
       solicitaFacturaElectronica: v.solicitaFacturaElectronica ?? false,
+      observacion:                v.observacion?.trim() || undefined,
       estado:                     'ABIERTA',
       activo:                     true,
       ...(v.mesaId           ? { mesa:           { id: v.mesaId           } } : {}),
@@ -89,7 +107,7 @@ export class VentaRegistrarPageComponent implements OnInit {
     this.ventaService.crear(payload).subscribe({
       next: () => {
         this.toastService.success('Venta creada exitosamente');
-        this.myForm.reset({ solicitaFacturaElectronica: false });
+        this.cerrarModalNuevaVenta();
         this.listarComponent?.cargarVentas();
       },
       error: (err) => {
@@ -97,6 +115,16 @@ export class VentaRegistrarPageComponent implements OnInit {
         this.toastService.error('Error al crear la venta: ' + (err.error?.error || 'Error desconocido'));
       },
     });
+  }
+
+  abrirModalNuevaVenta(): void {
+    this.myForm.reset({ solicitaFacturaElectronica: false });
+    this.modalNuevaVenta = true;
+  }
+
+  cerrarModalNuevaVenta(): void {
+    this.modalNuevaVenta = false;
+    this.myForm.reset({ solicitaFacturaElectronica: false });
   }
 
   isValidField(field: string): boolean | null {

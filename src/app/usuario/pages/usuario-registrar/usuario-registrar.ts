@@ -15,9 +15,9 @@ import { ToastService } from '../../../shared/services/toast.service';
 // Roles del POS — sincronizados con el enum Rol.java del backend
 // Cada rol solo puede crear usuarios con roles de menor jerarquía
 const ROLES_POR_ROL: Record<string, string[]> = {
-  ROOT:          ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'DOMICILIARIO'],
-  PROPIETARIO:   ['ADMINISTRADOR', 'CAJERO', 'MESERO', 'DOMICILIARIO'],
-  ADMINISTRADOR: ['CAJERO', 'MESERO', 'DOMICILIARIO'],
+  ROOT:          ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO'],
+  PROPIETARIO:   ['ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO'],
+  ADMINISTRADOR: ['CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO'],
 };
 
 @Component({

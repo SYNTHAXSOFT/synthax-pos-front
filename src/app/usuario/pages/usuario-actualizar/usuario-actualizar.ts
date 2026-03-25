@@ -7,7 +7,7 @@ import { Usuario } from '../../interfaces/usuario.interface';
 import { ToastService } from '../../../shared/services/toast.service';
 
 // Roles del POS — sincronizados con el enum Rol.java del backend
-const ROLES_POS = ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'DOMICILIARIO'];
+const ROLES_POS = ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO'];
 
 @Component({
   selector: 'app-actualizar-usuario',

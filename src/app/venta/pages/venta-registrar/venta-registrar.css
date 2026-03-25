@@ -1,0 +1,167 @@
+/* =============================================
+   SYNTHAX POS — Venta Registrar (modal)
+   ============================================= */
+
+/* ── Header de la página ─────────────────── */
+.spx-reg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* Botón Nueva Venta */
+.spx-reg-btn-nueva {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: #0d7ff2;
+  border: none;
+  border-radius: 0.625rem;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+.spx-reg-btn-nueva:hover  { background: #0b6dd4; }
+.spx-reg-btn-nueva:active { transform: scale(0.97); }
+
+/* ── Overlay ─────────────────────────────── */
+.spx-reg-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(3px);
+}
+
+/* ── Modal ───────────────────────────────── */
+.spx-reg-modal {
+  background: #1a242f;
+  border: 1px solid #283543;
+  border-radius: 0.875rem;
+  width: 100%;
+  max-width: 36rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+}
+
+.spx-reg-modal__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #283543;
+  position: sticky;
+  top: 0;
+  background: #1a242f;
+  z-index: 1;
+}
+
+.spx-reg-modal__icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  background: rgba(13, 127, 242, 0.12);
+  color: #0d7ff2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.spx-reg-modal__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.spx-reg-modal__subtitle {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.spx-reg-modal__close {
+  margin-left: auto;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid #283543;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: background 0.15s, color 0.15s;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+.spx-reg-modal__close:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.spx-reg-modal__body {
+  padding: 1.5rem;
+}
+
+/* ── Footer del modal ────────────────────── */
+.spx-reg-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1.25rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid #283543;
+}
+
+.spx-reg-btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  background: #1e2d3d;
+  border: 1px solid #283543;
+  color: #94a3b8;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.spx-reg-btn-cancel:hover { background: #283543; border-color: #64748b; color: #f1f5f9; }
+
+.spx-reg-btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.25rem;
+  background: #0d7ff2;
+  border: none;
+  color: #fff;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.spx-reg-btn-submit:hover { background: #0b6dd4; }

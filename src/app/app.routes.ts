@@ -17,8 +17,9 @@ import { RoleGuard } from './auth/guards/role.guard';
  *  Impuestos         | ROOT, PROPIETARIO, ADMINISTRADOR
  *  Insumos           | ROOT, PROPIETARIO, ADMINISTRADOR
  *  Compras           | ROOT, PROPIETARIO, ADMINISTRADOR
- *  Ventas            | ROOT, PROPIETARIO, ADMINISTRADOR, CAJERO, MESERO
- *  Pedidos           | ROOT, PROPIETARIO, ADMINISTRADOR, CAJERO, MESERO, DOMICILIARIO
+ *  Formas de Pago    | ROOT, PROPIETARIO, ADMINISTRADOR
+ *  Ventas            | ROOT, PROPIETARIO, ADMINISTRADOR, CAJERO, MESERO, COCINERO
+ *  Pedidos           | ROOT, PROPIETARIO, ADMINISTRADOR, CAJERO, MESERO, COCINERO, DOMICILIARIO
  *  Departamentos     | ROOT
  *  Municipios        | ROOT
  */
@@ -111,6 +112,14 @@ export const routes: Routes = [
         canActivate: [RoleGuard],
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
+      {
+        path: 'forma-pago',
+        title: 'Formas de Pago',
+        loadChildren: () =>
+          import('./forma-pago/forma-pago.routes').then((m) => m.formaPagoRoutes),
+        canActivate: [RoleGuard],
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
+      },
 
       // ── Catálogos POS ────────────────────────────────────────────────────────
       {
@@ -155,8 +164,8 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./venta/venta.routes').then((m) => m.ventaRoutes),
         canActivate: [RoleGuard],
-        // PROPIETARIO puede supervisar y controlar ventas
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO'] },
+        // Roles operativos ven ventas del día (solo lectura para COCINERO/MESERO/DOMICILIARIO)
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO'] },
       },
       {
         path: 'pedido',
@@ -164,7 +173,8 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./pedido/pedido.routes').then((m) => m.pedidoRoutes),
         canActivate: [RoleGuard],
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO'] },
+        // COCINERO puede ver los pedidos del día
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO'] },
       },
 
       { path: '**', redirectTo: 'inicio' },

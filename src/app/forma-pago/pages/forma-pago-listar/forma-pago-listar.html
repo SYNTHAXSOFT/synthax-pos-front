@@ -1,0 +1,274 @@
+<div class="spx-fp">
+
+  <!-- Header -->
+  <div class="spx-fp-header">
+    <div>
+      <h1 class="spx-fp-header__title">Formas de Pago</h1>
+      <p class="spx-fp-header__sub">Gestión de métodos de pago y seguimiento de saldos</p>
+    </div>
+    @if (esAdmin) {
+      <button class="spx-fp-btn-nueva" (click)="abrirModalNueva()">
+        <i class="fa-solid fa-plus"></i> Nueva Forma de Pago
+      </button>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (cargando) {
+    <div class="spx-fp-loading">
+      <div class="spx-fp-spinner"></div>
+      <p>Cargando formas de pago...</p>
+    </div>
+  }
+
+  <!-- Cards grid -->
+  @if (!cargando) {
+    @if (formasPago.length === 0) {
+      <div class="spx-fp-empty">
+        <i class="fa-solid fa-wallet spx-fp-empty__icon"></i>
+        <p class="spx-fp-empty__msg">No hay formas de pago registradas</p>
+        <p class="spx-fp-empty__sub">Crea la primera forma de pago para comenzar</p>
+      </div>
+    } @else {
+      <div class="spx-fp-grid">
+        @for (fp of formasPago; track fp.id) {
+          <div class="spx-fp-card" [class.spx-fp-card--inactive]="!fp.activo">
+
+            <!-- Card header -->
+            <div class="spx-fp-card__header">
+              <div class="spx-fp-card__icon">
+                <i class="fa-solid fa-wallet"></i>
+              </div>
+              <div class="spx-fp-card__info">
+                <p class="spx-fp-card__name">{{ fp.nombre }}</p>
+                @if (fp.descripcion) {
+                  <p class="spx-fp-card__desc">{{ fp.descripcion }}</p>
+                }
+              </div>
+              @if (!fp.activo) {
+                <span class="spx-fp-badge--inactiva">Inactiva</span>
+              }
+            </div>
+
+            <!-- Saldo -->
+            <div class="spx-fp-card__saldo">
+              <span class="spx-fp-card__saldo-label">Saldo actual</span>
+              <span class="spx-fp-card__saldo-value"
+                [class.spx-fp-card__saldo-value--neg]="(fp.saldoActual ?? 0) < 0">
+                $ {{ fp.saldoActual | number:'1.0-0' }}
+              </span>
+            </div>
+
+            <!-- Acciones -->
+            <div class="spx-fp-card__actions">
+              <button class="spx-fp-btn spx-fp-btn--hist" (click)="verHistorial(fp)" title="Ver historial">
+                <i class="fa-solid fa-clock-rotate-left"></i> Historial
+              </button>
+              @if (esAdmin && fp.activo) {
+                <button class="spx-fp-btn spx-fp-btn--edit" (click)="abrirAjuste(fp)" title="Ajustar saldo">
+                  <i class="fa-solid fa-sliders"></i> Ajustar
+                </button>
+                <button class="spx-fp-btn spx-fp-btn--del" (click)="desactivar(fp)" title="Desactivar">
+                  <i class="fa-solid fa-ban"></i>
+                </button>
+              }
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+  }
+
+</div>
+
+<!-- ══ Modal: Nueva Forma de Pago ══════════════════════════════════════════ -->
+@if (modalNueva) {
+  <div class="spx-fp-overlay" (click)="cerrarModalNueva()">
+    <div class="spx-fp-modal" (click)="$event.stopPropagation()">
+
+      <div class="spx-fp-modal__header">
+        <div class="spx-fp-modal__icon"><i class="fa-solid fa-wallet"></i></div>
+        <div>
+          <p class="spx-fp-modal__title">Nueva Forma de Pago</p>
+          <p class="spx-fp-modal__subtitle">Efectivo, Tarjeta, Transferencia, Nequi, etc.</p>
+        </div>
+        <button class="spx-fp-modal__close" (click)="cerrarModalNueva()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="spx-fp-modal__body">
+
+        <div class="spx-fp-form-group">
+          <label class="spx-fp-label">Nombre <span class="spx-fp-required">*</span></label>
+          <input class="spx-fp-input" type="text" placeholder="Ej: Efectivo, Tarjeta débito, Nequi..."
+            [(ngModel)]="nuevaNombre" />
+        </div>
+
+        <div class="spx-fp-form-group">
+          <label class="spx-fp-label">Descripción <span class="spx-fp-muted">(opcional)</span></label>
+          <input class="spx-fp-input" type="text" placeholder="Ej: Pagos en efectivo del restaurante"
+            [(ngModel)]="nuevaDescripcion" />
+        </div>
+
+        <div class="spx-fp-form-group">
+          <label class="spx-fp-label">Saldo inicial <span class="spx-fp-muted">(opcional)</span></label>
+          <div class="spx-fp-input-prefix">
+            <span class="spx-fp-prefix">$</span>
+            <input class="spx-fp-input spx-fp-input--prefixed" type="number" min="0"
+              [(ngModel)]="nuevaSaldoInicial" placeholder="0" />
+          </div>
+        </div>
+
+      </div>
+
+      <div class="spx-fp-modal__footer">
+        <button class="spx-fp-btn-cancel" (click)="cerrarModalNueva()">
+          <i class="fa-solid fa-xmark"></i> Cancelar
+        </button>
+        <button class="spx-fp-btn-submit" (click)="guardarNueva()" [disabled]="guardando">
+          @if (guardando) { <i class="fa-solid fa-spinner fa-spin"></i> Guardando... }
+          @else { <i class="fa-solid fa-check"></i> Crear }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ══ Modal: Ajuste de Saldo ══════════════════════════════════════════════ -->
+@if (modalAjuste && fpAjuste) {
+  <div class="spx-fp-overlay" (click)="cerrarAjuste()">
+    <div class="spx-fp-modal" (click)="$event.stopPropagation()">
+
+      <div class="spx-fp-modal__header">
+        <div class="spx-fp-modal__icon spx-fp-modal__icon--ajuste"><i class="fa-solid fa-sliders"></i></div>
+        <div>
+          <p class="spx-fp-modal__title">Ajustar Saldo</p>
+          <p class="spx-fp-modal__subtitle">{{ fpAjuste.nombre }}</p>
+        </div>
+        <button class="spx-fp-modal__close" (click)="cerrarAjuste()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="spx-fp-modal__body">
+
+        <div class="spx-fp-ajuste-actual">
+          <span class="spx-fp-ajuste-actual__label">Saldo actual</span>
+          <span class="spx-fp-ajuste-actual__value">$ {{ fpAjuste.saldoActual | number:'1.0-0' }}</span>
+        </div>
+
+        <div class="spx-fp-form-group">
+          <label class="spx-fp-label">Nuevo saldo <span class="spx-fp-required">*</span></label>
+          <div class="spx-fp-input-prefix">
+            <span class="spx-fp-prefix">$</span>
+            <input class="spx-fp-input spx-fp-input--prefixed" type="number"
+              [(ngModel)]="ajusteNuevoSaldo" placeholder="0" />
+          </div>
+        </div>
+
+        <div class="spx-fp-form-group">
+          <label class="spx-fp-label">Explicación del ajuste <span class="spx-fp-required">*</span></label>
+          <textarea class="spx-fp-input" rows="3"
+            placeholder="Ej: Conteo físico de caja al cierre del día..."
+            [(ngModel)]="ajusteExplicacion"></textarea>
+          <span class="spx-fp-hint-text">
+            <i class="fa-solid fa-circle-info"></i>
+            El historial de ajustes queda registrado con fecha, usuario y explicación.
+          </span>
+        </div>
+
+      </div>
+
+      <div class="spx-fp-modal__footer">
+        <button class="spx-fp-btn-cancel" (click)="cerrarAjuste()">
+          <i class="fa-solid fa-xmark"></i> Cancelar
+        </button>
+        <button class="spx-fp-btn-submit spx-fp-btn-submit--amber" (click)="confirmarAjuste()" [disabled]="ajustando">
+          @if (ajustando) { <i class="fa-solid fa-spinner fa-spin"></i> Ajustando... }
+          @else { <i class="fa-solid fa-sliders"></i> Confirmar ajuste }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ══ Modal: Historial de Movimientos ═════════════════════════════════════ -->
+@if (modalHistorial && fpHistorial) {
+  <div class="spx-fp-overlay" (click)="cerrarHistorial()">
+    <div class="spx-fp-modal spx-fp-modal--wide" (click)="$event.stopPropagation()">
+
+      <div class="spx-fp-modal__header">
+        <div class="spx-fp-modal__icon spx-fp-modal__icon--hist"><i class="fa-solid fa-clock-rotate-left"></i></div>
+        <div>
+          <p class="spx-fp-modal__title">Historial · {{ fpHistorial.nombre }}</p>
+          <p class="spx-fp-modal__subtitle">Saldo actual: $ {{ fpHistorial.saldoActual | number:'1.0-0' }}</p>
+        </div>
+        <button class="spx-fp-modal__close" (click)="cerrarHistorial()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="spx-fp-modal__body spx-fp-modal__body--scroll">
+
+        @if (cargandoMovs) {
+          <div class="spx-fp-loading" style="padding:2rem 0">
+            <div class="spx-fp-spinner"></div>
+          </div>
+        } @else if (movimientos.length === 0) {
+          <div class="spx-fp-empty" style="padding:2rem 0">
+            <i class="fa-solid fa-clock-rotate-left spx-fp-empty__icon"></i>
+            <p class="spx-fp-empty__msg">Sin movimientos registrados</p>
+          </div>
+        } @else {
+          <div class="spx-fp-movs">
+            @for (mov of movimientos; track mov.id) {
+              <div class="spx-fp-mov" [class.spx-fp-mov--ingreso]="(mov.valorMovimiento ?? 0) > 0"
+                                      [class.spx-fp-mov--egreso]="(mov.valorMovimiento ?? 0) < 0">
+
+                <div class="spx-fp-mov__icon">
+                  <i [class]="tipoIcon(mov.tipoMovimiento)"></i>
+                </div>
+
+                <div class="spx-fp-mov__body">
+                  <div class="spx-fp-mov__top">
+                    <span class="spx-fp-mov__tipo">{{ tipoLabel(mov.tipoMovimiento) }}</span>
+                    <span class="spx-fp-mov__valor"
+                      [class.spx-fp-mov__valor--pos]="(mov.valorMovimiento ?? 0) > 0"
+                      [class.spx-fp-mov__valor--neg]="(mov.valorMovimiento ?? 0) < 0">
+                      {{ (mov.valorMovimiento ?? 0) > 0 ? '+' : '' }}$ {{ mov.valorMovimiento | number:'1.0-0' }}
+                    </span>
+                  </div>
+                  <p class="spx-fp-mov__explicacion">{{ mov.explicacion }}</p>
+                  <div class="spx-fp-mov__meta">
+                    <span>{{ mov.fechaMovimiento | date:'dd/MM/yyyy HH:mm' }}</span>
+                    @if (mov.usuarioResponsable) {
+                      <span>· {{ mov.usuarioResponsable.nombre }} {{ mov.usuarioResponsable.apellido }}</span>
+                    }
+                    <span class="spx-fp-mov__saldos">
+                      $ {{ mov.saldoAnterior | number:'1.0-0' }}
+                      <i class="fa-solid fa-arrow-right" style="font-size:9px"></i>
+                      $ {{ mov.saldoNuevo | number:'1.0-0' }}
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+
+      <div class="spx-fp-modal__footer" style="justify-content:flex-end">
+        <button class="spx-fp-btn-cancel" (click)="cerrarHistorial()">
+          <i class="fa-solid fa-xmark"></i> Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

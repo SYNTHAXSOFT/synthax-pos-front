@@ -34,10 +34,26 @@ export class VentaService {
     return this.http.put<Venta>(`${this.base}/${id}`, venta);
   }
 
-  cerrarVenta(id: number, valorTotal: number, usuarioFacturadorId?: number): Observable<Venta> {
+  cerrarVenta(
+    id: number,
+    valorTotal: number,
+    usuarioFacturadorId?: number,
+    descuento?: number,
+    motivoDescuento?: string,
+    formaPagoId?: number,
+  ): Observable<Venta> {
     let params = new HttpParams().set('valorTotal', valorTotal.toString());
     if (usuarioFacturadorId != null) {
       params = params.set('usuarioFacturadorId', usuarioFacturadorId.toString());
+    }
+    if (descuento != null && descuento > 0) {
+      params = params.set('descuento', descuento.toString());
+    }
+    if (motivoDescuento) {
+      params = params.set('motivoDescuento', motivoDescuento);
+    }
+    if (formaPagoId != null) {
+      params = params.set('formaPagoId', formaPagoId.toString());
     }
     return this.http.patch<Venta>(`${this.base}/${id}/cerrar`, {}, { params });
   }

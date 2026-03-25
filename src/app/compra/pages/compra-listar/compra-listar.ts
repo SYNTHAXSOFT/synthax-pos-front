@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -22,6 +22,9 @@ export class CompraListarPageComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
 
   @Input() restauranteId?: number;
+  /** Cuando es true el botón "Nueva Compra" emite el evento en vez de navegar */
+  @Input() modoModal: boolean = false;
+  @Output() nuevaCompra = new EventEmitter<void>();
 
   public compras: Compra[] = [];
   public cargando: boolean = false;

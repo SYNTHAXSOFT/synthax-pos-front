@@ -12,6 +12,9 @@ import { ConfirmService } from '../../../shared/services/confirm.service';
 import { PedidoService } from '../../../pedido/services/pedido.service';
 import { ImpuestoService } from '../../../impuesto/services/impuesto.service';
 import { Impuesto } from '../../../impuesto/interfaces/impuesto.interface';
+import { Pedido } from '../../../pedido/interfaces/pedido.interface';
+import { FormaPagoService } from '../../../forma-pago/services/forma-pago.service';
+import { FormaPago } from '../../../forma-pago/interfaces/forma-pago.interface';
 
 @Component({
   selector: 'app-venta-listar',
@@ -21,18 +24,57 @@ import { Impuesto } from '../../../impuesto/interfaces/impuesto.interface';
   styleUrls: ['./venta-listar.css'],
 })
 export class VentaListarPageComponent implements OnInit {
-  private readonly ventaService    = inject(VentaService);
-  private readonly pedidoService   = inject(PedidoService);
-  private readonly impuestoService = inject(ImpuestoService);
-  private readonly router          = inject(Router);
-  private readonly authService     = inject(AuthService);
-  private readonly toastService    = inject(ToastService);
-  private readonly confirmService  = inject(ConfirmService);
+  private readonly ventaService      = inject(VentaService);
+  private readonly pedidoService     = inject(PedidoService);
+  private readonly impuestoService   = inject(ImpuestoService);
+  private readonly formaPagoService  = inject(FormaPagoService);
+  private readonly router            = inject(Router);
+  private readonly authService       = inject(AuthService);
+  private readonly toastService      = inject(ToastService);
+  private readonly confirmService    = inject(ConfirmService);
 
-  public ventas: Venta[]      = [];
-  public cargando: boolean    = false;
-  public estadoFiltro: string = '';
+  public ventas: Venta[]       = [];
+  public cargando: boolean     = false;
+  public estadoFiltro: string  = '';
   public readonly estadosVenta = ESTADOS_VENTA;
+
+  /** Rango de fechas para PROPIETARIO y ADMINISTRADOR */
+  public fechaDesde: string = '';
+  public fechaHasta: string = '';
+
+  /** Ventas visibles tras aplicar filtros de fecha y estado (cliente-side) */
+  get ventasMostradas(): Venta[] {
+    let lista = this.ventas;
+
+    if (this.soloHoy) {
+      // Roles operativos: solo ven las ventas del día de hoy
+      const ahora = new Date();
+      lista = lista.filter(v => {
+        if (!v.fechaCreacion) return false;
+        const fecha = new Date(v.fechaCreacion);
+        return fecha.getFullYear() === ahora.getFullYear() &&
+               fecha.getMonth()    === ahora.getMonth()    &&
+               fecha.getDate()     === ahora.getDate();
+      });
+    } else {
+      // PROPIETARIO / ADMINISTRADOR: filtro por rango de fechas
+      if (this.fechaDesde) {
+        const desde = new Date(this.fechaDesde + 'T00:00:00');
+        lista = lista.filter(v => v.fechaCreacion ? new Date(v.fechaCreacion) >= desde : false);
+      }
+      if (this.fechaHasta) {
+        const hasta = new Date(this.fechaHasta + 'T23:59:59');
+        lista = lista.filter(v => v.fechaCreacion ? new Date(v.fechaCreacion) <= hasta : false);
+      }
+    }
+
+    // Filtro por estado
+    if (this.estadoFiltro) {
+      lista = lista.filter(v => v.estado === this.estadoFiltro);
+    }
+
+    return lista;
+  }
 
   // ── Modal de cierre ───────────────────────────────────────────────────────
   public modalCerrar: boolean        = false;
@@ -41,10 +83,26 @@ export class VentaListarPageComponent implements OnInit {
   public cerrandoVenta: boolean      = false;
   public cargandoModalData: boolean  = false;
 
-  // ── Subtotal e impuestos ──────────────────────────────────────────────────
+  // ── Subtotal, impuestos y descuento ───────────────────────────────────────
   public subtotalCierre: number = 0;
   public impuestosDisponibles: Impuesto[] = [];
   public impuestosSeleccionados: Set<number> = new Set();
+  public descuentoPct: number = 0;
+  public motivoDescuento: string = '';
+
+  // ── Formas de pago ────────────────────────────────────────────────────────
+  public formasPago: FormaPago[]        = [];
+  public formaPagoSeleccionadaId: number | null = null;
+
+  // ── Datos para impresión de tirilla ──────────────────────────────────────
+  public mostrarModalImprimir: boolean = false;
+  public ventaParaImprimir?: Venta;
+  public pedidosParaImprimir: Pedido[] = [];
+  public impuestosParaImprimir: { impuesto: Impuesto; valor: number }[] = [];
+  public subtotalParaImprimir: number = 0;
+  public descuentoValorParaImprimir: number = 0;
+  public totalParaImprimir: number = 0;
+  public fechaImpresion: Date = new Date();
 
   // ── Totales calculados (getters) ──────────────────────────────────────────
   get totalImpuestosAplicados(): { impuesto: Impuesto; valor: number }[] {
@@ -61,34 +119,86 @@ export class VentaListarPageComponent implements OnInit {
     return this.subtotalCierre + sumaImpuestos;
   }
 
+  get valorDescuento(): number {
+    if (!this.descuentoPct || this.descuentoPct <= 0) return 0;
+    return Math.round(this.totalConImpuestos * (this.descuentoPct / 100));
+  }
+
+  get totalFinal(): number {
+    return this.totalConImpuestos - this.valorDescuento;
+  }
+
   // ─────────────────────────────────────────────────────────────────────────
+
+  /** Roles que solo pueden ver las ventas del día de hoy */
+  get soloHoy(): boolean {
+    const rol = this.authService.getUserRole() ?? '';
+    return ['CAJERO', 'COCINERO', 'MESERO', 'DOMICILIARIO'].includes(rol);
+  }
+
+  /** El cocinero solo puede ver ventas y pedidos, no crear ni cerrar/anular */
+  get esCocinero(): boolean {
+    return this.authService.getUserRole() === 'COCINERO';
+  }
 
   ngOnInit(): void {
     this.cargarVentas();
   }
 
+  /** Limpia el rango de fechas (PROPIETARIO / ADMINISTRADOR) */
+  limpiarFechas(): void {
+    this.fechaDesde = '';
+    this.fechaHasta = '';
+  }
+
   cargarVentas(): void {
     this.cargando = true;
-    const obs = this.estadoFiltro
-      ? this.ventaService.obtenerPorEstado(this.estadoFiltro)
-      : this.ventaService.obtenerTodos();
-
-    obs.subscribe({
+    this.ventaService.obtenerTodos().subscribe({
       next:  (data) => { this.ventas = data; this.cargando = false; },
       error: (err)  => { console.error('Error al cargar ventas:', err); this.cargando = false; },
     });
   }
 
-  filtrarPorEstado(estado: string): void {
-    this.estadoFiltro = estado;
+  /** Recarga desde API y mantiene los filtros activos */
+  actualizar(): void {
     this.cargarVentas();
   }
 
-  get totalAbiertas(): number { return this.ventas.filter(v => v.estado === 'ABIERTA').length; }
-  get totalPagadas(): number  { return this.ventas.filter(v => v.estado === 'PAGADA').length; }
-  get totalAnuladas(): number { return this.ventas.filter(v => v.estado === 'ANULADA').length; }
+  filtrarPorEstado(estado: string): void {
+    this.estadoFiltro = estado;
+  }
+
+  // Stats sobre el conjunto filtrado por fecha (sin filtro de estado para mostrar conteos reales)
+  get ventasFiltradas(): Venta[] {
+    // Igual que ventasMostradas pero sin el filtro de estado
+    let lista = this.ventas;
+    if (this.soloHoy) {
+      const ahora = new Date();
+      lista = lista.filter(v => {
+        if (!v.fechaCreacion) return false;
+        const fecha = new Date(v.fechaCreacion);
+        return fecha.getFullYear() === ahora.getFullYear() &&
+               fecha.getMonth()    === ahora.getMonth()    &&
+               fecha.getDate()     === ahora.getDate();
+      });
+    } else {
+      if (this.fechaDesde) {
+        const desde = new Date(this.fechaDesde + 'T00:00:00');
+        lista = lista.filter(v => v.fechaCreacion ? new Date(v.fechaCreacion) >= desde : false);
+      }
+      if (this.fechaHasta) {
+        const hasta = new Date(this.fechaHasta + 'T23:59:59');
+        lista = lista.filter(v => v.fechaCreacion ? new Date(v.fechaCreacion) <= hasta : false);
+      }
+    }
+    return lista;
+  }
+
+  get totalAbiertas(): number { return this.ventasFiltradas.filter(v => v.estado === 'ABIERTA').length; }
+  get totalPagadas(): number  { return this.ventasFiltradas.filter(v => v.estado === 'PAGADA').length; }
+  get totalAnuladas(): number { return this.ventasFiltradas.filter(v => v.estado === 'ANULADA').length; }
   get totalIngresos(): number {
-    return this.ventas
+    return this.ventasMostradas
       .filter(v => v.estado === 'PAGADA')
       .reduce((sum, v) => sum + (v.valorTotal ?? 0), 0);
   }
@@ -114,28 +224,31 @@ export class VentaListarPageComponent implements OnInit {
   // ── Apertura del modal de cierre ──────────────────────────────────────────
 
   abrirModalCerrar(venta: Venta): void {
-    this.ventaCierreId       = venta.id ?? null;
-    this.ventaCierreNumero   = venta.codigo ?? `#${venta.id}`;
-    this.subtotalCierre      = 0;
-    this.impuestosDisponibles = [];
+    this.ventaCierreId          = venta.id ?? null;
+    this.ventaCierreNumero      = venta.codigo ?? `#${venta.id}`;
+    this.subtotalCierre         = 0;
+    this.impuestosDisponibles   = [];
     this.impuestosSeleccionados = new Set();
-    this.cargandoModalData   = true;
-    this.modalCerrar         = true;
+    this.descuentoPct           = 0;
+    this.motivoDescuento        = '';
+    this.cargandoModalData      = true;
+    this.formaPagoSeleccionadaId = null;
+    this.modalCerrar             = true;
 
-    // Cargar pedidos e impuestos en paralelo
     forkJoin({
-      pedidos:   this.pedidoService.obtenerActivosPorVenta(venta.id!),
-      impuestos: this.impuestoService.obtenerActivos(),
+      pedidos:     this.pedidoService.obtenerActivosPorVenta(venta.id!),
+      impuestos:   this.impuestoService.obtenerActivos(),
+      formasPago:  this.formaPagoService.obtenerActivas(),
     }).subscribe({
-      next: ({ pedidos, impuestos }) => {
-        // Calcular subtotal: sum(cantidad × precio del producto)
+      next: ({ pedidos, impuestos, formasPago }) => {
+        this.pedidosParaImprimir = pedidos as Pedido[];
         this.subtotalCierre = pedidos.reduce((sum, p) => {
-          const precio   = p.producto?.precio  ?? 0;
-          const cantidad = p.cantidad           ?? 0;
+          const precio   = p.producto?.precio ?? 0;
+          const cantidad = p.cantidad         ?? 0;
           return sum + precio * cantidad;
         }, 0);
-
         this.impuestosDisponibles = impuestos;
+        this.formasPago           = formasPago;
         this.cargandoModalData    = false;
       },
       error: (err) => {
@@ -155,6 +268,10 @@ export class VentaListarPageComponent implements OnInit {
     this.subtotalCierre          = 0;
     this.impuestosDisponibles    = [];
     this.impuestosSeleccionados  = new Set();
+    this.descuentoPct            = 0;
+    this.motivoDescuento         = '';
+    this.formaPagoSeleccionadaId = null;
+    this.formasPago              = [];
   }
 
   toggleImpuesto(id: number): void {
@@ -170,21 +287,223 @@ export class VentaListarPageComponent implements OnInit {
   confirmarCierre(): void {
     if (!this.ventaCierreId) return;
     if (this.cargandoModalData) return;
+    if (!this.formaPagoSeleccionadaId) {
+      this.toastService.warning('Debes seleccionar una forma de pago.');
+      return;
+    }
+    if (this.descuentoPct > 0 && !this.motivoDescuento.trim()) {
+      this.toastService.warning('Debes ingresar el motivo del descuento.');
+      return;
+    }
 
     this.cerrandoVenta = true;
     const facturadorId = this.authService.getUserId() ?? undefined;
 
-    this.ventaService.cerrarVenta(this.ventaCierreId, this.totalConImpuestos, facturadorId).subscribe({
-      next: () => {
+    // Capturamos datos para la tirilla antes de cerrar el modal
+    const ventaEnCierre = this.ventasAbiertas?.find(v => v.id === this.ventaCierreId);
+
+    this.ventaService.cerrarVenta(
+      this.ventaCierreId,
+      this.totalFinal,
+      facturadorId,
+      this.descuentoPct > 0 ? this.descuentoPct : undefined,
+      this.motivoDescuento.trim() || undefined,
+      this.formaPagoSeleccionadaId ?? undefined,
+    ).subscribe({
+      next: (ventaCerrada) => {
         this.toastService.success('Venta cerrada · Stock de insumos actualizado');
+
+        // Preparar datos de impresión
+        this.ventaParaImprimir          = ventaCerrada ?? ventaEnCierre;
+        this.impuestosParaImprimir      = [...this.totalImpuestosAplicados];
+        this.subtotalParaImprimir       = this.subtotalCierre;
+        this.descuentoValorParaImprimir = this.valorDescuento;
+        this.totalParaImprimir          = this.totalFinal;
+        this.fechaImpresion             = new Date();
+
         this.cerrarModal();
         this.cargarVentas();
+        this.mostrarModalImprimir = true;
       },
       error: (err) => {
         this.cerrandoVenta = false;
         this.toastService.error('Error: ' + (err.error?.error || 'No se pudo cerrar la venta'));
       },
     });
+  }
+
+  imprimirTirilla(): void {
+    const venta = this.ventaParaImprimir;
+    if (!venta) return;
+
+    /* ── Helpers de formato ── */
+    const fmt = (n: number) =>
+      new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
+
+    const fmtDate = (d: Date) => {
+      const dd  = String(d.getDate()).padStart(2, '0');
+      const mm  = String(d.getMonth() + 1).padStart(2, '0');
+      const yy  = d.getFullYear();
+      const hh  = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${dd}/${mm}/${yy} ${hh}:${min}`;
+    };
+
+    /* ── Bloques de HTML ── */
+    const itemsHtml = this.pedidosParaImprimir.map(p => {
+      const precio   = p.producto?.precio ?? 0;
+      const cantidad = p.cantidad ?? 1;
+      const obsHtml  = p.observacion
+        ? `<br><small style="font-size:9px;color:#555;">↳ ${p.observacion}</small>`
+        : '';
+      return `<tr>
+        <td style="padding:3px 0;vertical-align:top;">${p.producto?.nombre ?? ''}${obsHtml}</td>
+        <td style="text-align:center;padding:3px 2px;vertical-align:top;">${cantidad}</td>
+        <td style="text-align:right;padding:3px 0;vertical-align:top;">$ ${fmt(precio * cantidad)}</td>
+      </tr>`;
+    }).join('');
+
+    const impuestosHtml = this.impuestosParaImprimir.map(t =>
+      `<div style="display:flex;justify-content:space-between;font-size:11px;margin:2px 0;">
+        <span>${t.impuesto.descripcion} (${t.impuesto.porcentajeImpuesto}%)</span>
+        <span>+ $ ${fmt(t.valor)}</span>
+      </div>`
+    ).join('');
+
+    const descuentoHtml = this.descuentoValorParaImprimir > 0
+      ? `<div style="display:flex;justify-content:space-between;font-size:11px;margin:2px 0;font-weight:600;">
+           <span>Descuento (${venta.descuento}%)</span>
+           <span>- $ ${fmt(this.descuentoValorParaImprimir)}</span>
+         </div>
+         ${venta.motivoDescuento
+           ? `<div style="font-size:9px;color:#555;font-style:italic;margin:1px 0 4px 8px;">${venta.motivoDescuento}</div>`
+           : ''}`
+      : '';
+
+    const mesaHtml    = venta.mesa?.nombre
+      ? `<p style="font-size:11px;margin:2px 0;">Mesa: ${venta.mesa.nombre}</p>` : '';
+    const creadorHtml = venta.usuarioCreador
+      ? `<div style="display:flex;justify-content:space-between;font-size:10px;margin:2px 0;">
+           <span>Atendido por</span>
+           <span>${venta.usuarioCreador.nombre} ${venta.usuarioCreador.apellido}</span>
+         </div>` : '';
+    const clienteHtml = venta.usuarioCliente
+      ? `<div style="display:flex;justify-content:space-between;font-size:10px;margin:2px 0;">
+           <span>Cliente</span>
+           <span>${venta.usuarioCliente.nombre} ${venta.usuarioCliente.apellido}</span>
+         </div>` : '';
+    const obsVentaHtml = venta.observacion
+      ? `<div style="font-size:10px;margin:6px 0;padding:4px 0;border-top:1px dashed #000;">
+           <strong>Instrucciones:</strong> ${venta.observacion}
+         </div>` : '';
+
+    /* ── HTML completo de la tirilla ── */
+    const html = `<!DOCTYPE html>
+<html lang="es"><head>
+  <meta charset="UTF-8">
+  <title>Tirilla #${venta.id}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 80mm; max-width: 80mm;
+      margin: 0 auto; padding: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px; color: #000; background: #fff;
+    }
+    @media print {
+      body { width: 80mm; margin: 0; padding: 8px; }
+      @page { size: 80mm auto; margin: 0; }
+    }
+    table { width: 100%; border-collapse: collapse; }
+    .div  { border-top: 1px dashed #000; margin: 6px 0; }
+    .divB { border-top: 2px solid  #000; margin: 6px 0; }
+  </style>
+</head><body>
+
+  <div style="text-align:center;margin-bottom:8px;">
+    <div style="font-size:24px;margin-bottom:4px;">&#127869;</div>
+    <h2 style="font-size:16px;font-weight:700;margin:0 0 2px 0;text-transform:uppercase;letter-spacing:2px;">SYNTHAX POS</h2>
+    <p style="font-size:12px;font-weight:600;margin:2px 0;text-transform:uppercase;">${venta.tipoPedido?.nombre ?? ''}</p>
+    ${mesaHtml}
+  </div>
+
+  <div class="div"></div>
+
+  <div style="margin:4px 0;">
+    <div style="display:flex;justify-content:space-between;font-size:10px;margin:2px 0;">
+      <span>Ticket #</span><span>${venta.id}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;margin:2px 0;">
+      <span>Fecha</span><span>${fmtDate(this.fechaImpresion)}</span>
+    </div>
+    ${creadorHtml}
+    ${clienteHtml}
+  </div>
+
+  <div class="div"></div>
+
+  <table style="font-size:11px;margin:4px 0;">
+    <thead>
+      <tr style="border-bottom:1px dashed #000;">
+        <th style="text-align:left;padding:2px 0;">Producto</th>
+        <th style="text-align:center;padding:2px;">Cant.</th>
+        <th style="text-align:right;padding:2px 0;">Total</th>
+      </tr>
+    </thead>
+    <tbody>${itemsHtml}</tbody>
+  </table>
+
+  <div class="div"></div>
+
+  <div style="margin:4px 0;">
+    <div style="display:flex;justify-content:space-between;font-size:11px;margin:2px 0;">
+      <span>Subtotal</span><span>$ ${fmt(this.subtotalParaImprimir)}</span>
+    </div>
+    ${impuestosHtml}
+    ${descuentoHtml}
+  </div>
+
+  <div class="divB"></div>
+
+  <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;padding:4px 0;letter-spacing:1px;">
+    <span>TOTAL</span><span>$ ${fmt(this.totalParaImprimir)}</span>
+  </div>
+
+  <div class="divB"></div>
+
+  ${obsVentaHtml}
+
+  <div style="text-align:center;margin-top:10px;font-size:11px;">
+    <p style="margin:2px 0;">¡Gracias por su compra!</p>
+    <p style="margin:2px 0;">SYNTHAX POS</p>
+  </div>
+
+</body></html>`;
+
+    /* ── Abrir ventana emergente y lanzar impresión ── */
+    const win = window.open('', '_blank', 'width=420,height=650,scrollbars=yes');
+    if (!win) {
+      this.toastService.warning('El navegador bloqueó la ventana emergente. Permita ventanas emergentes para este sitio e intente de nuevo.');
+      return;
+    }
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(() => {
+      win.print();
+      win.close();
+    }, 600);
+  }
+
+  cerrarModalImprimir(): void {
+    this.mostrarModalImprimir   = false;
+    this.ventaParaImprimir      = undefined;
+    this.pedidosParaImprimir    = [];
+  }
+
+  get ventasAbiertas(): Venta[] {
+    return this.ventas.filter(v => v.estado === 'ABIERTA');
   }
 
   getBadgeClass(estado?: string): string {

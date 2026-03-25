@@ -1,0 +1,412 @@
+/* =============================================
+   SYNTHAX POS — Pedido Registrar
+   ============================================= */
+
+:host {
+  --spx-bg:       #101922;
+  --spx-surface:  #1a242f;
+  --spx-surface2: #1e2d3d;
+  --spx-border:   #283543;
+  --spx-text:     #f1f5f9;
+  --spx-muted:    #64748b;
+  --spx-primary:  #0d7ff2;
+  --spx-ok:       #22c55e;
+  --spx-orange:   #f97316;
+  --spx-radius:   0.75rem;
+  display: block;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.spx-reg {
+  padding: 1.75rem 2rem;
+  background: var(--spx-bg);
+  min-height: 100%;
+  color: var(--spx-text);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ══ Banner de venta ══════════════════════════════════════════════════════ */
+.spx-reg-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: var(--spx-surface);
+  border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius);
+  padding: 1rem 1.5rem;
+  flex-wrap: wrap;
+}
+
+.spx-reg-banner__left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.spx-reg-banner__icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.625rem;
+  background: rgba(13, 127, 242, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: var(--spx-primary);
+  flex-shrink: 0;
+}
+
+.spx-reg-banner__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.spx-reg-banner__id {
+  font-size: 0.78rem;
+  color: var(--spx-muted);
+  font-weight: 500;
+}
+
+.spx-reg-banner__tipo {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--spx-text);
+  letter-spacing: -0.01em;
+}
+
+.spx-reg-banner__mesa {
+  font-size: 0.8rem;
+  color: var(--spx-primary);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.spx-reg-banner__obs {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: rgba(234, 179, 8, 0.08);
+  border: 1px solid rgba(234, 179, 8, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.875rem;
+  font-size: 0.85rem;
+  color: #fbbf24;
+  max-width: 28rem;
+  line-height: 1.45;
+}
+
+.spx-reg-banner__obs i {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  font-size: 0.875rem;
+}
+
+/* ══ Selector de venta ════════════════════════════════════════════════════ */
+.spx-reg-sel-venta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 32rem;
+}
+
+.spx-reg-sel-venta__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--spx-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.spx-reg-sel-venta__select {
+  background: var(--spx-surface);
+  border: 1px solid var(--spx-border);
+  color: var(--spx-text);
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.spx-reg-sel-venta__select:focus {
+  border-color: var(--spx-primary);
+}
+
+/* ══ Título de sección ════════════════════════════════════════════════════ */
+.spx-reg-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--spx-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+/* ══ Catálogo de productos ════════════════════════════════════════════════ */
+.spx-reg-catalog {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+  gap: 1rem;
+}
+
+/* ── Card ──────────────────────────────────────────────────────────────── */
+.spx-reg-card {
+  background: var(--spx-surface);
+  border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius);
+  display: flex;
+  gap: 0;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.spx-reg-card:hover {
+  border-color: #334155;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* Imagen */
+.spx-reg-card__img {
+  width: 5.5rem;
+  min-width: 5.5rem;
+  background: var(--spx-surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.spx-reg-card__img-el {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.spx-reg-card__img-ph {
+  font-size: 1.75rem;
+  color: var(--spx-muted);
+  opacity: 0.5;
+}
+
+/* Cuerpo */
+.spx-reg-card__body {
+  flex: 1;
+  min-width: 0;
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.spx-reg-card__header-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.spx-reg-card__name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--spx-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spx-reg-card__price {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--spx-ok);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.spx-reg-card__desc {
+  font-size: 0.8rem;
+  color: var(--spx-muted);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+
+/* Textarea de observación */
+.spx-reg-card__obs-input {
+  background: var(--spx-surface2);
+  border: 1px solid var(--spx-border);
+  border-radius: 0.5rem;
+  color: var(--spx-text);
+  font-size: 0.82rem;
+  font-family: inherit;
+  padding: 0.5rem 0.75rem;
+  resize: none;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.spx-reg-card__obs-input:focus {
+  border-color: var(--spx-primary);
+}
+
+.spx-reg-card__obs-input::placeholder {
+  color: var(--spx-muted);
+}
+
+/* Footer de acciones */
+.spx-reg-card__footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Botón Observación */
+.spx-reg-btn-obs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.4rem;
+  border: 1px solid var(--spx-border);
+  background: transparent;
+  color: var(--spx-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.spx-reg-btn-obs:hover,
+.spx-reg-btn-obs--active {
+  background: rgba(234, 179, 8, 0.12);
+  border-color: rgba(234, 179, 8, 0.4);
+  color: #fbbf24;
+}
+
+/* Contador de cantidad */
+.spx-reg-qty {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--spx-border);
+  border-radius: 0.4rem;
+  overflow: hidden;
+  margin-left: auto;
+}
+
+.spx-reg-qty__btn {
+  background: var(--spx-surface2);
+  border: none;
+  color: var(--spx-text);
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  transition: background 0.1s;
+  line-height: 1;
+}
+
+.spx-reg-qty__btn:hover:not(:disabled) {
+  background: #283543;
+}
+
+.spx-reg-qty__btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.spx-reg-qty__val {
+  min-width: 2rem;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--spx-text);
+  background: var(--spx-surface);
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid var(--spx-border);
+  border-right: 1px solid var(--spx-border);
+}
+
+/* Botón Agregar */
+.spx-reg-btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.4rem;
+  border: none;
+  background: var(--spx-primary);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+
+.spx-reg-btn-add:hover:not(:disabled) {
+  background: #0a6fd6;
+}
+
+.spx-reg-btn-add:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* ══ Contenedor del listado de pedidos ════════════════════════════════════ */
+.spx-reg-pedidos {
+  margin-top: 0.5rem;
+}
+
+/* ══ Responsive ═══════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .spx-reg {
+    padding: 1rem;
+  }
+
+  .spx-reg-catalog {
+    grid-template-columns: 1fr;
+  }
+
+  .spx-reg-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .spx-reg-banner__obs {
+    max-width: 100%;
+  }
+}

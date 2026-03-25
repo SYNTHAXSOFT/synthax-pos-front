@@ -18,16 +18,21 @@ export function authInterceptor(): HttpInterceptorFn {
 
     const token  = localStorage.getItem('auth_token');
     const rawUser = localStorage.getItem('current_user');
-    const userId  = rawUser ? JSON.parse(rawUser)?.id : null;
+    const parsedUser = rawUser ? JSON.parse(rawUser) : null;
+    const userId  = parsedUser?.id ?? null;
+    const userRol = parsedUser?.rol ?? null;
 
     if (token && !isLogin) {
       const headers: Record<string, string> = {
         Authorization: `Bearer ${token}`,
       };
 
-      // Añadir Usuario-Id si existe (requerido por los endpoints de gestión)
+      // Añadir Usuario-Id y Usuario-Rol (requeridos por los endpoints de gestión)
       if (userId != null) {
         headers['Usuario-Id'] = String(userId);
+      }
+      if (userRol != null) {
+        headers['Usuario-Rol'] = String(userRol);
       }
 
       const authReq = req.clone({ setHeaders: headers });

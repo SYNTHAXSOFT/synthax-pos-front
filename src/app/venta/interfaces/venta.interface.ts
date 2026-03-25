@@ -36,6 +36,15 @@ export interface Venta {
 
   /** true = emitir factura electrónica DIAN con los datos del usuarioCliente. */
   solicitaFacturaElectronica?: boolean;
+
+  /** Porcentaje de descuento aplicado al cerrar (0-100). */
+  descuento?: number;
+
+  /** Motivo del descuento. */
+  motivoDescuento?: string;
+
+  /** Forma de pago utilizada al cerrar la venta. */
+  formaPago?: { id?: number; nombre?: string; saldoActual?: number };
 }
 
 /** Payload para crear/actualizar una Venta (el backend resuelve los IDs) */
@@ -53,6 +62,8 @@ export interface VentaRequest {
   usuarioFacturador?: { id: number };
 
   solicitaFacturaElectronica?: boolean;
+  /** Notas de entrega, dirección, detalles específicos del pedido, etc. */
+  observacion?: string;
   estado?: string;
   activo?: boolean;
 }

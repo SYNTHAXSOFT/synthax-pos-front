@@ -2,7 +2,7 @@ import { environment } from '../../../environments/environment';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Pedido, PedidoRequest } from '../interfaces/pedido.interface';
+import { CambioEstadoRequest, Pedido, PedidoRequest } from '../interfaces/pedido.interface';
 import { API_ENDPOINTS } from '../../utils/constantes-utils';
 
 @Injectable({ providedIn: 'root' })
@@ -34,11 +34,12 @@ export class PedidoService {
     return this.http.put<Pedido>(`${this.base}/${id}`, pedido);
   }
 
-  cancelarItem(id: number): Observable<Pedido> {
-    return this.http.patch<Pedido>(`${this.base}/${id}/cancelar`, {});
+  /** Cambia el estado de un ítem (PATCH /{id}/estado) */
+  cambiarEstado(id: number, request: CambioEstadoRequest): Observable<Pedido> {
+    return this.http.patch<Pedido>(`${this.base}/${id}/estado`, request);
   }
 
-  desactivar(id: number): Observable<Pedido> {
-    return this.http.patch<Pedido>(`${this.base}/${id}/desactivar`, {});
+  eliminar(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
   }
 }

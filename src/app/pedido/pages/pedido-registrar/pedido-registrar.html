@@ -1,95 +1,134 @@
-<div class="spx-form-page">
+<div class="spx-reg">
 
-  <h1 class="spx-form-title">Agregar Ítem al Pedido</h1>
-  <p class="spx-form-subtitle">Selecciona la venta abierta y agrega productos al pedido</p>
-
-  <div class="spx-form-card spx-form-card--wide">
-    <div class="spx-form-card__header">
-      <div class="spx-form-card__icon"><i class="fa-solid fa-bowl-food"></i></div>
-      <div>
-        <p class="spx-form-card__title">Nuevo ítem</p>
-        <p class="spx-form-card__subtitle">Los campos con * son obligatorios</p>
+  <!-- ══ Banner info de la venta ══════════════════════════════════════════ -->
+  @if (ventaSeleccionada) {
+    <div class="spx-reg-banner">
+      <div class="spx-reg-banner__left">
+        <div class="spx-reg-banner__icon">
+          <i [class]="getTipoIcon(ventaSeleccionada.tipoPedido?.nombre)"></i>
+        </div>
+        <div class="spx-reg-banner__meta">
+          <span class="spx-reg-banner__id">Venta #{{ ventaSeleccionada.id }}</span>
+          <span class="spx-reg-banner__tipo">{{ ventaSeleccionada.tipoPedido?.nombre }}</span>
+          @if (ventaSeleccionada.mesa?.nombre) {
+            <span class="spx-reg-banner__mesa">
+              <i class="fa-solid fa-chair"></i> {{ ventaSeleccionada.mesa!.nombre }}
+            </span>
+          }
+        </div>
       </div>
+      @if (ventaSeleccionada.observacion) {
+        <div class="spx-reg-banner__obs">
+          <i class="fa-solid fa-note-sticky"></i>
+          <span>{{ ventaSeleccionada.observacion }}</span>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ══ Selector de venta (cuando no viene por URL) ══════════════════════ -->
+  @if (!ventaIdFijo && !soloLectura) {
+    <div class="spx-reg-sel-venta" [formGroup]="myForm">
+      <label class="spx-reg-sel-venta__label">
+        <i class="fa-solid fa-cash-register"></i> Selecciona la venta
+      </label>
+      <select class="spx-reg-sel-venta__select" formControlName="ventaId"
+        (change)="onVentaChange(+$any($event.target).value)">
+        <option [value]="null" disabled selected>Elige una venta abierta...</option>
+        @for (venta of ventasAbiertas; track venta.id) {
+          <option [value]="venta.id">
+            #{{ venta.id }} — {{ venta.tipoPedido?.nombre }}
+            @if (venta.mesa?.nombre) { · {{ venta.mesa?.nombre }} }
+          </option>
+        }
+      </select>
+    </div>
+  }
+
+  <!-- ══ Catálogo de productos ════════════════════════════════════════════ -->
+  @if (!soloLectura && (ventaIdFijo || ventaIdActual)) {
+    <div class="spx-reg-section-title">
+      <i class="fa-solid fa-bowl-food"></i> Agregar productos
     </div>
 
-    <div class="spx-form-card__body">
-      <form [formGroup]="myForm" (ngSubmit)="onSave()">
-        <div class="spx-form-grid spx-form-grid--4" style="margin-bottom:1.25rem">
+    <div class="spx-reg-catalog">
+      @for (prod of productos; track prod.id) {
+        <div class="spx-reg-card">
 
-          <!-- Venta -->
-          <div class="spx-form-group spx-form-col-span-2">
-            <label class="spx-form-label">Venta (ABIERTA) <span class="spx-form-required">*</span></label>
-            <select class="spx-form-select" formControlName="ventaId"
-              (change)="onVentaChange(+$any($event.target).value)">
-              <option [value]="null" disabled selected>Seleccione una venta</option>
-              @for (venta of ventasAbiertas; track venta.id) {
-                <option [value]="venta.id">
-                  #{{ venta.id }} — {{ venta.tipoPedido?.nombre }}
-                  @if (venta.mesa?.nombre) { — {{ venta.mesa?.nombre }} }
-                </option>
-              }
-            </select>
-            @if (isValidField('ventaId')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ getFieldError('ventaId') }}</span>
+          <!-- Imagen -->
+          <div class="spx-reg-card__img">
+            @if (prod.imagen) {
+              <img [src]="prod.imagen" [alt]="prod.nombre" class="spx-reg-card__img-el">
+            } @else {
+              <div class="spx-reg-card__img-ph">
+                <i class="fa-solid fa-bowl-food"></i>
+              </div>
             }
           </div>
 
-          <!-- Producto -->
-          <div class="spx-form-group spx-form-col-span-2">
-            <label class="spx-form-label">Producto <span class="spx-form-required">*</span></label>
-            <select class="spx-form-select" formControlName="productoId">
-              <option [value]="null" disabled selected>Seleccione un producto</option>
-              @for (prod of productos; track prod.id) {
-                <option [value]="prod.id">{{ prod.nombre }} — ${{ prod.precio | number:'1.0-2' }}</option>
-              }
-            </select>
-            @if (isValidField('productoId')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ getFieldError('productoId') }}</span>
+          <!-- Info + acciones -->
+          <div class="spx-reg-card__body">
+            <div class="spx-reg-card__header-row">
+              <span class="spx-reg-card__name">{{ prod.nombre }}</span>
+              <span class="spx-reg-card__price">$ {{ prod.precio | number:'1.0-0' }}</span>
+            </div>
+            @if (prod.descripcion) {
+              <p class="spx-reg-card__desc">{{ prod.descripcion }}</p>
             }
-          </div>
 
-          <!-- Cantidad -->
-          <div class="spx-form-group">
-            <label class="spx-form-label">Cantidad <span class="spx-form-required">*</span></label>
-            <input type="number" class="spx-form-input" min="1" step="1" placeholder="1"
-              formControlName="cantidad">
-            @if (isValidField('cantidad')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ getFieldError('cantidad') }}</span>
+            <!-- Textarea de observación (expandible) -->
+            @if (obsVisible(prod.id!)) {
+              <textarea
+                class="spx-reg-card__obs-input"
+                rows="2"
+                placeholder="Sin cebolla, término 3/4, bien caliente..."
+                [value]="getObs(prod.id!)"
+                (input)="setObs(prod.id!, $event)">
+              </textarea>
             }
-          </div>
 
-          <!-- Subtotal -->
-          <div class="spx-form-group">
-            <label class="spx-form-label">Subtotal</label>
-            <div class="spx-form-total-box">
-              <span class="spx-form-total-box__label">Calculado</span>
-              <span class="spx-form-total-box__value">$ {{ getSubtotalActual() | number:'1.0-2' }}</span>
+            <!-- Fila de acciones -->
+            <div class="spx-reg-card__footer">
+              <button
+                class="spx-reg-btn-obs"
+                [class.spx-reg-btn-obs--active]="obsVisible(prod.id!)"
+                (click)="toggleObs(prod.id!)"
+                title="Agregar observación">
+                <i class="fa-solid fa-note-sticky"></i>
+                <span>Observación</span>
+              </button>
+
+              <div class="spx-reg-qty">
+                <button class="spx-reg-qty__btn" (click)="decrementar(prod.id!)"
+                  [disabled]="getCantidad(prod.id!) <= 1">−</button>
+                <span class="spx-reg-qty__val">{{ getCantidad(prod.id!) }}</span>
+                <button class="spx-reg-qty__btn" (click)="incrementar(prod.id!)">+</button>
+              </div>
+
+              <button
+                class="spx-reg-btn-add"
+                (click)="agregarProducto(prod)"
+                [disabled]="agregando.has(prod.id!)">
+                @if (agregando.has(prod.id!)) {
+                  <i class="fa-solid fa-spinner fa-spin"></i>
+                } @else {
+                  <i class="fa-solid fa-plus"></i>
+                }
+                Agregar
+              </button>
             </div>
           </div>
 
-          <!-- Observación -->
-          <div class="spx-form-group spx-form-col-span-2">
-            <label class="spx-form-label">Observación <span style="color:#64748b;font-weight:400">(opcional)</span></label>
-            <input type="text" class="spx-form-input" placeholder="Sin cebolla, término 3/4, etc."
-              formControlName="observacion">
-          </div>
-
         </div>
-
-        <div class="spx-form-actions">
-          <button type="submit" class="spx-form-btn-submit">
-            <i class="fa-solid fa-plus"></i>
-            Agregar al Pedido
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Ítems del pedido seleccionado -->
-  @if (myForm.get('ventaId')?.value) {
-    <div class="spx-form-divider">
-      <app-pedido-listar [ventaId]="myForm.getRawValue().ventaId"></app-pedido-listar>
+      }
     </div>
   }
+
+  <!-- ══ Listado de pedidos de esta venta ═════════════════════════════════ -->
+  @if (ventaIdActual) {
+    <div class="spx-reg-pedidos">
+      <app-pedido-listar [ventaId]="ventaIdActual"></app-pedido-listar>
+    </div>
+  }
+
 </div>

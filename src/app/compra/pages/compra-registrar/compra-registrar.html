@@ -1,113 +1,159 @@
-<div class="spx-form-page">
+<div class="spx-compra-page">
 
-  <h1 class="spx-form-title">Registrar Compra de Insumo</h1>
-  <p class="spx-form-subtitle">Registra la adquisición de insumos e incrementa el stock automáticamente</p>
+  <!-- Lista de compras (vista principal) -->
+  <app-compra-listar [modoModal]="true" (nuevaCompra)="abrirModal()"></app-compra-listar>
 
-  <div class="spx-form-card spx-form-card--wide">
-    <div class="spx-form-card__header">
-      <div class="spx-form-card__icon"><i class="fa-solid fa-cart-shopping"></i></div>
-      <div>
-        <p class="spx-form-card__title">Nueva compra</p>
-        <p class="spx-form-card__subtitle">Los campos con * son obligatorios</p>
-      </div>
-    </div>
+  <!-- Modal overlay -->
+  @if (modalAbierto) {
+    <div class="spx-modal-backdrop" (click)="cerrarModal()">
+      <div class="spx-modal-container" (click)="$event.stopPropagation()">
 
-    <div class="spx-form-card__body">
-      <form [formGroup]="myForm" (ngSubmit)="onSave()">
-        <div class="spx-form-grid spx-form-grid--4" style="margin-bottom:1.25rem">
-
-          <!-- Código -->
-          <div class="spx-form-group">
-            <label class="spx-form-label">Código de compra <span class="spx-form-required">*</span></label>
-            <input type="text" class="spx-form-input" placeholder="CMP-001"
-              formControlName="codigo" [class.is-invalid]="isValidField('codigo')">
-            @if (isValidField('codigo')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Código obligatorio (mín. 2 caracteres)</span>
-            }
-          </div>
-
-          <!-- Restaurante -->
-          <div class="spx-form-group spx-form-col-span-2">
-            <label class="spx-form-label">Restaurante <span class="spx-form-required">*</span></label>
-            <select class="spx-form-select" formControlName="restauranteId"
-              [class.is-invalid]="isValidField('restauranteId')"
-              (change)="onRestauranteChange()">
-              <option [value]="null">Seleccione un restaurante...</option>
-              @for (r of restaurantes; track r.id) {
-                <option [value]="r.id">{{ r.nombre }}</option>
-              }
-            </select>
-            @if (isValidField('restauranteId')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Restaurante obligatorio</span>
-            }
-          </div>
-
-          <!-- Subtotal box (right-aligned) -->
-          <div class="spx-form-group">
-            <label class="spx-form-label">Valor total</label>
-            <div class="spx-form-total-box">
-              <span class="spx-form-total-box__label">Calculado</span>
-              <span class="spx-form-total-box__value">{{ subtotal | currency:'COP':'symbol':'1.0-0' }}</span>
+        <!-- Modal header -->
+        <div class="spx-modal-header">
+          <div class="spx-modal-header__info">
+            <div class="spx-modal-header__icon">
+              <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+            <div>
+              <p class="spx-modal-header__title">Registrar Compra de Insumo</p>
+              <p class="spx-modal-header__sub">Los campos con <span class="spx-form-required">*</span> son obligatorios</p>
             </div>
           </div>
-
-          <!-- Insumo -->
-          <div class="spx-form-group spx-form-col-span-2">
-            <label class="spx-form-label">Insumo <span class="spx-form-required">*</span></label>
-            <select class="spx-form-select" formControlName="insumoId"
-              [class.is-invalid]="isValidField('insumoId')"
-              [attr.disabled]="!myForm.value.restauranteId ? true : null">
-              <option [value]="null">{{ myForm.value.restauranteId ? 'Seleccione un insumo...' : 'Primero seleccione un restaurante' }}</option>
-              @for (i of insumos; track i.id) {
-                <option [value]="i.id">{{ i.descripcion }} — Stock: {{ i.stock }} {{ i.medida }}</option>
-              }
-            </select>
-            @if (isValidField('insumoId')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Insumo obligatorio</span>
-            }
-          </div>
-
-          <!-- Cantidad -->
-          <div class="spx-form-group">
-            <label class="spx-form-label">Cantidad <span class="spx-form-required">*</span></label>
-            <input type="number" class="spx-form-input" min="0.01" step="0.01" placeholder="0"
-              formControlName="cantidad" [class.is-invalid]="isValidField('cantidad')">
-            @if (isValidField('cantidad')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Cantidad requerida (mayor a 0)</span>
-            }
-          </div>
-
-          <!-- Valor unitario -->
-          <div class="spx-form-group">
-            <label class="spx-form-label">Valor unitario (COP) <span class="spx-form-required">*</span></label>
-            <div class="spx-form-input-group">
-              <span class="spx-form-input-prefix">$</span>
-              <input type="number" class="spx-form-input" min="1" step="1" placeholder="0"
-                formControlName="valorUnidad" [class.is-invalid]="isValidField('valorUnidad')">
-            </div>
-            @if (isValidField('valorUnidad')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Valor unitario requerido</span>
-            }
-          </div>
-
-        </div>
-
-        <div class="spx-form-hint">
-          <i class="fa-solid fa-circle-info"></i>
-          Al registrar la compra, el <strong>stock del insumo</strong> se incrementará automáticamente con la cantidad indicada.
-        </div>
-
-        <div class="spx-form-actions">
-          <button type="submit" class="spx-form-btn-submit">
-            <i class="fa-solid fa-cart-plus"></i>
-            Registrar Compra
+          <button class="spx-modal-close" (click)="cerrarModal()" title="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
-      </form>
-    </div>
-  </div>
 
-  <div class="spx-form-divider">
-    <app-compra-listar></app-compra-listar>
-  </div>
+        <!-- Modal body -->
+        <div class="spx-modal-body">
+          <form [formGroup]="myForm" (ngSubmit)="onSave()">
+            <div class="spx-form-grid spx-form-grid--4" style="margin-bottom:1.25rem">
+
+              <!-- Código -->
+              <div class="spx-form-group">
+                <label class="spx-form-label">Código de compra <span class="spx-form-required">*</span></label>
+                <input type="text" class="spx-form-input" placeholder="CMP-001"
+                  formControlName="codigo" [class.is-invalid]="isValidField('codigo')">
+                @if (isValidField('codigo')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Código obligatorio (mín. 2 caracteres)</span>
+                }
+              </div>
+
+              <!-- Restaurante -->
+              <div class="spx-form-group spx-form-col-span-2">
+                <label class="spx-form-label">Restaurante <span class="spx-form-required">*</span></label>
+                <select class="spx-form-select" formControlName="restauranteId"
+                  [class.is-invalid]="isValidField('restauranteId')"
+                  (change)="onRestauranteChange()">
+                  <option [value]="null">Seleccione un restaurante...</option>
+                  @for (r of restaurantes; track r.id) {
+                    <option [value]="r.id">{{ r.nombre }}</option>
+                  }
+                </select>
+                @if (isValidField('restauranteId')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Restaurante obligatorio</span>
+                }
+              </div>
+
+              <!-- Subtotal box -->
+              <div class="spx-form-group">
+                <label class="spx-form-label">Valor total</label>
+                <div class="spx-form-total-box">
+                  <span class="spx-form-total-box__label">Calculado</span>
+                  <span class="spx-form-total-box__value">{{ subtotal | currency:'COP':'symbol':'1.0-0' }}</span>
+                </div>
+              </div>
+
+              <!-- Insumo -->
+              <div class="spx-form-group spx-form-col-span-2">
+                <label class="spx-form-label">Insumo <span class="spx-form-required">*</span></label>
+                <select class="spx-form-select" formControlName="insumoId"
+                  [class.is-invalid]="isValidField('insumoId')"
+                  [attr.disabled]="!myForm.value.restauranteId ? true : null">
+                  <option [value]="null">{{ myForm.value.restauranteId ? 'Seleccione un insumo...' : 'Primero seleccione un restaurante' }}</option>
+                  @for (i of insumos; track i.id) {
+                    <option [value]="i.id">{{ i.descripcion }} — Stock: {{ i.stock }} {{ i.medida }}</option>
+                  }
+                </select>
+                @if (isValidField('insumoId')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Insumo obligatorio</span>
+                }
+              </div>
+
+              <!-- Cantidad -->
+              <div class="spx-form-group">
+                <label class="spx-form-label">Cantidad <span class="spx-form-required">*</span></label>
+                <input type="number" class="spx-form-input" min="0.01" step="0.01" placeholder="0"
+                  formControlName="cantidad" [class.is-invalid]="isValidField('cantidad')">
+                @if (isValidField('cantidad')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Cantidad requerida (mayor a 0)</span>
+                }
+              </div>
+
+              <!-- Valor unitario -->
+              <div class="spx-form-group">
+                <label class="spx-form-label">Valor unitario (COP) <span class="spx-form-required">*</span></label>
+                <div class="spx-form-input-group">
+                  <span class="spx-form-input-prefix">$</span>
+                  <input type="number" class="spx-form-input" min="1" step="1" placeholder="0"
+                    formControlName="valorUnidad" [class.is-invalid]="isValidField('valorUnidad')">
+                </div>
+                @if (isValidField('valorUnidad')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Valor unitario requerido</span>
+                }
+              </div>
+
+            </div>
+
+            <!-- Forma de pago -->
+            <div class="spx-compra-fp">
+              <p class="spx-compra-fp__title">
+                <i class="fa-solid fa-wallet"></i>
+                Forma de pago <span class="spx-form-required">*</span>
+              </p>
+              @if (formasPago.length === 0) {
+                <p class="spx-compra-fp__empty">No hay formas de pago disponibles.</p>
+              }
+              <div class="spx-compra-fp__list">
+                @for (fp of formasPago; track fp.id) {
+                  <div class="spx-compra-fp__item"
+                       [class.spx-compra-fp__item--selected]="formaPagoSeleccionadaId === fp.id"
+                       (click)="formaPagoSeleccionadaId = fp.id!">
+                    <span class="spx-compra-fp__radio-ui">
+                      <span class="spx-compra-fp__radio-dot"
+                        [style.opacity]="formaPagoSeleccionadaId === fp.id ? '1' : '0'"
+                        [style.transform]="formaPagoSeleccionadaId === fp.id ? 'scale(1)' : 'scale(0)'">
+                      </span>
+                    </span>
+                    <i class="fa-solid fa-wallet"></i>
+                    <span class="spx-compra-fp__nombre">{{ fp.nombre }}</span>
+                    <span class="spx-compra-fp__saldo">$ {{ fp.saldoActual | number:'1.0-0' }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="spx-form-hint">
+              <i class="fa-solid fa-circle-info"></i>
+              Al registrar la compra, el <strong>stock del insumo</strong> se incrementará y el saldo de la forma de pago se descontará automáticamente.
+            </div>
+
+            <!-- Modal actions -->
+            <div class="spx-modal-actions">
+              <button type="button" class="spx-modal-btn-cancel" (click)="cerrarModal()">
+                <i class="fa-solid fa-xmark"></i>
+                Cancelar
+              </button>
+              <button type="submit" class="spx-form-btn-submit">
+                <i class="fa-solid fa-cart-plus"></i>
+                Registrar Compra
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  }
+
 </div>

@@ -30,5 +30,6 @@ export interface CompraRequest {
   valorTotal?: number;
   insumo: { id: number };
   restaurante: { id: number };
+  formaPago?: { id: number };
   activo?: boolean;
 }

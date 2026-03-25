@@ -1,98 +1,143 @@
 <div class="spx-form-page">
 
-  <h1 class="spx-form-title">Nueva Venta</h1>
-  <p class="spx-form-subtitle">Abre una nueva venta y comienza a agregar pedidos</p>
-
-  <div class="spx-form-card">
-    <div class="spx-form-card__header">
-      <div class="spx-form-card__icon"><i class="fa-solid fa-cash-register"></i></div>
-      <div>
-        <p class="spx-form-card__title">Abrir venta</p>
-        <p class="spx-form-card__subtitle">La venta se creará en estado ABIERTA</p>
-      </div>
+  <!-- Header con botón Nueva Venta -->
+  <div class="spx-reg-header">
+    <div>
+      <h1 class="spx-form-title" style="margin:0 0 0.25rem 0">Ventas</h1>
+      <p class="spx-form-subtitle" style="margin:0">Gestión y registro de ventas</p>
     </div>
+    @if (!esCocinero) {
+      <button class="spx-reg-btn-nueva" (click)="abrirModalNuevaVenta()">
+        <i class="fa-solid fa-plus"></i>
+        Nueva Venta
+      </button>
+    }
+  </div>
 
-    <div class="spx-form-card__body">
-      <form [formGroup]="myForm" (ngSubmit)="onSave()">
-        <div class="spx-form-grid spx-form-grid--2" style="margin-bottom:1.25rem">
+  <!-- Listado -->
+  <app-venta-listar></app-venta-listar>
 
-          <!-- Tipo de pedido -->
-          <div class="spx-form-group">
-            <label class="spx-form-label">Tipo de Pedido <span class="spx-form-required">*</span></label>
-            <select class="spx-form-select" formControlName="tipoPedidoId">
-              <option [value]="null" disabled selected>Seleccione un tipo</option>
-              @for (tipo of tiposPedido; track tipo.id) {
-                <option [value]="tipo.id">{{ tipo.nombre }}</option>
-              }
-            </select>
-            @if (isValidField('tipoPedidoId')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Este campo es requerido</span>
-            }
-          </div>
+</div>
 
-          <!-- Mesa -->
-          <div class="spx-form-group">
-            <label class="spx-form-label">Mesa <span style="color:#64748b;font-weight:400">(opcional)</span></label>
-            <select class="spx-form-select" formControlName="mesaId">
-              <option [value]="null">Sin mesa asignada</option>
-              @for (mesa of mesas; track mesa.id) {
-                <option [value]="mesa.id">{{ mesa.nombre }}</option>
-              }
-            </select>
-          </div>
+<!-- ══ Modal: Nueva Venta ════════════════════════════════════════════════ -->
+@if (modalNuevaVenta) {
+  <div class="spx-reg-overlay" (click)="cerrarModalNuevaVenta()">
+    <div class="spx-reg-modal" (click)="$event.stopPropagation()">
 
-          <!-- Factura DIAN switch -->
-          <div class="spx-form-group spx-form-col-span-2">
-            <label class="spx-form-check">
-              <input type="checkbox" class="spx-form-check__input" id="solicitaFactura"
-                formControlName="solicitaFacturaElectronica">
-              <span class="spx-form-check__label">
-                <i class="fa-solid fa-file-invoice" style="margin-right:0.3rem;color:#f59e0b"></i>
-                El cliente solicita factura electrónica DIAN
-              </span>
-            </label>
-          </div>
+      <!-- Header -->
+      <div class="spx-reg-modal__header">
+        <div class="spx-reg-modal__icon"><i class="fa-solid fa-cash-register"></i></div>
+        <div>
+          <p class="spx-reg-modal__title">Nueva Venta</p>
+          <p class="spx-reg-modal__subtitle">La venta se abrirá en estado ABIERTA</p>
+        </div>
+        <button class="spx-reg-modal__close" (click)="cerrarModalNuevaVenta()" title="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
 
-          <!-- Cliente (visible solo si solicita factura) -->
-          @if (solicitaFactura) {
-            <div class="spx-form-group spx-form-col-span-2">
-              <label class="spx-form-label">
-                Cliente <span class="spx-form-required">*</span>
-                <span style="color:#64748b;font-weight:400;margin-left:0.3rem">(requerido para factura electrónica)</span>
-              </label>
-              <select class="spx-form-select" formControlName="usuarioClienteId">
-                <option [value]="null">Seleccione un cliente</option>
-                @for (cliente of clientes; track cliente.id) {
-                  <option [value]="cliente.id">
-                    {{ cliente.nombre }} {{ cliente.apellido }}
-                    @if (cliente.cedula) { · {{ cliente.cedula }} }
-                  </option>
+      <!-- Cuerpo -->
+      <div class="spx-reg-modal__body">
+        <form [formGroup]="myForm" (ngSubmit)="onSave()">
+          <div class="spx-form-grid spx-form-grid--2" style="margin-bottom:1.25rem">
+
+            <!-- Tipo de pedido -->
+            <div class="spx-form-group">
+              <label class="spx-form-label">Tipo de Pedido <span class="spx-form-required">*</span></label>
+              <select class="spx-form-select" formControlName="tipoPedidoId">
+                <option [value]="null" disabled selected>Seleccione un tipo</option>
+                @for (tipo of tiposPedido; track tipo.id) {
+                  <option [value]="tipo.id">{{ tipo.nombre }}</option>
                 }
               </select>
-              <span style="font-size:0.78rem;color:#64748b;margin-top:0.2rem">
-                Los datos fiscales del cliente se usarán para generar la factura DIAN.
-              </span>
+              @if (isValidField('tipoPedidoId')) {
+                <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Este campo es requerido</span>
+              }
             </div>
-          }
 
-        </div>
+            <!-- Mesa (oculta para Domicilio y Llevar) -->
+            @if (!ocultarMesa) {
+              <div class="spx-form-group">
+                <label class="spx-form-label">Mesa <span style="color:#64748b;font-weight:400">(opcional)</span></label>
+                <select class="spx-form-select" formControlName="mesaId">
+                  <option [value]="null">Sin mesa asignada</option>
+                  @for (mesa of mesas; track mesa.id) {
+                    <option [value]="mesa.id">{{ mesa.nombre }}</option>
+                  }
+                </select>
+              </div>
+            }
 
-        <div class="spx-form-hint">
-          <i class="fa-solid fa-circle-info"></i>
-          La venta se creará en estado <strong>ABIERTA</strong> y se asignará automáticamente al usuario activo como creador.
-        </div>
+            <!-- Factura DIAN switch -->
+            <div class="spx-form-group spx-form-col-span-2">
+              <label class="spx-form-check">
+                <input type="checkbox" class="spx-form-check__input" formControlName="solicitaFacturaElectronica">
+                <span class="spx-form-check__label">
+                  <i class="fa-solid fa-file-invoice" style="margin-right:0.3rem;color:#f59e0b"></i>
+                  El cliente solicita factura electrónica DIAN
+                </span>
+              </label>
+            </div>
 
-        <div class="spx-form-actions">
-          <button type="submit" class="spx-form-btn-submit">
-            <i class="fa-solid fa-lock-open"></i>
-            Abrir Venta
-          </button>
-        </div>
-      </form>
+            <!-- Cliente (visible solo si solicita factura) -->
+            @if (solicitaFactura) {
+              <div class="spx-form-group spx-form-col-span-2">
+                <label class="spx-form-label">
+                  Cliente <span class="spx-form-required">*</span>
+                  <span style="color:#64748b;font-weight:400;margin-left:0.3rem">(requerido para factura electrónica)</span>
+                </label>
+                <select class="spx-form-select" formControlName="usuarioClienteId">
+                  <option [value]="null">Seleccione un cliente</option>
+                  @for (cliente of clientes; track cliente.id) {
+                    <option [value]="cliente.id">
+                      {{ cliente.nombre }} {{ cliente.apellido }}
+                      @if (cliente.cedula) { · {{ cliente.cedula }} }
+                    </option>
+                  }
+                </select>
+                <span style="font-size:0.78rem;color:#64748b;margin-top:0.2rem">
+                  Los datos fiscales del cliente se usarán para generar la factura DIAN.
+                </span>
+              </div>
+            }
+
+            <!-- Observaciones -->
+            <div class="spx-form-group spx-form-col-span-2">
+              <label class="spx-form-label">
+                <i class="fa-solid fa-note-sticky" style="margin-right:0.3rem;color:#64748b"></i>
+                Observaciones
+                <span style="color:#64748b;font-weight:400;margin-left:0.3rem">(opcional)</span>
+              </label>
+              <textarea
+                class="spx-form-input"
+                rows="3"
+                placeholder="Ej: Entregar en Calle 45 #12-30 · Sin cebolla · Cliente espera en recepción..."
+                formControlName="observacion"
+                style="resize:vertical;min-height:72px;line-height:1.5">
+              </textarea>
+            </div>
+
+          </div>
+
+          <div class="spx-form-hint">
+            <i class="fa-solid fa-circle-info"></i>
+            Se creará en estado <strong>ABIERTA</strong> y se asignará al usuario activo como creador.
+          </div>
+
+          <!-- Footer del modal -->
+          <div class="spx-reg-modal__footer">
+            <button type="button" class="spx-reg-btn-cancel" (click)="cerrarModalNuevaVenta()">
+              <i class="fa-solid fa-xmark"></i> Cancelar
+            </button>
+            <button type="submit" class="spx-reg-btn-submit">
+              <i class="fa-solid fa-lock-open"></i> Abrir Venta
+            </button>
+          </div>
+
+        </form>
+      </div>
+
     </div>
   </div>
-
-  <div class="spx-form-divider">
-    <app-venta-listar></app-venta-listar>
-  </div>
-</div>
+}
+<!-- ════════════════════════════════════════════════════════════════════ -->

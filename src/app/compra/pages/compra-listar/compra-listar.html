@@ -6,10 +6,17 @@
       <h1 class="spx-compra-header__title">Compras</h1>
       <p class="spx-compra-header__sub">Registro de compras e insumos adquiridos</p>
     </div>
-    <a routerLink="/synthax-pos/compra/registrar" class="spx-compra-btn-primary">
-      <i class="fa-solid fa-plus"></i>
-      Nueva Compra
-    </a>
+    @if (modoModal) {
+      <button class="spx-compra-btn-primary" (click)="nuevaCompra.emit()">
+        <i class="fa-solid fa-plus"></i>
+        Nueva Compra
+      </button>
+    } @else {
+      <a routerLink="/synthax-pos/compra/registrar" class="spx-compra-btn-primary">
+        <i class="fa-solid fa-plus"></i>
+        Nueva Compra
+      </a>
+    }
   </div>
 
   <!-- Stats -->

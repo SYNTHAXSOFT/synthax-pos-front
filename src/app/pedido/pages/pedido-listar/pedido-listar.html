@@ -8,10 +8,24 @@
         @if (ventaId) { Venta #{{ ventaId }} } @else { Todos los pedidos }
       </p>
     </div>
-    <button class="spx-ped-btn-refresh" (click)="cargarPedidos()">
-      <i class="fa-solid fa-rotate-right"></i>
-      Actualizar
-    </button>
+    <div class="spx-ped-header-actions">
+      <!-- Botón Enviar todos a cocina (FIX #4) -->
+      @if (hayPedidosParaCocina) {
+        <button class="spx-ped-btn-cocina" (click)="enviarTodosACocina()" [disabled]="enviandoTodos">
+          @if (enviandoTodos) {
+            <div class="spx-ped-btn-spinner"></div>
+            Enviando...
+          } @else {
+            <i class="fa-solid fa-paper-plane"></i>
+            Enviar todos a cocina
+          }
+        </button>
+      }
+      <button class="spx-ped-btn-refresh" (click)="cargarPedidos()">
+        <i class="fa-solid fa-rotate-right"></i>
+        Actualizar
+      </button>
+    </div>
   </div>
 
   <!-- Stats -->
@@ -20,7 +34,7 @@
       <div class="spx-ped-stat__icon"><i class="fa-solid fa-list-ul"></i></div>
       <div>
         <span class="spx-ped-stat__value">{{ totalItems }}</span>
-        <span class="spx-ped-stat__label">Ítems total</span>
+        <span class="spx-ped-stat__label">Total ítems</span>
       </div>
     </div>
     <div class="spx-ped-stat">
@@ -33,8 +47,8 @@
     <div class="spx-ped-stat">
       <div class="spx-ped-stat__icon spx-ped-stat__icon--cancel"><i class="fa-solid fa-ban"></i></div>
       <div>
-        <span class="spx-ped-stat__value spx-ped-stat__value--cancel">{{ itemsCancelados }}</span>
-        <span class="spx-ped-stat__label">Cancelados</span>
+        <span class="spx-ped-stat__value spx-ped-stat__value--cancel">{{ itemsCancelados + itemsDestruidos }}</span>
+        <span class="spx-ped-stat__label">Cancelados/Destruidos</span>
       </div>
     </div>
     <div class="spx-ped-stat">
@@ -56,11 +70,16 @@
 
   <!-- Content -->
   @if (!cargando) {
-    @if (pedidos.length === 0) {
+    @if (pedidosVisibles.length === 0) {
       <div class="spx-ped-empty">
         <i class="fa-solid fa-bowl-food spx-ped-empty__icon"></i>
-        <p class="spx-ped-empty__msg">No hay ítems en este pedido</p>
-        <p class="spx-ped-empty__sub">Agrega productos desde el formulario de pedido</p>
+        @if (esCocinero && pedidos.length > 0) {
+          <p class="spx-ped-empty__msg">¡Todo listo! Sin pendientes en cocina</p>
+          <p class="spx-ped-empty__sub">Todos los productos han sido preparados o están en camino</p>
+        } @else {
+          <p class="spx-ped-empty__msg">No hay ítems en este pedido</p>
+          <p class="spx-ped-empty__sub">Agrega productos desde el formulario de pedido</p>
+        }
       </div>
     } @else {
       <div class="spx-ped-table-wrap">
@@ -72,14 +91,14 @@
               <th>Precio Unit.</th>
               <th>Cantidad</th>
               <th>Subtotal</th>
-              <th>Observación</th>
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            @for (pedido of pedidos; track pedido.id) {
-              <tr class="spx-ped-row" [class.spx-ped-row--cancel]="!pedido.activo">
+            <!-- FIX #3: usar pedidosVisibles (oculta CREADO para COCINERO) -->
+            @for (pedido of pedidosVisibles; track pedido.id) {
+              <tr class="spx-ped-row" [ngClass]="rowClass(pedido)">
                 <td class="spx-ped-td spx-ped-td--id">#{{ pedido.id }}</td>
 
                 <!-- Producto -->
@@ -92,6 +111,12 @@
                       <span class="spx-ped-producto__name">{{ pedido.producto?.nombre ?? '—' }}</span>
                       @if (pedido.producto?.codigo) {
                         <code class="spx-ped-producto__codigo">{{ pedido.producto!.codigo }}</code>
+                      }
+                      @if (pedido.observacion) {
+                        <span class="spx-ped-obs">
+                          <i class="fa-solid fa-note-sticky"></i>
+                          {{ pedido.observacion }}
+                        </span>
                       }
                     </div>
                   </div>
@@ -106,30 +131,104 @@
                 <td class="spx-ped-td spx-ped-td--subtotal">
                   $ {{ subtotal(pedido) | number:'1.0-2' }}
                 </td>
-                <td class="spx-ped-td spx-ped-td--obs">
-                  @if (pedido.observacion) {
-                    <span class="spx-ped-obs">
-                      <i class="fa-solid fa-comment-dots"></i>
-                      {{ pedido.observacion }}
-                    </span>
-                  } @else {
-                    <span class="spx-ped-no-obs">—</span>
-                  }
-                </td>
+
+                <!-- FIX #1: badge siempre muestra un estado (nunca "-") -->
                 <td class="spx-ped-td">
-                  <span class="spx-ped-badge"
-                    [class.spx-ped-badge--active]="pedido.activo"
-                    [class.spx-ped-badge--cancel]="!pedido.activo">
-                    {{ pedido.activo ? 'Activo' : 'Cancelado' }}
+                  <span class="spx-ped-badge" [ngClass]="badgeClass(pedido)">
+                    {{ badgeLabel(pedido) }}
                   </span>
                 </td>
-                <td class="spx-ped-td">
-                  @if (pedido.activo) {
-                    <button class="spx-ped-btn-cancel" (click)="cancelarItem(pedido.id)" title="Cancelar ítem">
-                      <i class="fa-solid fa-ban"></i>
-                      Cancelar
-                    </button>
-                  }
+
+                <!-- Acciones según rol y estado -->
+                <td class="spx-ped-td spx-ped-td--actions">
+                  <div class="spx-ped-actions">
+
+                    @if (puedeEnviarCocina(pedido)) {
+                      <button class="spx-ped-btn spx-ped-btn--primary"
+                        (click)="cambiarEstadoDirecto(pedido, 'PEDIDO')"
+                        title="Enviar a cocina">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        Enviar
+                      </button>
+                    }
+
+                    @if (puedeIniciarPreparacion(pedido)) {
+                      <button class="spx-ped-btn spx-ped-btn--orange"
+                        (click)="cambiarEstadoDirecto(pedido, 'PREPARANDO')"
+                        title="Iniciar preparación">
+                        <i class="fa-solid fa-fire-burner"></i>
+                        Preparando
+                      </button>
+                    }
+
+                    @if (puedeMarcarPreparado(pedido)) {
+                      <button class="spx-ped-btn spx-ped-btn--green"
+                        (click)="cambiarEstadoDirecto(pedido, 'PREPARADO')"
+                        title="Marcar como listo">
+                        <i class="fa-solid fa-check"></i>
+                        Listo
+                      </button>
+                    }
+
+                    @if (puedeEntregarCliente(pedido)) {
+                      <button class="spx-ped-btn spx-ped-btn--teal"
+                        (click)="cambiarEstadoDirecto(pedido, 'ENTREGADO_CLIENTE')"
+                        title="Entregar al cliente">
+                        <i class="fa-solid fa-hand-holding"></i>
+                        Cliente
+                      </button>
+                    }
+
+                    @if (puedeEntregarDomiciliario(pedido)) {
+                      <button class="spx-ped-btn spx-ped-btn--purple"
+                        (click)="cambiarEstadoDirecto(pedido, 'ENTREGADO_DOMICILIARIO')"
+                        title="Entregar al domiciliario">
+                        <i class="fa-solid fa-motorcycle"></i>
+                        Domicilio
+                      </button>
+                    }
+
+                    @if (puedeDevolver(pedido)) {
+                      <button class="spx-ped-btn spx-ped-btn--yellow"
+                        (click)="abrirModalMotivo(pedido, 'DEVUELTO')"
+                        title="Registrar devolución">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        Devolver
+                      </button>
+                    }
+
+                    @if (puedeCancelar(pedido)) {
+                      <button class="spx-ped-btn spx-ped-btn--cancel"
+                        (click)="abrirModalMotivo(pedido, 'CANCELADO')"
+                        title="Cancelar ítem">
+                        <i class="fa-solid fa-ban"></i>
+                        Cancelar
+                      </button>
+                    }
+
+                    @if (puedeDestruir(pedido)) {
+                      <button class="spx-ped-btn spx-ped-btn--destroy"
+                        (click)="abrirModalMotivo(pedido, 'DESTRUIDO')"
+                        title="Destruir ítem">
+                        <i class="fa-solid fa-trash-can"></i>
+                        Destruir
+                      </button>
+                    }
+
+                    <!-- FIX #2: botón eliminar visible cuando CREADO para roles permitidos -->
+                    @if (puedeEliminar(pedido)) {
+                      <button class="spx-ped-btn spx-ped-btn--delete"
+                        (click)="eliminarItem(pedido.id)"
+                        title="Eliminar ítem (solo en estado Creado)">
+                        <i class="fa-solid fa-xmark"></i>
+                      </button>
+                    }
+
+                    @if (!puedeHacerAlgo(pedido)) {
+                      <span class="spx-ped-no-action">—</span>
+                    }
+
+                  </div>
                 </td>
               </tr>
             }
@@ -149,3 +248,41 @@
   }
 
 </div>
+
+<!-- ── Modal para motivo ─────────────────────────────────────────────────── -->
+@if (modalVisible) {
+  <div class="spx-modal-overlay" (click)="cerrarModal()">
+    <div class="spx-modal" (click)="$event.stopPropagation()">
+      <div class="spx-modal__header">
+        <h3 class="spx-modal__title">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          {{ modalTitulo }}
+        </h3>
+        <button class="spx-modal__close" (click)="cerrarModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="spx-modal__body">
+        <label class="spx-ped-modal-label">
+          Motivo <span style="color:#ef4444">*</span>
+        </label>
+        <textarea
+          class="spx-ped-modal-textarea"
+          rows="3"
+          placeholder="Describe el motivo..."
+          [(ngModel)]="modalMotivo">
+        </textarea>
+      </div>
+      <div class="spx-modal__footer">
+        <button class="spx-ped-btn spx-ped-btn--cancel" (click)="cerrarModal()">
+          <i class="fa-solid fa-arrow-left"></i>
+          Volver
+        </button>
+        <button class="spx-ped-btn spx-ped-btn--destroy" (click)="confirmarModal()">
+          <i class="fa-solid fa-check"></i>
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+}
