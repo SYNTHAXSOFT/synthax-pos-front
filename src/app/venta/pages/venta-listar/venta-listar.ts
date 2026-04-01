@@ -142,7 +142,22 @@ export class VentaListarPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Para PROPIETARIO / ADMINISTRADOR inicia el filtro en "hoy"
+    if (!this.soloHoy) {
+      const hoy = this.fechaHoy();
+      this.fechaDesde = hoy;
+      this.fechaHasta = hoy;
+    }
     this.cargarVentas();
+  }
+
+  /** Devuelve la fecha de hoy en formato YYYY-MM-DD (requerido por <input type="date">) */
+  private fechaHoy(): string {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm   = String(d.getMonth() + 1).padStart(2, '0');
+    const dd   = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
   }
 
   /** Limpia el rango de fechas (PROPIETARIO / ADMINISTRADOR) */

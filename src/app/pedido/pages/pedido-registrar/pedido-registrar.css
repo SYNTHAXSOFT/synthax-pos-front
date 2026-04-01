@@ -103,6 +103,24 @@
   line-height: 1.45;
 }
 
+.spx-reg-banner--pagada {
+  border-color: rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.spx-reg-banner__pagada {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #60a5fa;
+}
+
 .spx-reg-banner__obs i {
   flex-shrink: 0;
   margin-top: 0.15rem;

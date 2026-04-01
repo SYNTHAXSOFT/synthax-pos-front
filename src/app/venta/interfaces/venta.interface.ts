@@ -45,6 +45,9 @@ export interface Venta {
 
   /** Forma de pago utilizada al cerrar la venta. */
   formaPago?: { id?: number; nombre?: string; saldoActual?: number };
+
+  /** Calculado por el backend: número de pedidos asociados a esta venta. */
+  numeroPedidos?: number;
 }
 
 /** Payload para crear/actualizar una Venta (el backend resuelve los IDs) */

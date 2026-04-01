@@ -462,16 +462,250 @@
 
 /* ── Responsive ───────────────────────────── */
 @media (max-width: 768px) {
-  .spx-dashboard {
-    padding: 1.25rem;
-  }
-
-  .spx-metrics {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.875rem;
-  }
-
-  .spx-dashboard__title {
-    font-size: 1.5rem;
-  }
+  .spx-dashboard { padding: 1.25rem; }
+  .spx-metrics { grid-template-columns: repeat(2, 1fr); gap: 0.875rem; }
+  .spx-dashboard__title { font-size: 1.5rem; }
 }
+
+/* ── Badge azul (para ventas) ─────────────── */
+.spx-badge--blue { background: rgba(59,130,246,0.12); color: #3b82f6; }
+
+/* ── Metric sub-text ─────────────────────── */
+.spx-metric__sub {
+  font-size: 0.72rem;
+  color: var(--spx-text-muted);
+  margin: 0.25rem 0 0;
+}
+
+/* ── Loading ─────────────────────────────── */
+.spx-dash-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  gap: 1rem;
+  color: var(--spx-text-muted);
+  font-size: 0.9rem;
+}
+.spx-dash-spinner {
+  width: 2rem; height: 2rem;
+  border: 3px solid var(--spx-border);
+  border-top-color: var(--spx-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Panel (card reutilizable) ───────────── */
+.spx-panel {
+  background: var(--spx-surface);
+  border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.spx-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--spx-border);
+}
+.spx-panel__title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--spx-text);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.spx-panel__title i { color: var(--spx-primary); }
+
+/* ── Stat Grid (ventas del día) ──────────── */
+.spx-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+@media (max-width: 600px) {
+  .spx-stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.spx-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1rem;
+  border-right: 1px solid var(--spx-border);
+  font-size: 1rem;
+}
+.spx-stat-item:last-child { border-right: none; }
+.spx-stat-item i { font-size: 1.1rem; flex-shrink: 0; }
+.spx-stat-item__val {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--spx-text);
+  line-height: 1;
+}
+.spx-stat-item__lbl {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--spx-text-muted);
+  margin-top: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.spx-stat-item--paid i { color: #22c55e; }
+.spx-stat-item--open i { color: #3b82f6; }
+.spx-stat-item--void i { color: #ef4444; }
+.spx-stat-item--devuelto i { color: #f59e0b; }
+
+/* ── Ventas recientes ────────────────────── */
+.spx-venta-list { display: flex; flex-direction: column; }
+.spx-venta-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--spx-border);
+  gap: 0.5rem;
+}
+.spx-venta-item:last-child { border-bottom: none; }
+.spx-venta-item__left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.spx-venta-item__right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.spx-venta-item__id {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--spx-text-muted);
+}
+.spx-venta-item__tipo {
+  font-size: 0.82rem;
+  color: var(--spx-text);
+}
+.spx-venta-item__mesa {
+  font-size: 0.75rem;
+  color: var(--spx-text-muted);
+}
+.spx-venta-item__val {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #22c55e;
+}
+.spx-venta-badge-sm {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--spx-border);
+  color: var(--spx-text-muted);
+}
+.spx-venta-badge-sm--paid { background: rgba(34,197,94,0.15);  color: #22c55e; }
+.spx-venta-badge-sm--open { background: rgba(59,130,246,0.15);  color: #3b82f6; }
+.spx-venta-badge-sm--void { background: rgba(239,68,68,0.15);   color: #ef4444; }
+
+/* ── Formas de pago / compras list ──────── */
+.spx-fp-list { display: flex; flex-direction: column; }
+.spx-fp-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--spx-border);
+  gap: 0.5rem;
+}
+.spx-fp-item:last-child { border-bottom: none; }
+.spx-fp-item__left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.spx-fp-item__icon {
+  width: 2rem; height: 2rem;
+  border-radius: 0.5rem;
+  background: rgba(13,127,242,0.1);
+  color: var(--spx-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+.spx-fp-item__icon--amber {
+  background: rgba(245,158,11,0.1);
+  color: #f59e0b;
+}
+.spx-fp-item__nombre {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--spx-text);
+}
+.spx-fp-item__saldo {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #22c55e;
+  flex-shrink: 0;
+}
+.spx-fp-more {
+  font-size: 0.75rem;
+  color: var(--spx-text-muted);
+  text-align: center;
+  padding: 0.5rem;
+  margin: 0;
+}
+
+/* ── Empty row ───────────────────────────── */
+.spx-empty-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  color: var(--spx-text-muted);
+  font-size: 0.85rem;
+}
+
+/* ── Shortcuts (reemplaza al panel de chart) */
+.spx-shortcuts {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
+}
+.spx-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1.25rem;
+  text-decoration: none;
+  border-bottom: 1px solid var(--spx-border);
+  transition: background 0.15s;
+  color: var(--spx-text);
+}
+.spx-shortcut:last-child { border-bottom: none; }
+.spx-shortcut:hover { background: rgba(255,255,255,0.03); }
+.spx-shortcut__icon {
+  width: 2.25rem; height: 2.25rem;
+  border-radius: var(--spx-radius-sm);
+  background: rgba(255,255,255,0.05);
+  color: var(--spx-text-sub);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.875rem; flex-shrink: 0;
+}
+.spx-shortcut__info { flex: 1; }
+.spx-shortcut__name { font-size: 0.85rem; font-weight: 600; color: var(--spx-text); margin: 0 0 0.2rem; }
+.spx-shortcut__desc { font-size: 0.75rem; color: var(--spx-text-muted); margin: 0; }
+.spx-shortcut__arrow { color: var(--spx-text-muted); font-size: 0.7rem; }

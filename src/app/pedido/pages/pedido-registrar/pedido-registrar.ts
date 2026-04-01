@@ -53,6 +53,11 @@ export class PedidoRegistrarPageComponent implements OnInit {
     return ['COCINERO', 'DOMICILIARIO'].includes(rol);
   }
 
+  /** Cuando la venta ya está PAGADA, no se pueden agregar ni modificar pedidos */
+  get ventaPagada(): boolean {
+    return this.ventaSeleccionada?.estado === 'PAGADA';
+  }
+
   get ventaIdActual(): number | null {
     return this.myForm.getRawValue().ventaId ?? null;
   }
@@ -85,6 +90,12 @@ export class PedidoRegistrarPageComponent implements OnInit {
         this.ventasAbiertas = d;
         if (this.ventaIdFijo) {
           this.ventaSeleccionada = d.find(v => v.id === this.ventaIdFijo);
+          // Si la venta no está en abiertas (ej. ya PAGADA), la cargamos por ID
+          if (!this.ventaSeleccionada) {
+            this.ventaService.obtenerPorId(this.ventaIdFijo).subscribe({
+              next: (v) => { this.ventaSeleccionada = v; },
+            });
+          }
           this.onVentaChange(this.ventaIdFijo);
         }
       },

@@ -1,0 +1,278 @@
+<div class="spx-cli">
+
+  <!-- ── Header ──────────────────────────────────────────────── -->
+  <div class="spx-cli__header">
+    <div>
+      <h2 class="spx-cli__title">Clientes</h2>
+      <p class="spx-cli__subtitle">Gestión de clientes del restaurante</p>
+    </div>
+    <button class="spx-cli-btn-primary" (click)="abrirCrear()">
+      <i class="fa-solid fa-user-plus"></i>
+      Nuevo Cliente
+    </button>
+  </div>
+
+  <!-- ── Stats ────────────────────────────────────────────────── -->
+  <div class="spx-cli__stats">
+    <div class="spx-cli-stat">
+      <p class="spx-cli-stat__label">Total Clientes</p>
+      <p class="spx-cli-stat__value">{{ clientes.length }}</p>
+    </div>
+    <div class="spx-cli-stat">
+      <p class="spx-cli-stat__label">Activos</p>
+      <div class="spx-cli-stat__row">
+        <span class="spx-cli-stat__dot spx-cli-stat__dot--green"></span>
+        <p class="spx-cli-stat__value">{{ totalActivos }}</p>
+      </div>
+    </div>
+    <div class="spx-cli-stat">
+      <p class="spx-cli-stat__label">Inactivos</p>
+      <p class="spx-cli-stat__value">{{ clientes.length - totalActivos }}</p>
+    </div>
+  </div>
+
+  <!-- ── Filters ──────────────────────────────────────────────── -->
+  <div class="spx-cli__filters">
+    <div class="spx-cli-search">
+      <i class="fa-solid fa-magnifying-glass spx-cli-search__icon"></i>
+      <input
+        type="text"
+        class="spx-cli-search__input"
+        placeholder="Buscar por nombre, cédula o email..."
+        [(ngModel)]="searchTerm"
+      />
+    </div>
+    <div class="spx-cli-filters-row">
+      <select class="spx-cli-select" [(ngModel)]="filtroEstado">
+        <option value="">Estado: Todos</option>
+        <option value="activo">Activos</option>
+        <option value="inactivo">Inactivos</option>
+      </select>
+      <button class="spx-cli-btn-outline" (click)="cargar()">
+        <i class="fa-solid fa-rotate-right"></i>
+        Actualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Loading ──────────────────────────────────────────────── -->
+  @if (cargando) {
+    <div class="spx-cli__loading">
+      <div class="spx-cli-spinner"></div>
+      <p>Cargando clientes...</p>
+    </div>
+  }
+
+  <!-- ── Table ────────────────────────────────────────────────── -->
+  @if (!cargando) {
+    <div class="spx-cli-table-card">
+      <div class="spx-cli-table-wrap">
+        <table class="spx-cli-table">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th class="spx-cli-th--cedula">Cédula</th>
+              <th>Email</th>
+              <th>Estado</th>
+              <th class="spx-cli-th--right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            @for (c of clientesPaginados; track c.id) {
+              <tr class="spx-cli-table__row">
+
+                <!-- Client name cell -->
+                <td>
+                  <div class="spx-cli-user-cell">
+                    <div class="spx-cli-avatar">{{ iniciales(c) }}</div>
+                    <div>
+                      <p class="spx-cli-user-cell__name">{{ c.nombre }} {{ c.apellido }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Cédula -->
+                <td class="spx-cli-td--cedula spx-cli-td--mono">{{ c.cedula }}</td>
+
+                <!-- Email -->
+                <td class="spx-cli-td--email">{{ c.email }}</td>
+
+                <!-- Estado -->
+                <td>
+                  <div [class]="c.activo ? 'spx-cli-status spx-cli-status--active' : 'spx-cli-status spx-cli-status--inactive'">
+                    <span class="spx-cli-status__dot"></span>
+                    {{ c.activo ? 'Activo' : 'Inactivo' }}
+                  </div>
+                </td>
+
+                <!-- Acciones -->
+                <td class="spx-cli-th--right">
+                  <div class="spx-cli-action-btns">
+                    <button
+                      class="spx-cli-action-btn spx-cli-action-btn--edit"
+                      (click)="abrirEditar(c)"
+                      title="Editar"
+                    >
+                      <i class="fa-solid fa-pen"></i>
+                    </button>
+                    @if (c.activo) {
+                      <button
+                        class="spx-cli-action-btn spx-cli-action-btn--deactivate"
+                        (click)="desactivar(c)"
+                        title="Desactivar"
+                      >
+                        <i class="fa-solid fa-toggle-on"></i>
+                      </button>
+                    }
+                  </div>
+                </td>
+
+              </tr>
+            }
+
+            @empty {
+              <tr>
+                <td colspan="5" class="spx-cli-table__empty">
+                  <i class="fa-solid fa-users-slash"></i>
+                  <p>No se encontraron clientes</p>
+                  <p class="spx-cli-table__empty-sub">Registra el primer cliente con el botón "Nuevo Cliente"</p>
+                </td>
+              </tr>
+            }
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table Footer / Pagination -->
+      <div class="spx-cli-table__footer">
+        <p class="spx-cli-table__count">
+          Mostrando <strong>{{ clientesPaginados.length }}</strong>
+          de <strong>{{ clientesFiltrados.length }}</strong> clientes
+        </p>
+        @if (totalPaginas > 1) {
+          <div class="spx-cli-pagination">
+            <button class="spx-cli-page-btn" [disabled]="paginaActual === 1" (click)="paginaAnterior()">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            @for (p of paginas; track p) {
+              <button
+                [class]="paginaActual === p ? 'spx-cli-page-btn spx-cli-page-btn--active' : 'spx-cli-page-btn'"
+                (click)="irAPagina(p)"
+              >{{ p }}</button>
+            }
+            <button class="spx-cli-page-btn" [disabled]="paginaActual === totalPaginas" (click)="paginaSiguiente()">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+</div>
+
+<!-- ── Modal Crear / Editar ─────────────────────────────────── -->
+@if (mostrarModal) {
+  <div class="spx-cli-modal-backdrop" (click)="cerrarModal()">
+    <div class="spx-cli-modal" (click)="$event.stopPropagation()">
+
+      <!-- Modal Header -->
+      <div class="spx-cli-modal__header">
+        <div>
+          <h3 class="spx-cli-modal__title">
+            <i [class]="modoEditar ? 'fa-solid fa-pen' : 'fa-solid fa-user-plus'"></i>
+            {{ modoEditar ? 'Editar Cliente' : 'Nuevo Cliente' }}
+          </h3>
+          @if (!modoEditar) {
+            <p class="spx-cli-modal__subtitle">La contraseña se genera automáticamente con la cédula</p>
+          }
+        </div>
+        <button class="spx-cli-modal__close" (click)="cerrarModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="spx-cli-modal__body">
+
+        <div class="spx-cli-form-row">
+          <div class="spx-cli-field">
+            <label class="spx-cli-label">Nombre <span class="spx-cli-required">*</span></label>
+            <input
+              type="text"
+              class="spx-cli-input"
+              placeholder="Nombre del cliente"
+              [(ngModel)]="form.nombre"
+            />
+          </div>
+          <div class="spx-cli-field">
+            <label class="spx-cli-label">Apellido <span class="spx-cli-required">*</span></label>
+            <input
+              type="text"
+              class="spx-cli-input"
+              placeholder="Apellido del cliente"
+              [(ngModel)]="form.apellido"
+            />
+          </div>
+        </div>
+
+        <div class="spx-cli-form-row">
+          <div class="spx-cli-field">
+            <label class="spx-cli-label">Cédula <span class="spx-cli-required">*</span></label>
+            <input
+              type="text"
+              class="spx-cli-input"
+              placeholder="Número de cédula"
+              [(ngModel)]="form.cedula"
+              (input)="onCedulaChange()"
+            />
+          </div>
+          <div class="spx-cli-field">
+            <label class="spx-cli-label">Email <span class="spx-cli-required">*</span></label>
+            <input
+              type="email"
+              class="spx-cli-input"
+              placeholder="correo@ejemplo.com"
+              [(ngModel)]="form.email"
+            />
+          </div>
+        </div>
+
+        <div class="spx-cli-field">
+          <label class="spx-cli-label">
+            Contraseña
+            @if (!modoEditar) { <span class="spx-cli-required">*</span> }
+            @if (modoEditar) { <span class="spx-cli-hint">(dejar en blanco para no cambiar)</span> }
+          </label>
+          <input
+            type="password"
+            class="spx-cli-input"
+            [placeholder]="modoEditar ? 'Nueva contraseña (opcional)' : 'Contraseña (auto: cédula)'"
+            [(ngModel)]="form.password"
+          />
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="spx-cli-modal__footer">
+        <button class="spx-cli-btn-outline" (click)="cerrarModal()">Cancelar</button>
+        <button
+          class="spx-cli-btn-primary"
+          [disabled]="!esFormValido() || guardando"
+          (click)="guardar()"
+        >
+          @if (guardando) {
+            <span class="spx-cli-btn-spinner"></span>
+          } @else {
+            <i [class]="modoEditar ? 'fa-solid fa-floppy-disk' : 'fa-solid fa-user-plus'"></i>
+          }
+          {{ modoEditar ? 'Guardar Cambios' : 'Crear Cliente' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

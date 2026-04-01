@@ -33,11 +33,32 @@ export class CompraListarPageComponent implements OnInit {
   searchTerm: string = '';
   filtroEstado: 'todos' | 'activa' | 'anulada' = 'todos';
 
+  /** Rango de fechas (YYYY-MM-DD) */
+  public fechaDesde: string = '';
+  public fechaHasta: string = '';
+
   ngOnInit(): void {
     if (!this.restauranteId) {
       this.restauranteId = this.authService.getRestauranteId() ?? undefined;
     }
+    // Por defecto: mostrar solo las compras de hoy
+    const hoy = this.fechaHoy();
+    this.fechaDesde = hoy;
+    this.fechaHasta = hoy;
     this.cargarCompras();
+  }
+
+  private fechaHoy(): string {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm   = String(d.getMonth() + 1).padStart(2, '0');
+    const dd   = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  limpiarFechas(): void {
+    this.fechaDesde = '';
+    this.fechaHasta = '';
   }
 
   cargarCompras(): void {
@@ -54,18 +75,34 @@ export class CompraListarPageComponent implements OnInit {
 
   get comprasFiltradas(): Compra[] {
     return this.compras.filter(c => {
+      // ── Filtro de texto ─────────────────────────────────
       const term = this.searchTerm.toLowerCase();
       const matchSearch = !term ||
         (c.codigo?.toLowerCase().includes(term) ?? false) ||
         (c.insumo?.descripcion?.toLowerCase().includes(term) ?? false) ||
         (c.insumo?.codigo?.toLowerCase().includes(term) ?? false);
 
+      // ── Filtro de estado ────────────────────────────────
       const matchEstado =
         this.filtroEstado === 'todos'  ? true :
         this.filtroEstado === 'activa' ? (c.activo === true) :
         this.filtroEstado === 'anulada'? (c.activo === false) : true;
 
-      return matchSearch && matchEstado;
+      // ── Filtro de fechas ────────────────────────────────
+      let matchFecha = true;
+      if (c.fechaCreacion) {
+        const fecha = new Date(c.fechaCreacion);
+        if (this.fechaDesde) {
+          matchFecha = matchFecha && fecha >= new Date(this.fechaDesde + 'T00:00:00');
+        }
+        if (this.fechaHasta) {
+          matchFecha = matchFecha && fecha <= new Date(this.fechaHasta + 'T23:59:59');
+        }
+      } else if (this.fechaDesde || this.fechaHasta) {
+        matchFecha = false;
+      }
+
+      return matchSearch && matchEstado && matchFecha;
     });
   }
 

@@ -157,6 +157,16 @@ export const routes: Routes = [
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
 
+      // ── Clientes ─────────────────────────────────────────────────────────────
+      {
+        path: 'cliente',
+        title: 'Clientes',
+        loadChildren: () =>
+          import('./cliente/cliente.routes').then((m) => m.clienteRoutes),
+        canActivate: [RoleGuard],
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO'] },
+      },
+
       // ── Operación POS ────────────────────────────────────────────────────────
       {
         path: 'venta',

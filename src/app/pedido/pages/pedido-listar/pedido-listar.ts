@@ -21,6 +21,8 @@ export class PedidoListarPageComponent implements OnInit, OnChanges {
   private readonly authService    = inject(AuthService);
 
   @Input() ventaId?: number;
+  /** Cuando la venta está PAGADA, todos los ítems son solo lectura */
+  @Input() ventaPagada: boolean = false;
 
   public pedidos:  Pedido[]  = [];
   public cargando: boolean   = false;
@@ -77,6 +79,7 @@ export class PedidoListarPageComponent implements OnInit, OnChanges {
 
   // ── FIX #4: Enviar todos los ítems CREADO a cocina ───────────────────────────
   get hayPedidosParaCocina(): boolean {
+    if (this.ventaPagada) return false;
     return this.pedidos.some(p => this.estadoEfectivo(p) === 'CREADO')
       && ['PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO'].includes(this.rol);
   }
@@ -115,41 +118,48 @@ export class PedidoListarPageComponent implements OnInit, OnChanges {
 
   /** CREADO → PEDIDO (Enviar a cocina) */
   puedeEnviarCocina(p: Pedido): boolean {
+    if (this.ventaPagada) return false;
     return this.estadoEfectivo(p) === 'CREADO'
       && ['PROPIETARIO','ADMINISTRADOR','CAJERO','MESERO'].includes(this.rol);
   }
 
   /** PEDIDO → PREPARANDO */
   puedeIniciarPreparacion(p: Pedido): boolean {
+    if (this.ventaPagada) return false;
     return this.estadoEfectivo(p) === 'PEDIDO' && this.rol === 'COCINERO';
   }
 
   /** PREPARANDO → PREPARADO  |  DEVUELTO → PREPARADO (re-preparación) */
   puedeMarcarPreparado(p: Pedido): boolean {
+    if (this.ventaPagada) return false;
     const est = this.estadoEfectivo(p);
     return (est === 'PREPARANDO' || est === 'DEVUELTO') && this.rol === 'COCINERO';
   }
 
   /** PREPARADO → ENTREGADO_CLIENTE */
   puedeEntregarCliente(p: Pedido): boolean {
+    if (this.ventaPagada) return false;
     return this.estadoEfectivo(p) === 'PREPARADO'
       && ['PROPIETARIO','ADMINISTRADOR','CAJERO','MESERO','DOMICILIARIO'].includes(this.rol);
   }
 
   /** PREPARADO → ENTREGADO_DOMICILIARIO */
   puedeEntregarDomiciliario(p: Pedido): boolean {
+    if (this.ventaPagada) return false;
     return this.estadoEfectivo(p) === 'PREPARADO'
       && ['PROPIETARIO','ADMINISTRADOR','CAJERO','MESERO'].includes(this.rol);
   }
 
   /** ENTREGADO_CLIENTE / ENTREGADO_DOMICILIARIO → DEVUELTO */
   puedeDevolver(p: Pedido): boolean {
+    if (this.ventaPagada) return false;
     return ['ENTREGADO_CLIENTE','ENTREGADO_DOMICILIARIO'].includes(this.estadoEfectivo(p))
       && ['PROPIETARIO','ADMINISTRADOR','CAJERO','MESERO','DOMICILIARIO'].includes(this.rol);
   }
 
   /** Cualquier estado excepto CREADO → CANCELADO (con motivo); DEVUELTO también puede cancelarse */
   puedeCancelar(p: Pedido): boolean {
+    if (this.ventaPagada) return false;
     const est = this.estadoEfectivo(p);
     return !['CREADO','CANCELADO','DESTRUIDO'].includes(est)
       && ['PROPIETARIO','ADMINISTRADOR','CAJERO','MESERO'].includes(this.rol);
@@ -157,6 +167,7 @@ export class PedidoListarPageComponent implements OnInit, OnChanges {
 
   /** post-PREPARANDO → DESTRUIDO (solo PROPIETARIO / ADMINISTRADOR); DEVUELTO también puede destruirse */
   puedeDestruir(p: Pedido): boolean {
+    if (this.ventaPagada) return false;
     const ORDEN: PedidoEstado[] = ['CREADO','PEDIDO','PREPARANDO','PREPARADO',
                                     'ENTREGADO_CLIENTE','ENTREGADO_DOMICILIARIO'];
     const est = this.estadoEfectivo(p);
@@ -171,6 +182,7 @@ export class PedidoListarPageComponent implements OnInit, OnChanges {
   // ── FIX #2: Eliminar físico solo cuando CREADO ───────────────────────────────
   // Permitido para PROPIETARIO, ADMINISTRADOR, CAJERO y MESERO
   puedeEliminar(p: Pedido): boolean {
+    if (this.ventaPagada) return false;
     return this.estadoEfectivo(p) === 'CREADO'
       && ['PROPIETARIO','ADMINISTRADOR','CAJERO','MESERO'].includes(this.rol);
   }

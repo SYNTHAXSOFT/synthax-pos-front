@@ -368,6 +368,9 @@
 }
 .spx-venta-td--id   { color: var(--spx-muted); font-variant-numeric: tabular-nums; }
 .spx-venta-td--date { color: var(--spx-muted); font-size: 0.8rem; }
+.spx-venta-td--total { text-align: right; }
+.spx-venta-total-cell { font-weight: 600; color: #22c55e; font-size: 0.875rem; }
+.spx-venta-td--muted { color: var(--spx-muted); }
 .spx-venta-td--center { text-align: center; }
 
 /* Status badges */

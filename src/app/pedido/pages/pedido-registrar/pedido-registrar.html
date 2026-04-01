@@ -2,7 +2,7 @@
 
   <!-- ══ Banner info de la venta ══════════════════════════════════════════ -->
   @if (ventaSeleccionada) {
-    <div class="spx-reg-banner">
+    <div class="spx-reg-banner" [class.spx-reg-banner--pagada]="ventaPagada">
       <div class="spx-reg-banner__left">
         <div class="spx-reg-banner__icon">
           <i [class]="getTipoIcon(ventaSeleccionada.tipoPedido?.nombre)"></i>
@@ -17,7 +17,13 @@
           }
         </div>
       </div>
-      @if (ventaSeleccionada.observacion) {
+      @if (ventaPagada) {
+        <div class="spx-reg-banner__pagada">
+          <i class="fa-solid fa-lock"></i>
+          <span>Venta PAGADA — solo lectura</span>
+        </div>
+      }
+      @if (ventaSeleccionada.observacion && !ventaPagada) {
         <div class="spx-reg-banner__obs">
           <i class="fa-solid fa-note-sticky"></i>
           <span>{{ ventaSeleccionada.observacion }}</span>
@@ -46,7 +52,7 @@
   }
 
   <!-- ══ Catálogo de productos ════════════════════════════════════════════ -->
-  @if (!soloLectura && (ventaIdFijo || ventaIdActual)) {
+  @if (!soloLectura && !ventaPagada && (ventaIdFijo || ventaIdActual)) {
     <div class="spx-reg-section-title">
       <i class="fa-solid fa-bowl-food"></i> Agregar productos
     </div>
@@ -127,7 +133,7 @@
   <!-- ══ Listado de pedidos de esta venta ═════════════════════════════════ -->
   @if (ventaIdActual) {
     <div class="spx-reg-pedidos">
-      <app-pedido-listar [ventaId]="ventaIdActual"></app-pedido-listar>
+      <app-pedido-listar [ventaId]="ventaIdActual" [ventaPagada]="ventaPagada"></app-pedido-listar>
     </div>
   }
 

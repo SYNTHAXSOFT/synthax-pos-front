@@ -41,6 +41,9 @@ const SEARCH_ITEMS: SearchItem[] = [
   { label: 'Compras',          sub: 'Historial de compras',             icon: 'fa-shopping-cart',   route: '/synthax-pos/compra/listar',           keywords: ['compra','compras','proveedor','abastecimiento'] },
   { label: 'Nueva Compra',     sub: 'Registrar compra de insumos',      icon: 'fa-cart-plus',       route: '/synthax-pos/compra/registrar',        keywords: ['nueva compra','crear compra','proveedor'] },
 
+  // Clientes
+  { label: 'Clientes',         sub: 'Gestión de clientes',              icon: 'fa-user-tie',        route: '/synthax-pos/cliente',                 keywords: ['cliente','clientes','consumidor','comprador'] },
+
   // Usuarios
   { label: 'Usuarios',         sub: 'Gestión de usuarios del sistema',  icon: 'fa-users',           route: '/synthax-pos/usuario/listar',          keywords: ['usuario','usuarios','empleado','mesero','cajero','staff'] },
   { label: 'Nuevo Usuario',    sub: 'Registrar nuevo usuario',          icon: 'fa-user-plus',       route: '/synthax-pos/usuario/registrar',       keywords: ['nuevo usuario','crear usuario','registrar usuario'] },

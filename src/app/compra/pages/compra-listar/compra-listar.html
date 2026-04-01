@@ -52,24 +52,57 @@
   </div>
 
   <!-- Filter Bar -->
-  <div class="spx-compra-filters">
+  <div class="spx-compra-filterbar">
+
+    <!-- Tabs de estado -->
+    <div class="spx-compra-tabs">
+      <button class="spx-compra-tab" [class.spx-compra-tab--active]="filtroEstado === 'todos'"
+        (click)="setFiltroEstado('todos')">
+        <i class="fa-solid fa-cart-shopping"></i> Todas
+        <span class="spx-compra-tab__badge">{{ comprasFiltradas.length }}</span>
+      </button>
+      <button class="spx-compra-tab spx-compra-tab--ok" [class.spx-compra-tab--active]="filtroEstado === 'activa'"
+        (click)="setFiltroEstado('activa')">
+        <i class="fa-solid fa-circle-check"></i> Activas
+        <span class="spx-compra-tab__badge spx-compra-tab__badge--ok">{{ totalActivas }}</span>
+      </button>
+      <button class="spx-compra-tab spx-compra-tab--void" [class.spx-compra-tab--active]="filtroEstado === 'anulada'"
+        (click)="setFiltroEstado('anulada')">
+        <i class="fa-solid fa-ban"></i> Anuladas
+        <span class="spx-compra-tab__badge spx-compra-tab__badge--void">{{ totalAnuladas }}</span>
+      </button>
+    </div>
+
+    <!-- Rango de fechas -->
+    <div class="spx-compra-daterange">
+      <div class="spx-compra-daterange__field">
+        <label class="spx-compra-daterange__label">
+          <i class="fa-solid fa-calendar-days"></i> Desde
+        </label>
+        <input type="date" class="spx-compra-daterange__input"
+          [(ngModel)]="fechaDesde" [max]="fechaHasta || ''">
+      </div>
+      <span class="spx-compra-daterange__sep">→</span>
+      <div class="spx-compra-daterange__field">
+        <label class="spx-compra-daterange__label">Hasta</label>
+        <input type="date" class="spx-compra-daterange__input"
+          [(ngModel)]="fechaHasta" [min]="fechaDesde || ''">
+      </div>
+      @if (fechaDesde || fechaHasta) {
+        <button class="spx-compra-daterange__clear" (click)="limpiarFechas()" title="Limpiar fechas">
+          <i class="fa-solid fa-xmark"></i> Limpiar
+        </button>
+      }
+    </div>
+
+    <!-- Búsqueda de texto -->
     <div class="spx-compra-search">
       <i class="fa-solid fa-magnifying-glass spx-compra-search__icon"></i>
-      <input
-        type="text"
-        class="spx-compra-search__input"
+      <input type="text" class="spx-compra-search__input"
         placeholder="Buscar por código o insumo..."
-        [(ngModel)]="searchTerm"
-      />
+        [(ngModel)]="searchTerm" />
     </div>
-    <div class="spx-compra-pills">
-      <button class="spx-compra-pill" [class.spx-compra-pill--active]="filtroEstado === 'todos'"
-        (click)="setFiltroEstado('todos')">Todas</button>
-      <button class="spx-compra-pill" [class.spx-compra-pill--active]="filtroEstado === 'activa'"
-        (click)="setFiltroEstado('activa')">Activas</button>
-      <button class="spx-compra-pill spx-compra-pill--danger" [class.spx-compra-pill--active]="filtroEstado === 'anulada'"
-        (click)="setFiltroEstado('anulada')">Anuladas</button>
-    </div>
+
   </div>
 
   <!-- Loading -->
