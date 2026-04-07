@@ -709,3 +709,68 @@
 .spx-shortcut__name { font-size: 0.85rem; font-weight: 600; color: var(--spx-text); margin: 0 0 0.2rem; }
 .spx-shortcut__desc { font-size: 0.75rem; color: var(--spx-text-muted); margin: 0; }
 .spx-shortcut__arrow { color: var(--spx-text-muted); font-size: 0.7rem; }
+
+/* ── Caja buttons & status ──────────────────── */
+.spx-btn-caja {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .65rem 1.1rem; border-radius: var(--spx-radius);
+  font-size: .875rem; font-weight: 600;
+  border: none; cursor: pointer;
+  transition: all .15s; white-space: nowrap;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.spx-btn-caja--open {
+  background: #059669; color: #fff;
+  box-shadow: 0 4px 12px rgba(5,150,105,.35);
+}
+.spx-btn-caja--open:hover {
+  background: #047857;
+  box-shadow: 0 6px 18px rgba(5,150,105,.45);
+  transform: translateY(-1px);
+}
+.spx-btn-caja--close {
+  background: #dc2626; color: #fff;
+  box-shadow: 0 4px 12px rgba(220,38,38,.35);
+}
+.spx-btn-caja--close:hover {
+  background: #b91c1c;
+  box-shadow: 0 6px 18px rgba(220,38,38,.45);
+  transform: translateY(-1px);
+}
+
+.spx-caja-status {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .8rem; font-weight: 600; color: #34d399;
+  padding: .4rem .75rem; background: rgba(52,211,153,.1);
+  border: 1px solid rgba(52,211,153,.25); border-radius: 999px;
+}
+.spx-caja-status__dot {
+  font-size: .45rem; animation: pulse 1.5s ease infinite;
+}
+
+/* ── Caja closed banner ─────────────────────── */
+.spx-caja-banner {
+  display: flex; align-items: center; gap: 1rem;
+  background: rgba(220,38,38,.08);
+  border: 1px solid rgba(220,38,38,.3);
+  border-radius: var(--spx-radius);
+  padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.spx-caja-banner__icon {
+  width: 2.5rem; height: 2.5rem; border-radius: .625rem;
+  background: rgba(220,38,38,.15); color: #f87171;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; flex-shrink: 0;
+}
+.spx-caja-banner__content {
+  flex: 1; display: flex; flex-direction: column; gap: .2rem;
+  min-width: 200px;
+}
+.spx-caja-banner__content strong { font-size: .9rem; color: #fca5a5; }
+.spx-caja-banner__content span   { font-size: .8rem; color: #94a3b8; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .4; }
+}

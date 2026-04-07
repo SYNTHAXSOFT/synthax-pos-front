@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { HomePageComponent } from './shared/pages/home-page/home-page.component';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { RoleGuard } from './auth/guards/role.guard';
+import { CajaGuard } from './caja/guards/caja.guard';
 
 /**
  * Rutas del sistema POS (alineadas con SecurityConfig.java):
@@ -50,7 +51,7 @@ export const routes: Routes = [
         title: 'Usuarios',
         loadChildren: () =>
           import('./usuario/usuario.routes').then((m) => m.usuarioRoutes),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, CajaGuard],
         // PROPIETARIO puede gestionar el personal de su restaurante
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
@@ -61,7 +62,7 @@ export const routes: Routes = [
         title: 'Departamentos',
         loadChildren: () =>
           import('./departamento/departamento.routes').then((m) => m.departamentoRoutes),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, CajaGuard],
         data: { roles: ['ROOT'] },
       },
       {
@@ -69,7 +70,7 @@ export const routes: Routes = [
         title: 'Municipios',
         loadChildren: () =>
           import('./municipio/municipio.routes').then((m) => m.municipioRoutes),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, CajaGuard],
         data: { roles: ['ROOT'] },
       },
 
@@ -81,7 +82,7 @@ export const routes: Routes = [
         title: 'Restaurantes',
         loadChildren: () =>
           import('./restaurante/restaurante.routes').then((m) => m.restauranteRoutes),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, CajaGuard],
         data: { roles: ['ROOT', 'ADMINISTRADOR'] },
       },
       {
@@ -93,7 +94,7 @@ export const routes: Routes = [
           import('./restaurante/pages/restaurante-branding/restaurante-branding').then(
             (m) => m.RestauranteBrandingComponent
           ),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, CajaGuard],
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
       {
@@ -101,7 +102,7 @@ export const routes: Routes = [
         title: 'Insumos',
         loadChildren: () =>
           import('./insumo/insumo.routes').then((m) => m.insumoRoutes),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, CajaGuard],
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
       {
@@ -109,7 +110,7 @@ export const routes: Routes = [
         title: 'Compras',
         loadChildren: () =>
           import('./compra/compra.routes').then((m) => m.compraRoutes),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, CajaGuard],
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
       {
@@ -117,7 +118,7 @@ export const routes: Routes = [
         title: 'Formas de Pago',
         loadChildren: () =>
           import('./forma-pago/forma-pago.routes').then((m) => m.formaPagoRoutes),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, CajaGuard],
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
 
@@ -127,7 +128,7 @@ export const routes: Routes = [
         title: 'Productos',
         loadChildren: () =>
           import('./producto/producto.routes').then((m) => m.productoRoutes),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, CajaGuard],
         // PROPIETARIO gestiona el catálogo de su restaurante
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
@@ -136,7 +137,7 @@ export const routes: Routes = [
         title: 'Mesas',
         loadChildren: () =>
           import('./mesa/mesa.routes').then((m) => m.mesaRoutes),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, CajaGuard],
         // PROPIETARIO gestiona las mesas de su restaurante
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
@@ -145,7 +146,7 @@ export const routes: Routes = [
         title: 'Tipos de Pedido',
         loadChildren: () =>
           import('./tipo-pedido/tipo-pedido.routes').then((m) => m.tipoPedidoRoutes),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, CajaGuard],
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
       {
@@ -153,7 +154,7 @@ export const routes: Routes = [
         title: 'Impuestos',
         loadChildren: () =>
           import('./impuesto/impuesto.routes').then((m) => m.impuestoRoutes),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, CajaGuard],
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
       },
 
@@ -163,7 +164,7 @@ export const routes: Routes = [
         title: 'Clientes',
         loadChildren: () =>
           import('./cliente/cliente.routes').then((m) => m.clienteRoutes),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, CajaGuard],
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO'] },
       },
 
@@ -173,7 +174,7 @@ export const routes: Routes = [
         title: 'Ventas',
         loadChildren: () =>
           import('./venta/venta.routes').then((m) => m.ventaRoutes),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, CajaGuard],
         // Roles operativos ven ventas del día (solo lectura para COCINERO/MESERO/DOMICILIARIO)
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO'] },
       },
@@ -182,7 +183,7 @@ export const routes: Routes = [
         title: 'Pedidos',
         loadChildren: () =>
           import('./pedido/pedido.routes').then((m) => m.pedidoRoutes),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, CajaGuard],
         // COCINERO puede ver los pedidos del día
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO'] },
       },

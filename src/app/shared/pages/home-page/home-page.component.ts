@@ -19,9 +19,10 @@ export class HomePageComponent {
     password: ''
   };
 
-  cargando      = false;
-  errorMessage  = '';
-  showPassword  = false;
+  cargando       = false;
+  errorMessage   = '';
+  showPassword   = false;
+  cajaCerrada    = false;
 
   constructor(
     private authService: AuthService,
@@ -34,8 +35,9 @@ export class HomePageComponent {
     return;
   }
 
-  this.cargando = true;
+  this.cargando    = true;
   this.errorMessage = '';
+  this.cajaCerrada  = false;
 
   this.authService.login(this.credentials).subscribe({
     next: (response) => {
@@ -45,8 +47,9 @@ export class HomePageComponent {
     },
     error: (error) => {
       console.error('Error en login:', error);
+      this.cajaCerrada  = error.error?.codigo === 'CAJA_CERRADA';
       this.errorMessage = error.error?.mensaje || 'Credenciales incorrectas';
-      this.cargando = false;
+      this.cargando     = false;
     },
     complete: () => {
       this.cargando = false;

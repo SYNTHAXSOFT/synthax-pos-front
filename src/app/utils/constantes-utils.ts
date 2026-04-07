@@ -29,6 +29,7 @@ export const API_ENDPOINTS = {
   INSUMOS:        'insumos',
   COMPRAS:        'compras',
   FORMAS_PAGO:    'formas-pago',
+  CAJA:           'caja',
 };
 
 // Roles del sistema POS (sincronizados con Rol.java del backend)

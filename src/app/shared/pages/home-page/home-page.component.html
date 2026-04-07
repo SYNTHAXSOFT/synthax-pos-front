@@ -64,11 +64,24 @@
           </div>
         </div>
 
-        <!-- Error -->
-        @if (errorMessage) {
+        <!-- Error genérico -->
+        @if (errorMessage && !cajaCerrada) {
           <div class="spx-error">
             <i class="fa fa-circle-exclamation"></i>
             <span>{{ errorMessage }}</span>
+          </div>
+        }
+
+        <!-- Error caja cerrada -->
+        @if (cajaCerrada) {
+          <div class="spx-error spx-error--caja">
+            <div class="spx-error--caja__icon">
+              <i class="fa-solid fa-lock"></i>
+            </div>
+            <div>
+              <strong>Acceso restringido</strong>
+              <span>{{ errorMessage }}</span>
+            </div>
           </div>
         }
 

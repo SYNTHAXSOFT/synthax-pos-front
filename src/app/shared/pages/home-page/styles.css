@@ -225,6 +225,31 @@
   margin-bottom: 1rem;
 }
 
+/* Error especial: caja cerrada */
+.spx-error--caja {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 0.85rem 1rem;
+}
+.spx-error--caja__icon {
+  width: 2rem; height: 2rem;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; color: #f87171;
+  flex-shrink: 0;
+}
+.spx-error--caja > div {
+  display: flex; flex-direction: column; gap: 0.2rem;
+}
+.spx-error--caja strong {
+  font-weight: 700; font-size: 0.875rem; color: #fca5a5;
+}
+.spx-error--caja span {
+  font-size: 0.8rem; color: #f87171; line-height: 1.4;
+}
+
 /* ── Botón ingresar ─────────────────────────── */
 .spx-btn-login {
   width: 100%;

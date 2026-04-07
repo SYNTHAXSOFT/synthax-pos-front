@@ -1,0 +1,304 @@
+<!-- Backdrop -->
+<div class="caja-modal-backdrop" (click)="!cerrando && cancelar()"></div>
+
+<!-- Modal -->
+<div class="caja-modal caja-modal--wide" role="dialog" aria-modal="true">
+
+  <!-- Header -->
+  <div class="caja-modal__header">
+    <div class="caja-modal__header-icon caja-modal__header-icon--red">
+      <i class="fa-solid fa-cash-register"></i>
+    </div>
+    <div>
+      <h2 class="caja-modal__title">Cierre de Caja</h2>
+      <p class="caja-modal__subtitle">Revisa el reporte antes de finalizar el día</p>
+    </div>
+    @if (!cerrando) {
+      <button class="caja-modal__close" (click)="cancelar()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    }
+  </div>
+
+  <!-- Body -->
+  <div class="caja-modal__body caja-modal__body--scroll">
+
+    @if (cargando) {
+      <div class="caja-report__loading">
+        <div class="caja-spin"></div>
+        <p>Generando reporte del día...</p>
+      </div>
+    }
+
+    @if (error && !cargando) {
+      <div class="caja-modal__alert caja-modal__alert--error">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        {{ error }}
+      </div>
+    }
+
+    @if (reporte && !cargando) {
+
+      <!-- ── Métricas rápidas ─────────────────────────────────────── -->
+      <div class="caja-report__metrics">
+        <div class="caja-metric caja-metric--green">
+          <span class="caja-metric__lbl">Ventas del día</span>
+          <span class="caja-metric__val">$ {{ fmt(reporte.totalVentasDia) }}</span>
+        </div>
+        <div class="caja-metric caja-metric--amber">
+          <span class="caja-metric__lbl">Compras del día</span>
+          <span class="caja-metric__val">$ {{ fmt(reporte.totalComprasDia) }}</span>
+        </div>
+        <div class="caja-metric caja-metric--blue">
+          <span class="caja-metric__lbl">Monto inicial</span>
+          <span class="caja-metric__val">$ {{ fmt(reporte.montoInicial) }}</span>
+        </div>
+        <div class="caja-metric" [class.caja-metric--green]="reporte.efectivoAEntregar >= 0"
+                                  [class.caja-metric--red]="reporte.efectivoAEntregar < 0">
+          <span class="caja-metric__lbl">Efectivo a entregar</span>
+          <span class="caja-metric__val">$ {{ fmt(reporte.efectivoAEntregar) }}</span>
+        </div>
+      </div>
+
+      <!-- ── Ventas del día ─────────────────────────────────────────── -->
+      <div class="caja-report__section">
+        <h3 class="caja-report__section-title">
+          <i class="fa-solid fa-receipt"></i> Ventas del Día
+          <span class="caja-report__section-badge">{{ reporte.listaVentas?.length ?? 0 }}</span>
+        </h3>
+
+        @if (!reporte.listaVentas || reporte.listaVentas.length === 0) {
+          <p class="caja-report__empty">Sin ventas registradas hoy.</p>
+        } @else {
+          <div class="caja-report__table-wrap">
+            <table class="caja-report__table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Tipo</th>
+                  <th>Cliente</th>
+                  <th>Método de Pago</th>
+                  <th>Productos</th>
+                  <th class="r">Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (v of reporte.listaVentas; track v.ventaId) {
+                  <tr>
+                    <td class="txt-muted">{{ v.codigo ?? v.ventaId }}</td>
+                    <td><span class="caja-tipo-badge">{{ v.tipoVenta }}</span></td>
+                    <td>{{ v.cliente }}</td>
+                    <td>{{ v.metodoPago }}</td>
+                    <td class="caja-productos-cell">{{ v.productos?.join(', ') || '—' }}</td>
+                    <td class="r txt-green"><strong>$ {{ fmt(v.valor) }}</strong></td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="5" class="r"><strong>Total</strong></td>
+                  <td class="r txt-green"><strong>$ {{ fmt(reporte.totalVentasDia) }}</strong></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        }
+      </div>
+
+      <!-- ── Compras del día ───────────────────────────────────────── -->
+      <div class="caja-report__section">
+        <h3 class="caja-report__section-title">
+          <i class="fa-solid fa-cart-flatbed"></i> Compras del Día
+        </h3>
+
+        @if (!reporte.listaCompras || reporte.listaCompras.length === 0) {
+          <p class="caja-report__empty">Sin compras registradas hoy.</p>
+        } @else {
+          <div class="caja-report__table-wrap">
+            <table class="caja-report__table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Insumo</th>
+                  <th class="r">Cant.</th>
+                  <th class="r">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of reporte.listaCompras; track c.id) {
+                  <tr>
+                    <td>{{ c.codigo ?? '—' }}</td>
+                    <td>{{ c.insumo?.descripcion ?? '—' }}</td>
+                    <td class="r">{{ c.cantidad }}</td>
+                    <td class="r">$ {{ fmt(c.valorTotal) }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="r"><strong>Total</strong></td>
+                  <td class="r"><strong>$ {{ fmt(reporte.totalComprasDia) }}</strong></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        }
+      </div>
+
+      <!-- ── Métodos de pago ──────────────────────────────────────── -->
+      <div class="caja-report__section">
+        <h3 class="caja-report__section-title">
+          <i class="fa-solid fa-wallet"></i> Métodos de Pago
+        </h3>
+
+        @if (!reporte.metodosPago || reporte.metodosPago.length === 0) {
+          <p class="caja-report__empty">Sin métodos de pago registrados.</p>
+        } @else {
+          <div class="caja-report__table-wrap">
+            <table class="caja-report__table">
+              <thead>
+                <tr>
+                  <th>Método</th>
+                  <th class="r">Valor Inicial</th>
+                  <th class="r">Ingresos día</th>
+                  <th class="r">Egresos día</th>
+                  <th class="r">Valor Final</th>
+                  <th class="r">Diferencia</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (mp of reporte.metodosPago; track mp.formaPagoId) {
+                  <tr>
+                    <td><strong>{{ mp.formaPagoNombre }}</strong></td>
+                    <td class="r">$ {{ fmt(mp.saldoInicial) }}</td>
+                    <td class="r txt-green">$ {{ fmt(mp.ingresosDelDia) }}</td>
+                    <td class="r txt-red">$ {{ fmt(mp.egresosDelDia) }}</td>
+                    <td class="r">$ {{ fmt(mp.saldoFinal) }}</td>
+                    <td class="r" [class.txt-green]="mp.diferencia >= 0" [class.txt-red]="mp.diferencia < 0">
+                      $ {{ fmt(mp.diferencia) }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td><strong>Total ingresos</strong></td>
+                  <td></td>
+                  <td class="r"><strong>$ {{ fmt(reporte.totalIngresosFormaPago) }}</strong></td>
+                  <td colspan="3">
+                    @if (reporte.coincideConVentas) {
+                      <span class="caja-badge caja-badge--green">
+                        <i class="fa-solid fa-check"></i> Cuadra con ventas
+                      </span>
+                    } @else {
+                      <span class="caja-badge caja-badge--red">
+                        <i class="fa-solid fa-xmark"></i> No cuadra con ventas
+                      </span>
+                    }
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <!-- Verificación -->
+          <div class="caja-report__verify" [class.caja-report__verify--ok]="reporte.coincideConVentas"
+                                            [class.caja-report__verify--fail]="!reporte.coincideConVentas">
+            <i [class]="reporte.coincideConVentas ? 'fa-solid fa-circle-check' : 'fa-solid fa-triangle-exclamation'"></i>
+            @if (reporte.coincideConVentas) {
+              Los ingresos por forma de pago
+              (<strong>$ {{ fmt(reporte.totalIngresosFormaPago) }}</strong>)
+              coinciden con el total de ventas
+              (<strong>$ {{ fmt(reporte.totalVentasDia) }}</strong>).
+            } @else {
+              Diferencia detectada: ingresos
+              (<strong>$ {{ fmt(reporte.totalIngresosFormaPago) }}</strong>)
+              vs ventas
+              (<strong>$ {{ fmt(reporte.totalVentasDia) }}</strong>).
+            }
+          </div>
+        }
+      </div>
+
+      <!-- ── Insumos ──────────────────────────────────────────────── -->
+      <div class="caja-report__section">
+        <h3 class="caja-report__section-title">
+          <i class="fa-solid fa-warehouse"></i> Inventario de Insumos
+        </h3>
+
+        @if (!reporte.listaInsumos || reporte.listaInsumos.length === 0) {
+          <p class="caja-report__empty">Sin insumos registrados.</p>
+        } @else {
+          <div class="caja-report__table-wrap">
+            <table class="caja-report__table">
+              <thead>
+                <tr>
+                  <th>Insumo</th>
+                  <th>Unidad</th>
+                  <th class="r">Stock Inicial</th>
+                  <th class="r">Comprado</th>
+                  <th class="r">Vendido</th>
+                  <th class="r">Stock Final</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (ins of reporte.listaInsumos; track ins.insumoId) {
+                  <tr>
+                    <td>{{ ins.insumoDescripcion }}</td>
+                    <td>{{ ins.medida }}</td>
+                    <td class="r">{{ ins.stockInicial }}</td>
+                    <td class="r txt-green">{{ ins.stockComprado > 0 ? '+' + ins.stockComprado : '—' }}</td>
+                    <td class="r txt-amber">{{ ins.stockVendido > 0 ? ins.stockVendido : '—' }}</td>
+                    <td class="r">{{ ins.stockFinal }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      <!-- ── Efectivo a entregar ──────────────────────────────────── -->
+      <div class="caja-report__efectivo">
+        <div class="caja-report__efectivo-calc">
+          <span>Ingresos efectivo del día</span>
+          <span>$ {{ fmt(getIngresosEfectivo()) }}</span>
+        </div>
+        <div class="caja-report__efectivo-calc">
+          <span>Compras en efectivo del día</span>
+          <span>— $ {{ fmt(getEgresosEfectivo()) }}</span>
+        </div>
+        <div class="caja-report__efectivo-total">
+          <span><i class="fa-solid fa-hand-holding-dollar"></i> Efectivo a entregar</span>
+          <span class="caja-report__efectivo-valor">$ {{ fmt(reporte.efectivoAEntregar) }}</span>
+        </div>
+      </div>
+
+    }
+
+  </div>
+
+  <!-- Footer -->
+  <div class="caja-modal__footer">
+    <button class="caja-btn caja-btn--secondary" (click)="cancelar()" [disabled]="cerrando">
+      Cancelar
+    </button>
+    @if (reporte && !reporteFinal) {
+      <button class="caja-btn caja-btn--outline" (click)="descargarPdf()" [disabled]="descargando || cerrando">
+        @if (descargando) {
+          <span class="caja-btn__spinner caja-btn__spinner--dark"></span> Descargando...
+        } @else {
+          <i class="fa-solid fa-file-pdf"></i> Vista Previa PDF
+        }
+      </button>
+      <button class="caja-btn caja-btn--danger" (click)="finalizar()" [disabled]="cerrando || cargando">
+        @if (cerrando) {
+          <span class="caja-btn__spinner"></span> Cerrando caja...
+        } @else {
+          <i class="fa-solid fa-lock"></i> Finalizar y Cerrar Caja
+        }
+      </button>
+    }
+  </div>
+
+</div>

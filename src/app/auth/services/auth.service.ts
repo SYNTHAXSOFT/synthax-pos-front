@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, Injector } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
@@ -17,6 +17,7 @@ export class AuthService {
   private readonly http            = inject(HttpClient);
   private readonly router          = inject(Router);
   private readonly brandingService = inject(BrandingService);
+  private readonly injector        = inject(Injector);
 
   // ── Autenticación ─────────────────────────────────────────────────────────
 
@@ -52,6 +53,10 @@ export class AuthService {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.RESTAURANTE_KEY);
     this.brandingService.clearBranding();
+    // Importación diferida para evitar dependencia circular con CajaService
+    import('../../caja/services/caja.service').then(({ CajaService }) => {
+      this.injector.get(CajaService).invalidarEstado();
+    });
     this.router.navigate(['/']);
   }
 

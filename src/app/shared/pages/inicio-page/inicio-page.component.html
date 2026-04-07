@@ -1,5 +1,20 @@
 <div class="spx-dashboard">
 
+  <!-- ── Modales de caja ──────────────────────────────────────── -->
+  @if (mostrarApertura) {
+    <app-apertura-caja-modal
+      (cerrado)="mostrarApertura = false"
+      (aperturado)="onAperturado($event)">
+    </app-apertura-caja-modal>
+  }
+
+  @if (mostrarCierre) {
+    <app-cierre-caja-modal
+      (cerrado)="mostrarCierre = false"
+      (cerradoOk)="onCierreOk($event)">
+    </app-cierre-caja-modal>
+  }
+
   <!-- ── Header ──────────────────────────────────────────────── -->
   <div class="spx-dashboard__header">
     <div>
@@ -7,11 +22,46 @@
       <p class="spx-dashboard__subtitle">Bienvenido, <strong>{{ userName }}</strong> · {{ todayStr }}</p>
     </div>
     <div class="spx-dashboard__header-actions">
+
+      <!-- Botones de caja (solo roles autorizados) -->
+      @if (puedeOperarCaja) {
+        @if (!cajaAbierta) {
+          <button class="spx-btn-caja spx-btn-caja--open" (click)="abrirModalApertura()">
+            <i class="fa-solid fa-lock-open"></i> Apertura de Caja
+          </button>
+        } @else {
+          <span class="spx-caja-status">
+            <i class="fa-solid fa-circle spx-caja-status__dot"></i>
+            Caja abierta
+            @if (cajaSesion?.fechaApertura) {
+              · desde {{ fmtHora(cajaSesion?.fechaApertura) }}
+            }
+          </span>
+          <button class="spx-btn-caja spx-btn-caja--close" (click)="abrirModalCierre()">
+            <i class="fa-solid fa-cash-register"></i> Cierre de Caja
+          </button>
+        }
+      }
+
       <a routerLink="/synthax-pos/venta" class="spx-btn-cta">
         <i class="fa-solid fa-plus"></i> Nueva Venta
       </a>
     </div>
   </div>
+
+  <!-- ── Banner caja cerrada (roles autorizados) ───────────────── -->
+  @if (puedeOperarCaja && !cajaAbierta && !cargando) {
+    <div class="spx-caja-banner">
+      <div class="spx-caja-banner__icon"><i class="fa-solid fa-lock"></i></div>
+      <div class="spx-caja-banner__content">
+        <strong>Caja no aperturada</strong>
+        <span>Debes realizar la apertura de caja antes de comenzar las operaciones del día.</span>
+      </div>
+      <button class="spx-btn-caja spx-btn-caja--open" (click)="abrirModalApertura()">
+        <i class="fa-solid fa-lock-open"></i> Aperturar ahora
+      </button>
+    </div>
+  }
 
   <!-- ── Loading ──────────────────────────────────────────────── -->
   @if (cargando) {

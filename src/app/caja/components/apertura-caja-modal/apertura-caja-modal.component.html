@@ -1,0 +1,74 @@
+<!-- Backdrop -->
+<div class="caja-modal-backdrop" (click)="cancelar()"></div>
+
+<!-- Modal -->
+<div class="caja-modal" role="dialog" aria-modal="true">
+
+  <div class="caja-modal__header">
+    <div class="caja-modal__header-icon caja-modal__header-icon--green">
+      <i class="fa-solid fa-lock-open"></i>
+    </div>
+    <div>
+      <h2 class="caja-modal__title">Apertura de Caja</h2>
+      <p class="caja-modal__subtitle">Ingresa el monto en efectivo con que inicia el día</p>
+    </div>
+  </div>
+
+  <div class="caja-modal__body">
+
+    @if (error) {
+      <div class="caja-modal__alert caja-modal__alert--error">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        {{ error }}
+      </div>
+    }
+
+    <div class="caja-modal__field">
+      <label class="caja-modal__label" for="montoInicial">
+        <i class="fa-solid fa-dollar-sign"></i> Monto inicial en efectivo
+      </label>
+      <div class="caja-modal__input-wrap">
+        <span class="caja-modal__prefix">$</span>
+        <input
+          id="montoInicial"
+          type="number"
+          class="caja-modal__input"
+          placeholder="0"
+          min="0"
+          step="1000"
+          [(ngModel)]="montoInicial"
+          [disabled]="cargando"
+        />
+      </div>
+      <p class="caja-modal__hint">
+        Este es el valor en efectivo con el que comienza la caja. Puede ser $0.
+      </p>
+    </div>
+
+    @if (montoInicial !== null && montoInicial >= 0) {
+      <div class="caja-modal__preview">
+        <i class="fa-solid fa-vault"></i>
+        Base de caja: <strong>$ {{ fmt(montoInicial) }}</strong>
+      </div>
+    }
+
+  </div>
+
+  <div class="caja-modal__footer">
+    <button class="caja-btn caja-btn--secondary" (click)="cancelar()" [disabled]="cargando">
+      Cancelar
+    </button>
+    <button
+      class="caja-btn caja-btn--success"
+      (click)="aperturar()"
+      [disabled]="cargando || montoInicial === null || montoInicial < 0"
+    >
+      @if (cargando) {
+        <span class="caja-btn__spinner"></span> Abriendo...
+      } @else {
+        <i class="fa-solid fa-lock-open"></i> Aperturar Caja
+      }
+    </button>
+  </div>
+
+</div>
