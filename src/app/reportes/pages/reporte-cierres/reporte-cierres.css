@@ -1,0 +1,126 @@
+@import url('../reporte-ventas/reporte-ventas.css');
+
+/* ── Cierre rows (expandibles) ─────────────── */
+.spx-cierre-row {
+  border-bottom: 1px solid var(--spx-border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.spx-cierre-row:last-child { border-bottom: none; }
+.spx-cierre-row:hover      { background: rgba(255,255,255,0.02); }
+.spx-cierre-row--open      { background: rgba(13,127,242,0.04); }
+
+.spx-cierre-row__main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.spx-cierre-row__left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.spx-cierre-row__dates {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.8rem;
+  color: var(--spx-text-sub);
+}
+.spx-cierre-row__dates i { color: var(--spx-text-muted); margin-right: 0.3rem; }
+
+.spx-cierre-row__right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.spx-cierre-row__monto {
+  font-size: 0.82rem;
+  color: var(--spx-text-muted);
+}
+.spx-cierre-row__monto strong { color: var(--spx-text); }
+
+.spx-cierre-row__dur {
+  font-size: 0.78rem;
+  color: var(--spx-text-muted);
+}
+
+.spx-cierre-row__chevron {
+  font-size: 0.75rem;
+  color: var(--spx-text-muted);
+}
+
+/* ── Detalle expandido ─────────────────────── */
+.spx-cierre-detail {
+  border-top: 1px solid var(--spx-border);
+  padding: 1.25rem;
+  background: rgba(0,0,0,0.15);
+}
+
+.spx-cierre-detail__error {
+  color: #ef4444;
+  font-size: 0.85rem;
+  padding: 1rem;
+  margin: 0;
+}
+
+.spx-cierre-detail__section {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--spx-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 1.25rem 0 0.75rem;
+}
+.spx-cierre-detail__section:first-of-type { margin-top: 0.5rem; }
+
+.spx-cierre-detail__table {
+  border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius-sm);
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+/* ── Totales del cierre ────────────────────── */
+.spx-cierre-totales {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.spx-cierre-total {
+  background: var(--spx-surface);
+  border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius-sm);
+  padding: 0.875rem 1rem;
+}
+.spx-cierre-total--green { border-color: rgba(34,197,94,0.3);  background: rgba(34,197,94,0.06);  }
+.spx-cierre-total--amber { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); }
+.spx-cierre-total--red   { border-color: rgba(239,68,68,0.3);  background: rgba(239,68,68,0.06);  }
+
+.spx-cierre-total__lbl {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--spx-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.35rem;
+}
+.spx-cierre-total__val {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--spx-text);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}

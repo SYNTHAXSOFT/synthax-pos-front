@@ -58,4 +58,8 @@ export class CajaService {
   obtenerReportePorSesion(sesionId: number): Observable<CierreReporteDTO> {
     return this.http.get<CierreReporteDTO>(`${this.base}/reporte/${sesionId}`, { headers: this.headers() });
   }
+
+  listarSesiones(): Observable<CajaSesion[]> {
+    return this.http.get<CajaSesion[]>(`${this.base}/sesiones`, { headers: this.headers() });
+  }
 }

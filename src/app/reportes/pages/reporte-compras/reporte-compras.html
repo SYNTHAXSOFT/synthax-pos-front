@@ -1,0 +1,141 @@
+<div class="spx-rpt">
+
+  <!-- Header -->
+  <div class="spx-rpt__header">
+    <a routerLink="/synthax-pos/inicio" class="spx-rpt__back">
+      <i class="fa-solid fa-arrow-left"></i> Volver
+    </a>
+    <div>
+      <h2 class="spx-rpt__title"><i class="fa-solid fa-cart-flatbed"></i> Reporte de Compras</h2>
+      <p class="spx-rpt__subtitle">Historial de compras de insumos con filtros</p>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="spx-rpt__filters">
+    <div class="spx-filter-grid">
+      <div class="spx-filter-item" style="flex:2; min-width:200px">
+        <label>Insumo</label>
+        <input type="text" [(ngModel)]="filtroInsumo" placeholder="Buscar por insumo...">
+      </div>
+      <div class="spx-filter-item">
+        <label>Fecha Inicio</label>
+        <input type="date" [(ngModel)]="filtroFechaInicio">
+      </div>
+      <div class="spx-filter-item">
+        <label>Fecha Fin</label>
+        <input type="date" [(ngModel)]="filtroFechaFin">
+      </div>
+      <div class="spx-filter-item">
+        <label>Valor Mín ($)</label>
+        <input type="number" [(ngModel)]="filtroValorMin" placeholder="0" min="0">
+      </div>
+      <div class="spx-filter-item">
+        <label>Valor Máx ($)</label>
+        <input type="number" [(ngModel)]="filtroValorMax" placeholder="Sin límite" min="0">
+      </div>
+      <div class="spx-filter-item">
+        <label>Estado</label>
+        <select [(ngModel)]="filtroActivo">
+          <option value="">Todos</option>
+          <option value="true">Activa</option>
+          <option value="false">Anulada</option>
+        </select>
+      </div>
+    </div>
+    <button class="spx-rpt__clear" (click)="limpiarFiltros()">
+      <i class="fa-solid fa-times"></i> Limpiar
+    </button>
+  </div>
+
+  <!-- Loading -->
+  @if (cargando) {
+    <div class="spx-rpt__loading">
+      <div class="spx-rpt__spinner"></div>
+      <p>Cargando compras...</p>
+    </div>
+  }
+
+  @if (!cargando) {
+
+    <!-- Métricas -->
+    <div class="spx-rpt__metrics">
+      <div class="spx-rpt-metric" style="border-color: rgba(245,158,11,0.3)">
+        <i class="fa-solid fa-coins" style="color:#f59e0b"></i>
+        <div>
+          <p class="spx-rpt-metric__val">$ {{ fmt(totalGastado) }}</p>
+          <p class="spx-rpt-metric__lbl">Total Gastado</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-boxes-stacked" style="color:#22c55e"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ contActivas }}</p>
+          <p class="spx-rpt-metric__lbl">Activas</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-ban" style="color:#ef4444"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ contAnuladas }}</p>
+          <p class="spx-rpt-metric__lbl">Anuladas</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-hashtag" style="color:#94a3b8"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ comprasFiltradas.length }}</p>
+          <p class="spx-rpt-metric__lbl">Total</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="spx-rpt__table-wrap">
+      @if (comprasFiltradas.length === 0) {
+        <div class="spx-rpt__empty">
+          <i class="fa-solid fa-cart-flatbed"></i>
+          <p>No se encontraron compras con los filtros aplicados</p>
+        </div>
+      } @else {
+        <table class="spx-rpt__table">
+          <thead>
+            <tr>
+              <th>#ID</th>
+              <th>Código</th>
+              <th>Fecha</th>
+              <th>Insumo</th>
+              <th>Medida</th>
+              <th class="text-right">Cantidad</th>
+              <th class="text-right">Val. Unidad</th>
+              <th class="text-right">Val. Total</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of comprasFiltradas; track c.id) {
+              <tr>
+                <td class="spx-rpt__id">{{ c.id }}</td>
+                <td>{{ c.codigo ?? '—' }}</td>
+                <td>{{ fmtFecha(c.fechaCreacion) }}</td>
+                <td>{{ c.insumo?.descripcion ?? '—' }}</td>
+                <td>{{ c.insumo?.medida ?? '—' }}</td>
+                <td class="text-right">{{ c.cantidad }}</td>
+                <td class="text-right">$ {{ fmt(c.valorUnidad ?? 0) }}</td>
+                <td class="text-right spx-rpt__money">$ {{ fmt(c.valorTotal ?? 0) }}</td>
+                <td>
+                  <span class="spx-rpt__badge"
+                    [class.spx-rpt__badge--green]="c.activo !== false"
+                    [class.spx-rpt__badge--red]="c.activo === false">
+                    {{ c.activo !== false ? 'Activa' : 'Anulada' }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  }
+
+</div>

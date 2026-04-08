@@ -1,0 +1,170 @@
+<div class="spx-rpt">
+
+  <!-- Header -->
+  <div class="spx-rpt__header">
+    <a routerLink="/synthax-pos/inicio" class="spx-rpt__back">
+      <i class="fa-solid fa-arrow-left"></i> Volver
+    </a>
+    <div>
+      <h2 class="spx-rpt__title"><i class="fa-solid fa-receipt"></i> Reporte de Ventas</h2>
+      <p class="spx-rpt__subtitle">Historial completo con filtros avanzados</p>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="spx-rpt__filters">
+    <div class="spx-filter-grid">
+      <div class="spx-filter-item">
+        <label>Estado</label>
+        <select [(ngModel)]="filtroEstado">
+          <option value="">Todos</option>
+          <option value="PAGADA">Pagada</option>
+          <option value="ABIERTA">Abierta</option>
+          <option value="ANULADA">Anulada</option>
+        </select>
+      </div>
+      <div class="spx-filter-item">
+        <label>Fecha Inicio</label>
+        <input type="date" [(ngModel)]="filtroFechaInicio">
+      </div>
+      <div class="spx-filter-item">
+        <label>Fecha Fin</label>
+        <input type="date" [(ngModel)]="filtroFechaFin">
+      </div>
+      <div class="spx-filter-item">
+        <label>Mesa</label>
+        <select [(ngModel)]="filtroMesa">
+          <option value="">Todas</option>
+          @for (m of mesas; track m) {
+            <option [value]="m">{{ m }}</option>
+          }
+        </select>
+      </div>
+      <div class="spx-filter-item">
+        <label>Tipo Pedido</label>
+        <select [(ngModel)]="filtroTipoPedido">
+          <option value="">Todos</option>
+          @for (t of tiposPedido; track t) {
+            <option [value]="t">{{ t }}</option>
+          }
+        </select>
+      </div>
+      <div class="spx-filter-item">
+        <label>Cliente</label>
+        <input type="text" [(ngModel)]="filtroCliente" placeholder="Nombre del cliente...">
+      </div>
+      <div class="spx-filter-item">
+        <label>Usuario (vendedor)</label>
+        <input type="text" [(ngModel)]="filtroUsuario" placeholder="Nombre del usuario...">
+      </div>
+    </div>
+    <button class="spx-rpt__clear" (click)="limpiarFiltros()">
+      <i class="fa-solid fa-times"></i> Limpiar
+    </button>
+  </div>
+
+  <!-- Loading -->
+  @if (cargando) {
+    <div class="spx-rpt__loading">
+      <div class="spx-rpt__spinner"></div>
+      <p>Cargando ventas...</p>
+    </div>
+  }
+
+  @if (!cargando) {
+
+    <!-- Métricas -->
+    <div class="spx-rpt__metrics">
+      <div class="spx-rpt-metric spx-rpt-metric--green">
+        <i class="fa-solid fa-coins"></i>
+        <div>
+          <p class="spx-rpt-metric__val">$ {{ fmt(totalIngresos) }}</p>
+          <p class="spx-rpt-metric__lbl">Ingresos</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-circle-check" style="color:#22c55e"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ contPagadas }}</p>
+          <p class="spx-rpt-metric__lbl">Pagadas</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-lock-open" style="color:#3b82f6"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ contAbiertas }}</p>
+          <p class="spx-rpt-metric__lbl">Abiertas</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-ban" style="color:#ef4444"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ contAnuladas }}</p>
+          <p class="spx-rpt-metric__lbl">Anuladas</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-hashtag" style="color:#94a3b8"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ ventasFiltradas.length }}</p>
+          <p class="spx-rpt-metric__lbl">Total</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="spx-rpt__table-wrap">
+      @if (ventasFiltradas.length === 0) {
+        <div class="spx-rpt__empty">
+          <i class="fa-solid fa-receipt"></i>
+          <p>No se encontraron ventas con los filtros aplicados</p>
+        </div>
+      } @else {
+        <table class="spx-rpt__table">
+          <thead>
+            <tr>
+              <th>#ID</th>
+              <th>Fecha</th>
+              <th>Tipo</th>
+              <th>Mesa</th>
+              <th>Cliente</th>
+              <th>Vendedor</th>
+              <th>Forma Pago</th>
+              <th>Estado</th>
+              <th class="text-right">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (v of ventasFiltradas; track v.id) {
+              <tr>
+                <td class="spx-rpt__id">{{ v.id }}</td>
+                <td>{{ fmtFecha(v.fechaCreacion) }}</td>
+                <td>{{ v.tipoPedido?.nombre ?? '—' }}</td>
+                <td>{{ v.mesa?.nombre ?? '—' }}</td>
+                <td>{{ clienteNombre(v) }}</td>
+                <td>
+                  @if (v.usuarioCreador) {
+                    {{ (v.usuarioCreador.nombre ?? '') + ' ' + (v.usuarioCreador.apellido ?? '') }}
+                  } @else { — }
+                </td>
+                <td>{{ v.formaPago?.nombre ?? '—' }}</td>
+                <td>
+                  <span class="spx-rpt__badge"
+                    [class.spx-rpt__badge--green]="v.estado === 'PAGADA'"
+                    [class.spx-rpt__badge--blue]="v.estado === 'ABIERTA'"
+                    [class.spx-rpt__badge--red]="v.estado === 'ANULADA'">
+                    {{ v.estado }}
+                  </span>
+                </td>
+                <td class="text-right spx-rpt__money">
+                  @if (v.valorTotal) { $ {{ fmt(v.valorTotal) }} }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  }
+
+</div>

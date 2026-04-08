@@ -122,6 +122,84 @@
 
     </div>
 
+    <!-- ── Reportes del Sistema ─────────────────────────────── -->
+    <div class="spx-reports">
+      <div class="spx-reports__header">
+        <h3 class="spx-reports__title">
+          <i class="fa-solid fa-chart-bar"></i> Reportes del Sistema
+        </h3>
+        <p class="spx-reports__subtitle">Accede a análisis detallados con filtros avanzados</p>
+      </div>
+      <div class="spx-reports__grid">
+
+        <a routerLink="/synthax-pos/reporte/ventas" class="spx-report-card spx-report-card--green">
+          <div class="spx-report-card__icon">
+            <i class="fa-solid fa-receipt"></i>
+          </div>
+          <div class="spx-report-card__info">
+            <p class="spx-report-card__name">Ventas</p>
+            <p class="spx-report-card__desc">
+              Filtros por estado, cliente, mesa, usuario, tipo de pedido y fechas
+            </p>
+          </div>
+          <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
+        </a>
+
+        <a routerLink="/synthax-pos/reporte/compras" class="spx-report-card spx-report-card--amber">
+          <div class="spx-report-card__icon">
+            <i class="fa-solid fa-cart-flatbed"></i>
+          </div>
+          <div class="spx-report-card__info">
+            <p class="spx-report-card__name">Compras</p>
+            <p class="spx-report-card__desc">
+              Filtros por insumo, rango de precios, fechas y estado
+            </p>
+          </div>
+          <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
+        </a>
+
+        <a routerLink="/synthax-pos/reporte/cierres" class="spx-report-card spx-report-card--blue">
+          <div class="spx-report-card__icon">
+            <i class="fa-solid fa-cash-register"></i>
+          </div>
+          <div class="spx-report-card__info">
+            <p class="spx-report-card__name">Cierres de Caja</p>
+            <p class="spx-report-card__desc">
+              Histórico de sesiones con detalle de ventas, compras e insumos
+            </p>
+          </div>
+          <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
+        </a>
+
+        <a routerLink="/synthax-pos/reporte/logs" class="spx-report-card spx-report-card--purple">
+          <div class="spx-report-card__icon">
+            <i class="fa-solid fa-timeline"></i>
+          </div>
+          <div class="spx-report-card__info">
+            <p class="spx-report-card__name">Logs del Sistema</p>
+            <p class="spx-report-card__desc">
+              Auditoría de cambios de estado en pedidos por usuario, rol y fecha
+            </p>
+          </div>
+          <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
+        </a>
+
+        <a routerLink="/synthax-pos/reporte/inventario" class="spx-report-card spx-report-card--rose">
+          <div class="spx-report-card__icon">
+            <i class="fa-solid fa-warehouse"></i>
+          </div>
+          <div class="spx-report-card__info">
+            <p class="spx-report-card__name">Inventario</p>
+            <p class="spx-report-card__desc">
+              Stock actual de insumos con alertas de nivel bajo y sin existencias
+            </p>
+          </div>
+          <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
+        </a>
+
+      </div>
+    </div>
+
     <!-- ── Main Grid ─────────────────────────────────────────── -->
     <div class="spx-main-grid">
 
@@ -318,6 +396,46 @@
               <div class="spx-shortcut__info">
                 <p class="spx-shortcut__name">Clientes</p>
                 <p class="spx-shortcut__desc">Gestionar clientes</p>
+              </div>
+              <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
+            </a>
+            <a routerLink="/synthax-pos/mesa" class="spx-shortcut">
+              <div class="spx-shortcut__icon"><i class="fa-solid fa-chair"></i></div>
+              <div class="spx-shortcut__info">
+                <p class="spx-shortcut__name">Mesas</p>
+                <p class="spx-shortcut__desc">Configurar mesas</p>
+              </div>
+              <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
+            </a>
+            <a routerLink="/synthax-pos/forma-pago" class="spx-shortcut">
+              <div class="spx-shortcut__icon"><i class="fa-solid fa-wallet"></i></div>
+              <div class="spx-shortcut__info">
+                <p class="spx-shortcut__name">Formas de Pago</p>
+                <p class="spx-shortcut__desc">Gestionar métodos</p>
+              </div>
+              <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
+            </a>
+            <a routerLink="/synthax-pos/tipo-pedido" class="spx-shortcut">
+              <div class="spx-shortcut__icon"><i class="fa-solid fa-tags"></i></div>
+              <div class="spx-shortcut__info">
+                <p class="spx-shortcut__name">Tipos de Pedido</p>
+                <p class="spx-shortcut__desc">Canales de venta</p>
+              </div>
+              <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
+            </a>
+            <a routerLink="/synthax-pos/impuesto" class="spx-shortcut">
+              <div class="spx-shortcut__icon"><i class="fa-solid fa-percent"></i></div>
+              <div class="spx-shortcut__info">
+                <p class="spx-shortcut__name">Impuestos</p>
+                <p class="spx-shortcut__desc">Configurar tarifas</p>
+              </div>
+              <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
+            </a>
+            <a routerLink="/synthax-pos/identidad-visual" class="spx-shortcut">
+              <div class="spx-shortcut__icon"><i class="fa-solid fa-palette"></i></div>
+              <div class="spx-shortcut__info">
+                <p class="spx-shortcut__name">Identidad Visual</p>
+                <p class="spx-shortcut__desc">Logo y colores</p>
               </div>
               <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
             </a>

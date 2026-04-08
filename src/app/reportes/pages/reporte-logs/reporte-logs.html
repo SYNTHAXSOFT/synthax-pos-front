@@ -1,0 +1,153 @@
+<div class="spx-rpt">
+
+  <!-- Header -->
+  <div class="spx-rpt__header">
+    <a routerLink="/synthax-pos/inicio" class="spx-rpt__back">
+      <i class="fa-solid fa-arrow-left"></i> Volver
+    </a>
+    <div>
+      <h2 class="spx-rpt__title"><i class="fa-solid fa-timeline"></i> Logs del Sistema</h2>
+      <p class="spx-rpt__subtitle">Auditoría de cambios de estado en pedidos</p>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="spx-rpt__filters">
+    <div class="spx-filter-grid">
+      <div class="spx-filter-item">
+        <label>Fecha Inicio</label>
+        <input type="date" [(ngModel)]="filtroFechaInicio">
+      </div>
+      <div class="spx-filter-item">
+        <label>Fecha Fin</label>
+        <input type="date" [(ngModel)]="filtroFechaFin">
+      </div>
+      <div class="spx-filter-item">
+        <label>Estado Anterior</label>
+        <select [(ngModel)]="filtroEstadoAnterior">
+          <option value="">Todos</option>
+          @for (e of estadosPedido; track e) {
+            <option [value]="e">{{ e }}</option>
+          }
+        </select>
+      </div>
+      <div class="spx-filter-item">
+        <label>Estado Nuevo</label>
+        <select [(ngModel)]="filtroEstadoNuevo">
+          <option value="">Todos</option>
+          @for (e of estadosPedido; track e) {
+            <option [value]="e">{{ e }}</option>
+          }
+        </select>
+      </div>
+      <div class="spx-filter-item">
+        <label>Rol Usuario</label>
+        <select [(ngModel)]="filtroRol">
+          <option value="">Todos</option>
+          @for (r of rolesSistema; track r) {
+            <option [value]="r">{{ r }}</option>
+          }
+        </select>
+      </div>
+      <div class="spx-filter-item">
+        <label>ID Pedido</label>
+        <input type="number" [(ngModel)]="filtroPedidoId" placeholder="Ej: 123">
+      </div>
+      <div class="spx-filter-item">
+        <label>Motivo</label>
+        <input type="text" [(ngModel)]="filtroMotivo" placeholder="Buscar motivo...">
+      </div>
+    </div>
+    <button class="spx-rpt__clear" (click)="limpiarFiltros()">
+      <i class="fa-solid fa-times"></i> Limpiar
+    </button>
+  </div>
+
+  <!-- Loading -->
+  @if (cargando) {
+    <div class="spx-rpt__loading">
+      <div class="spx-rpt__spinner"></div>
+      <p>Cargando logs...</p>
+    </div>
+  }
+
+  @if (!cargando) {
+
+    <!-- Métrica -->
+    <div class="spx-rpt__metrics">
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-timeline" style="color:#a855f7"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ logsFiltrados.length }}</p>
+          <p class="spx-rpt-metric__lbl">Registros</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-ban" style="color:#ef4444"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ contCancelados }}</p>
+          <p class="spx-rpt-metric__lbl">Cancelaciones</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-trash" style="color:#94a3b8"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ contDestruidos }}</p>
+          <p class="spx-rpt-metric__lbl">Destruidos</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="spx-rpt__table-wrap">
+      @if (logsFiltrados.length === 0) {
+        <div class="spx-rpt__empty">
+          <i class="fa-solid fa-timeline"></i>
+          <p>No se encontraron logs con los filtros aplicados</p>
+        </div>
+      } @else {
+        <table class="spx-rpt__table">
+          <thead>
+            <tr>
+              <th>#Log</th>
+              <th>Fecha</th>
+              <th>#Pedido</th>
+              <th>Estado Anterior</th>
+              <th>Estado Nuevo</th>
+              <th>Rol</th>
+              <th>Usuario ID</th>
+              <th>Motivo</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of logsFiltrados; track l.id) {
+              <tr>
+                <td class="spx-rpt__id">{{ l.id }}</td>
+                <td>{{ fmtFecha(l.fechaCambio) }}</td>
+                <td class="spx-rpt__id">{{ l.pedido?.id ?? '—' }}</td>
+                <td>
+                  @if (l.estadoAnterior) {
+                    <span class="spx-rpt__badge" [ngClass]="badgeClass(l.estadoAnterior)">
+                      {{ l.estadoAnterior }}
+                    </span>
+                  } @else { — }
+                </td>
+                <td>
+                  <span class="spx-rpt__badge" [ngClass]="badgeClass(l.estadoNuevo)">
+                    {{ l.estadoNuevo }}
+                  </span>
+                </td>
+                <td>
+                  <span class="spx-rpt__badge spx-rpt__badge--blue">{{ l.rolUsuario ?? '—' }}</span>
+                </td>
+                <td>{{ l.usuarioId ?? '—' }}</td>
+                <td class="spx-rpt__motivo">{{ l.motivo ?? '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  }
+
+</div>

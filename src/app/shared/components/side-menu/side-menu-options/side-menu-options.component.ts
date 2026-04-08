@@ -32,9 +32,9 @@ export class SideMenuOptionsComponent {
   private authService = inject(AuthService);
   private readonly confirmService = inject(ConfirmService);
 
-  // Genera los ítems del menú desde las rutas, excluyendo comodines y redirects
+  // Genera los ítems del menú desde las rutas, excluyendo comodines, redirects y los marcados con hideFromMenu
   reactiveMenu: MenuItem[] = reactiveItems
-    .filter((item) => item.path && item.path !== '**' && !item.redirectTo)
+    .filter((item) => item.path && item.path !== '**' && !item.redirectTo && !item.data?.['hideFromMenu'])
     .map((item) => ({
       route: `synthax-pos/${item.path}`,   // prefijo actualizado a synthax-pos
       title: `${item.title}`,

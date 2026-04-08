@@ -95,7 +95,7 @@ export const routes: Routes = [
             (m) => m.RestauranteBrandingComponent
           ),
         canActivate: [RoleGuard, CajaGuard],
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideFromMenu: true },
       },
       {
         path: 'insumo',
@@ -119,7 +119,7 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./forma-pago/forma-pago.routes').then((m) => m.formaPagoRoutes),
         canActivate: [RoleGuard, CajaGuard],
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideFromMenu: true },
       },
 
       // ── Catálogos POS ────────────────────────────────────────────────────────
@@ -138,8 +138,7 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./mesa/mesa.routes').then((m) => m.mesaRoutes),
         canActivate: [RoleGuard, CajaGuard],
-        // PROPIETARIO gestiona las mesas de su restaurante
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideFromMenu: true },
       },
       {
         path: 'tipo-pedido',
@@ -147,7 +146,7 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./tipo-pedido/tipo-pedido.routes').then((m) => m.tipoPedidoRoutes),
         canActivate: [RoleGuard, CajaGuard],
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideFromMenu: true },
       },
       {
         path: 'impuesto',
@@ -155,7 +154,17 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./impuesto/impuesto.routes').then((m) => m.impuestoRoutes),
         canActivate: [RoleGuard, CajaGuard],
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideFromMenu: true },
+      },
+
+      // ── Reportes ─────────────────────────────────────────────────────────────
+      {
+        path: 'reporte',
+        title: 'Reportes',
+        loadChildren: () =>
+          import('./reportes/reportes.routes').then((m) => m.reportesRoutes),
+        canActivate: [RoleGuard],
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideFromMenu: true },
       },
 
       // ── Clientes ─────────────────────────────────────────────────────────────

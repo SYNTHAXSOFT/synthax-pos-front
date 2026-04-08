@@ -1,0 +1,221 @@
+<div class="spx-rpt">
+
+  <!-- Header -->
+  <div class="spx-rpt__header">
+    <a routerLink="/synthax-pos/inicio" class="spx-rpt__back">
+      <i class="fa-solid fa-arrow-left"></i> Volver
+    </a>
+    <div>
+      <h2 class="spx-rpt__title"><i class="fa-solid fa-cash-register"></i> Cierres de Caja</h2>
+      <p class="spx-rpt__subtitle">Histórico de sesiones de caja — haz clic en una fila para ver el reporte completo</p>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="spx-rpt__filters">
+    <div class="spx-filter-grid">
+      <div class="spx-filter-item">
+        <label>Estado</label>
+        <select [(ngModel)]="filtroEstado">
+          <option value="">Todos</option>
+          <option value="CERRADA">Cerrada</option>
+          <option value="ABIERTA">Abierta</option>
+        </select>
+      </div>
+      <div class="spx-filter-item">
+        <label>Apertura desde</label>
+        <input type="date" [(ngModel)]="filtroFechaInicio">
+      </div>
+      <div class="spx-filter-item">
+        <label>Apertura hasta</label>
+        <input type="date" [(ngModel)]="filtroFechaFin">
+      </div>
+    </div>
+    <button class="spx-rpt__clear" (click)="limpiarFiltros()">
+      <i class="fa-solid fa-times"></i> Limpiar
+    </button>
+  </div>
+
+  <!-- Loading -->
+  @if (cargando) {
+    <div class="spx-rpt__loading">
+      <div class="spx-rpt__spinner"></div>
+      <p>Cargando sesiones...</p>
+    </div>
+  }
+
+  @if (!cargando) {
+
+    <!-- Métricas -->
+    <div class="spx-rpt__metrics">
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-hashtag" style="color:#94a3b8"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ sesionesFiltradas.length }}</p>
+          <p class="spx-rpt-metric__lbl">Total Sesiones</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-lock" style="color:#22c55e"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ contCerradas }}</p>
+          <p class="spx-rpt-metric__lbl">Cerradas</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-lock-open" style="color:#f59e0b"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ contAbiertas }}</p>
+          <p class="spx-rpt-metric__lbl">Abiertas</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de sesiones -->
+    <div class="spx-rpt__table-wrap">
+      @if (sesionesFiltradas.length === 0) {
+        <div class="spx-rpt__empty">
+          <i class="fa-solid fa-cash-register"></i>
+          <p>No se encontraron sesiones con los filtros aplicados</p>
+        </div>
+      } @else {
+        @for (s of sesionesFiltradas; track s.id) {
+
+          <!-- Fila principal -->
+          <div class="spx-cierre-row" [class.spx-cierre-row--open]="sesionExpandida === s.id"
+               (click)="toggleDetalle(s)">
+            <div class="spx-cierre-row__main">
+              <div class="spx-cierre-row__left">
+                <span class="spx-rpt__id">#{{ s.id }}</span>
+                <div class="spx-cierre-row__dates">
+                  <span><i class="fa-solid fa-lock-open"></i> {{ fmtFecha(s.fechaApertura) }}</span>
+                  @if (s.fechaCierre) {
+                    <span><i class="fa-solid fa-lock"></i> {{ fmtFecha(s.fechaCierre) }}</span>
+                  }
+                </div>
+                <span class="spx-rpt__badge"
+                  [class.spx-rpt__badge--green]="s.estado === 'CERRADA'"
+                  [class.spx-rpt__badge--amber]="s.estado === 'ABIERTA'">
+                  {{ s.estado }}
+                </span>
+              </div>
+              <div class="spx-cierre-row__right">
+                @if (s.montoInicial != null) {
+                  <span class="spx-cierre-row__monto">
+                    Monto inicial: <strong>$ {{ fmt(s.montoInicial) }}</strong>
+                  </span>
+                }
+                @if (s.fechaCierre) {
+                  <span class="spx-cierre-row__dur">
+                    <i class="fa-solid fa-clock"></i> {{ duracion(s.fechaApertura, s.fechaCierre) }}
+                  </span>
+                }
+                <i class="fa-solid spx-cierre-row__chevron"
+                   [class.fa-chevron-down]="sesionExpandida !== s.id"
+                   [class.fa-chevron-up]="sesionExpandida === s.id"></i>
+              </div>
+            </div>
+
+            <!-- Detalle expandido -->
+            @if (sesionExpandida === s.id) {
+              <div class="spx-cierre-detail" (click)="$event.stopPropagation()">
+                @if (reporteCargando) {
+                  <div class="spx-rpt__loading" style="padding:2rem">
+                    <div class="spx-rpt__spinner"></div>
+                    <p>Cargando reporte...</p>
+                  </div>
+                }
+                @if (reporteError) {
+                  <p class="spx-cierre-detail__error">{{ reporteError }}</p>
+                }
+                @if (reporteDetalle && !reporteCargando) {
+                  <!-- Totales -->
+                  <div class="spx-cierre-totales">
+                    <div class="spx-cierre-total spx-cierre-total--green">
+                      <p class="spx-cierre-total__lbl">Total Ventas</p>
+                      <p class="spx-cierre-total__val">$ {{ fmt(reporteDetalle.totalVentasDia) }}</p>
+                    </div>
+                    <div class="spx-cierre-total spx-cierre-total--amber">
+                      <p class="spx-cierre-total__lbl">Total Compras</p>
+                      <p class="spx-cierre-total__val">$ {{ fmt(reporteDetalle.totalComprasDia) }}</p>
+                    </div>
+                    <div class="spx-cierre-total">
+                      <p class="spx-cierre-total__lbl">Efectivo a Entregar</p>
+                      <p class="spx-cierre-total__val">$ {{ fmt(reporteDetalle.efectivoAEntregar) }}</p>
+                    </div>
+                    <div class="spx-cierre-total" [class.spx-cierre-total--green]="reporteDetalle.coincideConVentas"
+                         [class.spx-cierre-total--red]="!reporteDetalle.coincideConVentas">
+                      <p class="spx-cierre-total__lbl">Cuadre</p>
+                      <p class="spx-cierre-total__val">
+                        <i class="fa-solid" [class.fa-circle-check]="reporteDetalle.coincideConVentas"
+                           [class.fa-circle-xmark]="!reporteDetalle.coincideConVentas"></i>
+                        {{ reporteDetalle.coincideConVentas ? 'Cuadra' : 'No cuadra' }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Métodos de pago -->
+                  @if (reporteDetalle.metodosPago?.length) {
+                    <h4 class="spx-cierre-detail__section">Métodos de Pago</h4>
+                    <table class="spx-rpt__table spx-cierre-detail__table">
+                      <thead>
+                        <tr>
+                          <th>Método</th>
+                          <th class="text-right">Saldo Inicial</th>
+                          <th class="text-right">Ingresos</th>
+                          <th class="text-right">Egresos</th>
+                          <th class="text-right">Saldo Final</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (mp of reporteDetalle.metodosPago; track mp.formaPagoId) {
+                          <tr>
+                            <td>{{ mp.formaPagoNombre }}</td>
+                            <td class="text-right">$ {{ fmt(mp.saldoInicial) }}</td>
+                            <td class="text-right spx-rpt__money">$ {{ fmt(mp.ingresosDelDia) }}</td>
+                            <td class="text-right" style="color:#ef4444">$ {{ fmt(mp.egresosDelDia) }}</td>
+                            <td class="text-right">$ {{ fmt(mp.saldoFinal) }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  }
+
+                  <!-- Insumos -->
+                  @if (reporteDetalle.listaInsumos?.length) {
+                    <h4 class="spx-cierre-detail__section">Movimiento de Insumos</h4>
+                    <table class="spx-rpt__table spx-cierre-detail__table">
+                      <thead>
+                        <tr>
+                          <th>Insumo</th>
+                          <th>Medida</th>
+                          <th class="text-right">Stock Inicial</th>
+                          <th class="text-right">Comprado</th>
+                          <th class="text-right">Vendido</th>
+                          <th class="text-right">Stock Final</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (ins of reporteDetalle.listaInsumos; track ins.insumoId) {
+                          <tr>
+                            <td>{{ ins.insumoDescripcion }}</td>
+                            <td>{{ ins.medida }}</td>
+                            <td class="text-right">{{ ins.stockInicial }}</td>
+                            <td class="text-right spx-rpt__money">+{{ ins.stockComprado }}</td>
+                            <td class="text-right" style="color:#ef4444">-{{ ins.stockVendido }}</td>
+                            <td class="text-right">{{ ins.stockFinal }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  }
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+
+</div>

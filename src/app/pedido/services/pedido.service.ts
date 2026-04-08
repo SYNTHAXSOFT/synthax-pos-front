@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CambioEstadoRequest, Pedido, PedidoRequest } from '../interfaces/pedido.interface';
+import { LogCambioPedido } from '../interfaces/log-cambio-pedido.interface';
 import { API_ENDPOINTS } from '../../utils/constantes-utils';
 
 @Injectable({ providedIn: 'root' })
@@ -41,5 +42,13 @@ export class PedidoService {
 
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  obtenerHistorial(pedidoId: number): Observable<LogCambioPedido[]> {
+    return this.http.get<LogCambioPedido[]>(`${this.base}/${pedidoId}/historial`);
+  }
+
+  obtenerLogs(): Observable<LogCambioPedido[]> {
+    return this.http.get<LogCambioPedido[]>(`${this.base}/logs`);
   }
 }

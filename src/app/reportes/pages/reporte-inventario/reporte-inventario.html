@@ -1,0 +1,146 @@
+<div class="spx-rpt">
+
+  <!-- Header -->
+  <div class="spx-rpt__header">
+    <a routerLink="/synthax-pos/inicio" class="spx-rpt__back">
+      <i class="fa-solid fa-arrow-left"></i> Volver
+    </a>
+    <div>
+      <h2 class="spx-rpt__title"><i class="fa-solid fa-warehouse"></i> Reporte de Inventario</h2>
+      <p class="spx-rpt__subtitle">Estado actual del stock de insumos</p>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="spx-rpt__filters">
+    <div class="spx-filter-grid">
+      <div class="spx-filter-item" style="flex:2; min-width:200px">
+        <label>Buscar insumo</label>
+        <input type="text" [(ngModel)]="filtroBusqueda" placeholder="Descripción o código...">
+      </div>
+      <div class="spx-filter-item">
+        <label>Unidad de medida</label>
+        <select [(ngModel)]="filtroMedida">
+          <option value="">Todas</option>
+          @for (m of medidas; track m) {
+            <option [value]="m">{{ m }}</option>
+          }
+        </select>
+      </div>
+      <div class="spx-filter-item">
+        <label>Stock mínimo</label>
+        <input type="number" [(ngModel)]="filtroStockMin" placeholder="Ej: 10" min="0">
+      </div>
+      <div class="spx-filter-item">
+        <label>Estado</label>
+        <select [(ngModel)]="filtroActivo">
+          <option value="">Todos</option>
+          <option value="true">Activo</option>
+          <option value="false">Inactivo</option>
+        </select>
+      </div>
+    </div>
+    <button class="spx-rpt__clear" (click)="limpiarFiltros()">
+      <i class="fa-solid fa-times"></i> Limpiar
+    </button>
+  </div>
+
+  <!-- Loading -->
+  @if (cargando) {
+    <div class="spx-rpt__loading">
+      <div class="spx-rpt__spinner"></div>
+      <p>Cargando inventario...</p>
+    </div>
+  }
+
+  @if (!cargando) {
+
+    <!-- Métricas -->
+    <div class="spx-rpt__metrics">
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-boxes-stacked" style="color:#3b82f6"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ contActivos }}</p>
+          <p class="spx-rpt-metric__lbl">Insumos Activos</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-triangle-exclamation" style="color:#f59e0b"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ contStockBajo }}</p>
+          <p class="spx-rpt-metric__lbl">Stock Bajo (&lt;{{ STOCK_BAJO }})</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-circle-xmark" style="color:#ef4444"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ contSinStock }}</p>
+          <p class="spx-rpt-metric__lbl">Sin Stock</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-hashtag" style="color:#94a3b8"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ insumosFiltrados.length }}</p>
+          <p class="spx-rpt-metric__lbl">Total</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="spx-rpt__table-wrap">
+      @if (insumosFiltrados.length === 0) {
+        <div class="spx-rpt__empty">
+          <i class="fa-solid fa-warehouse"></i>
+          <p>No se encontraron insumos con los filtros aplicados</p>
+        </div>
+      } @else {
+        <table class="spx-rpt__table">
+          <thead>
+            <tr>
+              <th>#ID</th>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Medida</th>
+              <th class="text-right">Stock</th>
+              <th>Nivel</th>
+              <th>Estado</th>
+              <th>Registro</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (i of insumosFiltrados; track i.id) {
+              <tr>
+                <td class="spx-rpt__id">{{ i.id }}</td>
+                <td>{{ i.codigo ?? '—' }}</td>
+                <td><strong style="color:var(--spx-text)">{{ i.descripcion }}</strong></td>
+                <td>{{ i.medida ?? '—' }}</td>
+                <td class="text-right">
+                  <strong [style.color]="(i.stock ?? 0) === 0 ? '#ef4444' : (i.stock ?? 0) < STOCK_BAJO ? '#f59e0b' : '#22c55e'">
+                    {{ i.stock ?? 0 }}
+                  </strong>
+                </td>
+                <td>
+                  <span class="spx-rpt__badge" [ngClass]="stockClass(i)">
+                    @if ((i.stock ?? 0) === 0)              { Sin stock }
+                    @else if ((i.stock ?? 0) < STOCK_BAJO)  { Bajo }
+                    @else                                    { Normal }
+                  </span>
+                </td>
+                <td>
+                  <span class="spx-rpt__badge"
+                    [class.spx-rpt__badge--green]="i.activo !== false"
+                    [class.spx-rpt__badge--red]="i.activo === false">
+                    {{ i.activo !== false ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td>{{ fmtFecha(i.fechaCreacion) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  }
+
+</div>

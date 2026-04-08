@@ -1,0 +1,10 @@
+@import url('../reporte-ventas/reporte-ventas.css');
+
+.spx-rpt__motivo {
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--spx-text-muted);
+  font-size: 0.78rem;
+}
