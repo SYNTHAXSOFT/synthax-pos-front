@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Usuario } from '../../usuario/interfaces/usuario.interface';
+import { Cliente } from '../interfaces/cliente.interface';
 import { API_ENDPOINTS } from '../../utils/constantes-utils';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/services/auth.service';
@@ -16,34 +16,31 @@ export class ClienteService {
     return new HttpHeaders({ 'Usuario-Id': this.authService.getUserId()?.toString() ?? '' });
   }
 
-  listar(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(
-      `${environment.URL}/${API_ENDPOINTS.USUARIOS}/${API_ENDPOINTS.USUARIOS_ROL_ACTIVOS}/CLIENTE`,
-      { headers: this.headers }
-    );
+  private get url(): string {
+    return `${environment.URL}/${API_ENDPOINTS.CLIENTES}`;
   }
 
-  crear(cliente: Usuario): Observable<Usuario> {
-    return this.http.post<Usuario>(
-      `${environment.URL}/${API_ENDPOINTS.USUARIOS}`,
-      { ...cliente, rol: 'CLIENTE' },
-      { headers: this.headers }
-    );
+  listar(): Observable<Cliente[]> {
+    return this.http.get<Cliente[]>(this.url, { headers: this.headers });
   }
 
-  actualizar(id: number, cliente: Usuario): Observable<Usuario> {
-    return this.http.put<Usuario>(
-      `${environment.URL}/${API_ENDPOINTS.USUARIOS}/${id}`,
-      { ...cliente, rol: 'CLIENTE' },
-      { headers: this.headers }
-    );
+  obtenerPorId(id: number): Observable<Cliente> {
+    return this.http.get<Cliente>(`${this.url}/${id}`, { headers: this.headers });
   }
 
-  desactivar(id: number): Observable<Usuario> {
-    return this.http.patch<Usuario>(
-      `${environment.URL}/${API_ENDPOINTS.USUARIOS}/${id}/desactivar`,
-      {},
-      { headers: this.headers }
-    );
+  crear(cliente: Cliente): Observable<Cliente> {
+    return this.http.post<Cliente>(this.url, cliente, { headers: this.headers });
+  }
+
+  actualizar(id: number, cliente: Cliente): Observable<Cliente> {
+    return this.http.put<Cliente>(`${this.url}/${id}`, cliente, { headers: this.headers });
+  }
+
+  desactivar(id: number): Observable<Cliente> {
+    return this.http.patch<Cliente>(`${this.url}/${id}/desactivar`, {}, { headers: this.headers });
+  }
+
+  activar(id: number): Observable<Cliente> {
+    return this.http.patch<Cliente>(`${this.url}/${id}/activar`, {}, { headers: this.headers });
   }
 }

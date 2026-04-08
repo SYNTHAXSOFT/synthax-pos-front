@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { PedidoService } from '../../services/pedido.service';
 import { PedidoRequest } from '../../interfaces/pedido.interface';
@@ -15,7 +15,7 @@ import { AuthService } from '../../../auth/services/auth.service';
 @Component({
   selector: 'app-pedido-registrar',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PedidoListarPageComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, PedidoListarPageComponent],
   templateUrl: './pedido-registrar.html',
   styleUrls: ['./pedido-registrar.css'],
 })
@@ -34,6 +34,20 @@ export class PedidoRegistrarPageComponent implements OnInit {
   public productos:        Producto[] = [];
   public ventaSeleccionada?: Venta;
   public ventaIdFijo?: number;
+
+  /** Texto del buscador de productos */
+  public filtroCatalogo: string = '';
+
+  /** Productos filtrados según el texto de búsqueda */
+  get productosFiltrados(): Producto[] {
+    const term = this.filtroCatalogo.trim().toLowerCase();
+    if (!term) return this.productos;
+    return this.productos.filter(p =>
+      p.nombre?.toLowerCase().includes(term) ||
+      p.descripcion?.toLowerCase().includes(term) ||
+      p.codigo?.toLowerCase().includes(term)
+    );
+  }
 
   // ── Estado por producto ───────────────────────────────────────────────────
   private obsMap      = new Map<number, string>();

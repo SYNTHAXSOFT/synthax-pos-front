@@ -6,10 +6,10 @@
       <h1 class="spx-prod-header__title">Productos</h1>
       <p class="spx-prod-header__sub">Administra el catálogo de productos de tu restaurante</p>
     </div>
-    <a routerLink="/synthax-pos/producto/registrar" class="spx-prod-btn-primary">
+    <button class="spx-prod-btn-primary" (click)="nuevoProducto.emit()">
       <i class="fa-solid fa-plus"></i>
       Nuevo Producto
-    </a>
+    </button>
   </div>
 
   <!-- Stats Row -->

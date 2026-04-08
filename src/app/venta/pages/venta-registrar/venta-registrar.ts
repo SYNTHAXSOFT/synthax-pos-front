@@ -1,15 +1,14 @@
 import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { VentaService } from '../../services/venta.service';
 import { VentaRequest } from '../../interfaces/venta.interface';
 import { MesaService } from '../../../mesa/services/mesa.service';
 import { TipoPedidoService } from '../../../tipo-pedido/services/tipo-pedido.service';
-import { UsuarioService } from '../../../usuario/services/usuario.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Mesa } from '../../../mesa/interfaces/mesa.interface';
 import { TipoPedido } from '../../../tipo-pedido/interfaces/tipo-pedido.interface';
-import { Usuario } from '../../../usuario/interfaces/usuario.interface';
 import { VentaListarPageComponent } from '../venta-listar/venta-listar';
 import { ToastService } from '../../../shared/services/toast.service';
 
@@ -21,28 +20,25 @@ import { ToastService } from '../../../shared/services/toast.service';
   styleUrls: ['../../../shared/styles/spx-forms.css', './venta-registrar.css'],
 })
 export class VentaRegistrarPageComponent implements OnInit {
-  private readonly fb               = inject(FormBuilder);
-  private readonly ventaService     = inject(VentaService);
-  private readonly mesaService      = inject(MesaService);
-  private readonly tipoPedidoService= inject(TipoPedidoService);
-  private readonly usuarioService   = inject(UsuarioService);
-  private readonly authService      = inject(AuthService);
-  private readonly toastService     = inject(ToastService);
+  private readonly fb                = inject(FormBuilder);
+  private readonly ventaService      = inject(VentaService);
+  private readonly mesaService       = inject(MesaService);
+  private readonly tipoPedidoService = inject(TipoPedidoService);
+  private readonly authService       = inject(AuthService);
+  private readonly toastService      = inject(ToastService);
+  private readonly router            = inject(Router);
 
   @ViewChild(VentaListarPageComponent) listarComponent?: VentaListarPageComponent;
 
   public mesas:       Mesa[]      = [];
   public tiposPedido: TipoPedido[]= [];
-  public clientes:    Usuario[]   = [];
 
   public modalNuevaVenta = false;
 
   public myForm: FormGroup = this.fb.group({
-    tipoPedidoId:               [null, [Validators.required]],
-    mesaId:                     [null],
-    solicitaFacturaElectronica: [false],
-    usuarioClienteId:           [null],
-    observacion:                [''],
+    tipoPedidoId: [null, [Validators.required]],
+    mesaId:       [null],
+    observacion:  [''],
   });
 
   ngOnInit(): void {
@@ -51,10 +47,6 @@ export class VentaRegistrarPageComponent implements OnInit {
 
   get esCocinero(): boolean {
     return this.authService.getUserRole() === 'COCINERO';
-  }
-
-  get solicitaFactura(): boolean {
-    return !!this.myForm.get('solicitaFacturaElectronica')?.value;
   }
 
   /** Oculta el campo mesa cuando el tipo de pedido es Domicilio o Llevar */
@@ -70,16 +62,9 @@ export class VentaRegistrarPageComponent implements OnInit {
   cargarCatalogos(): void {
     this.mesaService.obtenerActivos().subscribe({ next: (d) => this.mesas = d });
     this.tipoPedidoService.obtenerActivos().subscribe({ next: (d) => this.tiposPedido = d });
-    this.usuarioService.listarUsuarios().subscribe({ next: (d) => this.clientes = d });
   }
 
   onSave(): void {
-    // Si solicitó factura, el cliente es obligatorio
-    if (this.solicitaFactura && !this.myForm.value.usuarioClienteId) {
-      this.toastService.warning('Debe seleccionar un cliente cuando se solicita factura electrónica.');
-      return;
-    }
-
     if (this.myForm.invalid) {
       this.myForm.markAllAsTouched();
       return;
@@ -94,21 +79,18 @@ export class VentaRegistrarPageComponent implements OnInit {
     }
 
     const payload: VentaRequest = {
-      tipoPedido:                 { id: v.tipoPedidoId },
-      usuarioCreador:             { id: currentUserId },
-      solicitaFacturaElectronica: v.solicitaFacturaElectronica ?? false,
-      observacion:                v.observacion?.trim() || undefined,
-      estado:                     'ABIERTA',
-      activo:                     true,
-      ...(v.mesaId           ? { mesa:           { id: v.mesaId           } } : {}),
-      ...(v.usuarioClienteId ? { usuarioCliente: { id: v.usuarioClienteId } } : {}),
+      tipoPedido:    { id: v.tipoPedidoId },
+      usuarioCreador: { id: currentUserId },
+      observacion:   v.observacion?.trim() || undefined,
+      estado:        'ABIERTA',
+      activo:        true,
+      ...(v.mesaId ? { mesa: { id: v.mesaId } } : {}),
     };
 
     this.ventaService.crear(payload).subscribe({
-      next: () => {
-        this.toastService.success('Venta creada exitosamente');
+      next: (ventaCreada) => {
         this.cerrarModalNuevaVenta();
-        this.listarComponent?.cargarVentas();
+        this.router.navigate(['/synthax-pos/pedido/registrar'], { queryParams: { ventaId: ventaCreada.id } });
       },
       error: (err) => {
         console.error('Error:', err);
@@ -118,13 +100,13 @@ export class VentaRegistrarPageComponent implements OnInit {
   }
 
   abrirModalNuevaVenta(): void {
-    this.myForm.reset({ solicitaFacturaElectronica: false });
+    this.myForm.reset();
     this.modalNuevaVenta = true;
   }
 
   cerrarModalNuevaVenta(): void {
     this.modalNuevaVenta = false;
-    this.myForm.reset({ solicitaFacturaElectronica: false });
+    this.myForm.reset();
   }
 
   isValidField(field: string): boolean | null {

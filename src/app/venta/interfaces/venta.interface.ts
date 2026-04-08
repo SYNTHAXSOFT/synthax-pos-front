@@ -25,8 +25,11 @@ export interface Venta {
   tipoPedido?: TipoPedido;
   mesa?: Mesa;
 
-  /** Cliente registrado. Null = venta anónima (solo tiquete POS). */
+  /** Cliente registrado (tabla legacy Usuario). Null = venta anónima. */
   usuarioCliente?: UsuarioRef;
+
+  /** Cliente registrado (tabla independiente clientes). */
+  cliente?: { id?: number; nombre?: string; apellido?: string; cedula?: string; email?: string; telefono?: string; };
 
   /** Empleado que abrió la venta. */
   usuarioCreador?: UsuarioRef;
@@ -55,7 +58,9 @@ export interface VentaRequest {
   tipoPedido: { id: number };
   mesa?: { id: number };
 
-  /** ID del cliente registrado. Opcional — null = venta anónima. */
+  /** ID del cliente (tabla clientes). Opcional — null = venta anónima. */
+  cliente?: { id: number };
+  /** ID del cliente legacy (tabla usuarios). Opcional. */
   usuarioCliente?: { id: number };
 
   /** ID del empleado que abre la venta. Obligatorio. */

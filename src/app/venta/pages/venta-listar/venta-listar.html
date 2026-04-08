@@ -182,7 +182,9 @@
                   {{ venta.usuarioCreador?.nombre }} {{ venta.usuarioCreador?.apellido }}
                 </td>
                 <td class="spx-venta-td">
-                  @if (venta.usuarioCliente) {
+                  @if (venta.cliente) {
+                    {{ venta.cliente.nombre }} {{ venta.cliente.apellido }}
+                  } @else if (venta.usuarioCliente) {
                     {{ venta.usuarioCliente.nombre }} {{ venta.usuarioCliente.apellido }}
                   } @else {
                     <span class="spx-venta-anon">Anónimo</span>
@@ -276,37 +278,146 @@
           </div>
         } @else {
 
-          <!-- ── Impuestos ─────────────────────────────── -->
+          <!-- ── Cliente ──────────────────────────────────── -->
+          <div class="spx-modal__section">
+            <p class="spx-modal__section-title">
+              <i class="fa-solid fa-user"></i>
+              Cliente
+              <span class="spx-modal__section-hint">opcional</span>
+            </p>
+
+            @if (clienteSeleccionado) {
+              <!-- Cliente seleccionado -->
+              <div class="spx-modal__client-selected">
+                <div class="spx-modal__client-selected__avatar">
+                  {{ (clienteSeleccionado.nombre[0] + clienteSeleccionado.apellido[0]).toUpperCase() }}
+                </div>
+                <div class="spx-modal__client-selected__info">
+                  <span class="spx-modal__client-selected__name">
+                    {{ clienteSeleccionado.nombre }} {{ clienteSeleccionado.apellido }}
+                  </span>
+                  <span class="spx-modal__client-selected__cedula">CC {{ clienteSeleccionado.cedula }}</span>
+                </div>
+                <button class="spx-modal__client-selected__remove" (click)="limpiarCliente()" title="Quitar cliente">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+              <!-- Factura electrónica -->
+              <label class="spx-modal__factura-toggle">
+                <input type="checkbox" [(ngModel)]="solicitaFacturaElectronica" />
+                <span class="spx-modal__factura-toggle__box">
+                  <i class="fa-solid fa-check"></i>
+                </span>
+                <span class="spx-modal__factura-toggle__label">
+                  <i class="fa-solid fa-file-invoice spx-modal__factura-icon"></i>
+                  Solicita factura electrónica DIAN
+                </span>
+              </label>
+
+            } @else if (mostrarFormNuevoCliente) {
+              <!-- Mini-form crear cliente -->
+              <div class="spx-modal__new-client">
+                <p class="spx-modal__new-client__title">
+                  <i class="fa-solid fa-user-plus"></i> Nuevo cliente
+                </p>
+                <div class="spx-modal__new-client__grid">
+                  <input class="spx-modal__new-client__input" type="text" placeholder="Nombre *"
+                    [(ngModel)]="nuevoCliente.nombre" />
+                  <input class="spx-modal__new-client__input" type="text" placeholder="Apellido *"
+                    [(ngModel)]="nuevoCliente.apellido" />
+                  <input class="spx-modal__new-client__input" type="text" placeholder="Cédula *"
+                    [(ngModel)]="nuevoCliente.cedula" />
+                  <input class="spx-modal__new-client__input" type="email" placeholder="Email *"
+                    [(ngModel)]="nuevoCliente.email" />
+                  <input class="spx-modal__new-client__input spx-modal__new-client__input--full"
+                    type="tel" placeholder="Teléfono (opcional)"
+                    [(ngModel)]="nuevoCliente.telefono" />
+                </div>
+                <div class="spx-modal__new-client__actions">
+                  <button class="spx-modal__new-client__btn-cancel" (click)="cerrarFormNuevoCliente()">
+                    Cancelar
+                  </button>
+                  <button class="spx-modal__new-client__btn-save"
+                    [disabled]="guardandoCliente"
+                    (click)="guardarNuevoCliente()">
+                    @if (guardandoCliente) {
+                      <i class="fa-solid fa-spinner fa-spin"></i>
+                    } @else {
+                      <i class="fa-solid fa-user-plus"></i>
+                    }
+                    Guardar y seleccionar
+                  </button>
+                </div>
+              </div>
+
+            } @else {
+              <!-- Buscador -->
+              <div class="spx-modal__client-search">
+                <i class="fa-solid fa-magnifying-glass spx-modal__client-search__icon"></i>
+                <input
+                  class="spx-modal__client-search__input"
+                  type="text"
+                  placeholder="Buscar por cédula o nombre..."
+                  [(ngModel)]="clienteBusqueda"
+                  (ngModelChange)="onClienteBusquedaChange()"
+                  (focus)="mostrarDropdownCliente = clienteBusqueda.trim().length > 0"
+                  autocomplete="off"
+                />
+              </div>
+
+              @if (mostrarDropdownCliente) {
+                <div class="spx-modal__client-dropdown">
+                  @for (c of clientesFiltrados; track c.id) {
+                    <button class="spx-modal__client-option" (click)="seleccionarCliente(c)">
+                      <span class="spx-modal__client-option__avatar">
+                        {{ (c.nombre[0] + c.apellido[0]).toUpperCase() }}
+                      </span>
+                      <span class="spx-modal__client-option__info">
+                        <span class="spx-modal__client-option__name">{{ c.nombre }} {{ c.apellido }}</span>
+                        <span class="spx-modal__client-option__cedula">CC {{ c.cedula }}</span>
+                      </span>
+                    </button>
+                  }
+                  @if (clientesFiltrados.length === 0) {
+                    <div class="spx-modal__client-noresult">
+                      <i class="fa-solid fa-user-slash"></i>
+                      No se encontró el cliente
+                    </div>
+                  }
+                  <button class="spx-modal__client-create" (click)="abrirFormNuevoCliente()">
+                    <i class="fa-solid fa-user-plus"></i>
+                    Crear nuevo cliente
+                  </button>
+                </div>
+              }
+            }
+          </div>
+
+          <!-- ── Impuestos (horizontal) ────────────────── -->
           @if (impuestosDisponibles.length > 0) {
             <div class="spx-modal__section">
               <p class="spx-modal__section-title">
                 <i class="fa-solid fa-percent"></i>
                 Impuestos aplicables
               </p>
-              <div class="spx-modal__tax-list">
+              <div class="spx-modal__tax-chips">
                 @for (imp of impuestosDisponibles; track imp.id) {
-                  <label class="spx-modal__tax-item"
-                         [class.spx-modal__tax-item--selected]="impuestosSeleccionados.has(imp.id!)">
-                    <span class="spx-modal__tax-check-wrap">
-                      <input
-                        type="checkbox"
-                        class="spx-modal__tax-check"
-                        [checked]="impuestosSeleccionados.has(imp.id!)"
-                        (change)="toggleImpuesto(imp.id!)"
-                      />
-                      <span class="spx-modal__tax-check-icon">
-                        <i class="fa-solid fa-check"></i>
-                      </span>
-                    </span>
-                    <span class="spx-modal__tax-name">{{ imp.descripcion }}</span>
-                    <span class="spx-modal__tax-pct">{{ imp.porcentajeImpuesto }}%</span>
-                  </label>
+                  <button
+                    class="spx-modal__tax-chip"
+                    [class.spx-modal__tax-chip--active]="impuestosSeleccionados.has(imp.id!)"
+                    (click)="toggleImpuesto(imp.id!)">
+                    @if (impuestosSeleccionados.has(imp.id!)) {
+                      <i class="fa-solid fa-check"></i>
+                    }
+                    {{ imp.descripcion }}
+                    <span class="spx-modal__tax-chip__pct">{{ imp.porcentajeImpuesto }}%</span>
+                  </button>
                 }
               </div>
             </div>
           }
 
-          <!-- ── Forma de pago ─────────────────────────── -->
+          <!-- ── Formas de pago (horizontal) ──────────── -->
           <div class="spx-modal__section">
             <p class="spx-modal__section-title">
               <i class="fa-solid fa-wallet"></i>
@@ -319,21 +430,16 @@
                 <span>No hay formas de pago activas. Crea una en <strong>Formas de Pago</strong> antes de cerrar ventas.</span>
               </div>
             } @else {
-              <div class="spx-modal__fp-list">
+              <div class="spx-modal__fp-cards">
                 @for (fp of formasPago; track fp.id) {
-                  <label class="spx-modal__fp-item"
-                    [class.spx-modal__fp-item--selected]="formaPagoSeleccionadaId === fp.id">
-                    <input type="radio" name="formaPago"
-                      class="spx-modal__fp-radio"
-                      [value]="fp.id"
-                      [(ngModel)]="formaPagoSeleccionadaId" />
-                    <span class="spx-modal__fp-radio-ui">
-                      <span class="spx-modal__fp-radio-dot"></span>
-                    </span>
-                    <i class="fa-solid fa-wallet spx-modal__fp-icon"></i>
-                    <span class="spx-modal__fp-nombre">{{ fp.nombre }}</span>
-                    <span class="spx-modal__fp-saldo">$ {{ fp.saldoActual | number:'1.0-0' }}</span>
-                  </label>
+                  <button
+                    class="spx-modal__fp-card"
+                    [class.spx-modal__fp-card--selected]="formaPagoSeleccionadaId === fp.id"
+                    (click)="formaPagoSeleccionadaId = fp.id!">
+                    <i class="fa-solid fa-wallet spx-modal__fp-card__icon"></i>
+                    <span class="spx-modal__fp-card__nombre">{{ fp.nombre }}</span>
+                    <span class="spx-modal__fp-card__saldo">$ {{ fp.saldoActual | number:'1.0-0' }}</span>
+                  </button>
                 }
               </div>
             }
@@ -363,28 +469,23 @@
                 <option [value]="100">100%</option>
               </select>
               @if (descuentoPct > 0) {
-                <span class="spx-modal__discount-badge">
-                  − $ {{ valorDescuento | number:'1.0-0' }}
-                </span>
+                <span class="spx-modal__discount-badge">− $ {{ valorDescuento | number:'1.0-0' }}</span>
               }
             </div>
             @if (descuentoPct > 0) {
-              <textarea
-                class="spx-modal__discount-obs"
-                rows="2"
+              <textarea class="spx-modal__discount-obs" rows="2"
                 placeholder="Motivo del descuento (requerido) *"
                 [(ngModel)]="motivoDescuento">
               </textarea>
             }
           </div>
 
-          <!-- ── Resumen de totales ─────────────────────── -->
+          <!-- ── Resumen ────────────────────────────────── -->
           <div class="spx-modal__summary">
             <div class="spx-modal__summary-row">
               <span class="spx-modal__summary-label">Subtotal</span>
               <span class="spx-modal__summary-value">$ {{ subtotalCierre | number:'1.0-0' }}</span>
             </div>
-
             @for (linea of totalImpuestosAplicados; track linea.impuesto.id) {
               <div class="spx-modal__summary-row spx-modal__summary-row--tax">
                 <span class="spx-modal__summary-label">
@@ -396,19 +497,16 @@
                 </span>
               </div>
             }
-
             @if (descuentoPct > 0) {
               <div class="spx-modal__summary-row spx-modal__summary-row--discount">
                 <span class="spx-modal__summary-label">
-                  <i class="fa-solid fa-tag"></i>
-                  Descuento ({{ descuentoPct }}%)
+                  <i class="fa-solid fa-tag"></i> Descuento ({{ descuentoPct }}%)
                 </span>
                 <span class="spx-modal__summary-value spx-modal__summary-value--discount">
                   − $ {{ valorDescuento | number:'1.0-0' }}
                 </span>
               </div>
             }
-
             <div class="spx-modal__summary-total">
               <div class="spx-modal__summary-total-left">
                 <i class="fa-solid fa-coins"></i>

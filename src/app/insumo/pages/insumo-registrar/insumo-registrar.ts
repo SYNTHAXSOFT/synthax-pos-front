@@ -1,7 +1,6 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { InsumoService } from '../../services/insumo.service';
 import { InsumoRequest } from '../../interfaces/insumo.interface';
 import { RestauranteService } from '../../../restaurante/services/restaurante.service';
@@ -18,12 +17,11 @@ import { ToastService } from '../../../shared/services/toast.service';
   templateUrl: './insumo-registrar.html',
   styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
-export class InsumoRegistrarPageComponent implements OnInit {
+export class InsumoRegistrarPageComponent implements OnInit, OnDestroy {
   private readonly fb                 = inject(FormBuilder);
   private readonly insumoService      = inject(InsumoService);
   private readonly restauranteService = inject(RestauranteService);
   private readonly authService        = inject(AuthService);
-  private readonly route              = inject(ActivatedRoute);
   private readonly toastService       = inject(ToastService);
 
   @ViewChild(InsumoListarPageComponent) listarComponent?: InsumoListarPageComponent;
@@ -32,16 +30,16 @@ export class InsumoRegistrarPageComponent implements OnInit {
   private insumoId?: number;
   public restaurantes: Restaurante[] = [];
   public readonly medidas = MEDIDAS_INSUMO;
-  /** true si el usuario es ROOT y puede elegir cualquier restaurante */
   public esRoot: boolean = false;
+  public modalAbierto: boolean = false;
 
   public myForm: FormGroup = this.fb.group({
-    codigo:       ['', [Validators.required, Validators.minLength(2)]],
-    descripcion:  ['', [Validators.required]],
-    stock:        [0,  [Validators.min(0)]],
-    medida:       ['UNIDAD', [Validators.required]],
-    restauranteId:[null, [Validators.required]],
-    activo:       [true],
+    codigo:        ['', [Validators.required, Validators.minLength(2)]],
+    descripcion:   ['', [Validators.required]],
+    stock:         [0,  [Validators.min(0)]],
+    medida:        ['UNIDAD', [Validators.required]],
+    restauranteId: [null, [Validators.required]],
+    activo:        [true],
   });
 
   ngOnInit(): void {
@@ -49,37 +47,56 @@ export class InsumoRegistrarPageComponent implements OnInit {
     this.esRoot = (rol === 'ROOT');
 
     if (this.esRoot) {
-      // ROOT puede elegir cualquier restaurante
       this.restauranteService.obtenerActivos().subscribe({ next: (d) => this.restaurantes = d });
     } else {
-      // PROPIETARIO / ADMINISTRADOR: solo su propio restaurante, autoseleccionado
       const rest = this.authService.getCurrentRestaurante();
       if (rest) {
         this.restaurantes = [rest as unknown as Restaurante];
         this.myForm.patchValue({ restauranteId: rest.id });
       }
     }
+  }
 
-    this.route.queryParams.subscribe((params) => {
-      const id = params['id'];
-      if (id) {
+  ngOnDestroy(): void {
+    document.body.style.overflow = '';
+  }
+
+  abrirModal(): void {
+    this.editando = false;
+    this.insumoId = undefined;
+    const restauranteId = this.esRoot ? null : (this.authService.getRestauranteId() ?? null);
+    this.myForm.reset({ stock: 0, medida: 'UNIDAD', activo: true, restauranteId });
+    this.modalAbierto = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  abrirModalEditar(id: number): void {
+    this.insumoService.obtenerPorId(id).subscribe({
+      next: (i) => {
         this.editando = true;
-        this.insumoId = +id;
-        this.insumoService.obtenerPorId(this.insumoId).subscribe({
-          next: (i) => {
-            this.myForm.patchValue({
-              codigo:        i.codigo,
-              descripcion:   i.descripcion,
-              stock:         i.stock,
-              medida:        i.medida,
-              restauranteId: i.restaurante?.id ?? null,
-              activo:        i.activo,
-            });
-          },
-          error: (err) => console.error('Error al cargar insumo:', err),
+        this.insumoId = id;
+        this.myForm.patchValue({
+          codigo:        i.codigo,
+          descripcion:   i.descripcion,
+          stock:         i.stock,
+          medida:        i.medida,
+          restauranteId: i.restaurante?.id ?? null,
+          activo:        i.activo,
         });
-      }
+        this.modalAbierto = true;
+        document.body.style.overflow = 'hidden';
+      },
+      error: () => this.toastService.error('Error al cargar el insumo'),
     });
+  }
+
+  cerrarModal(): void {
+    this.modalAbierto = false;
+    document.body.style.overflow = '';
+    this.editando = false;
+    this.insumoId = undefined;
+    const restauranteId = this.esRoot ? null : (this.authService.getRestauranteId() ?? null);
+    this.myForm.reset({ stock: 0, medida: 'UNIDAD', activo: true, restauranteId });
   }
 
   onSave(): void {
@@ -101,7 +118,7 @@ export class InsumoRegistrarPageComponent implements OnInit {
       this.insumoService.actualizar(this.insumoId, payload).subscribe({
         next: () => {
           this.toastService.success('Insumo actualizado exitosamente');
-          this.resetForm();
+          this.cerrarModal();
           this.listarComponent?.cargarInsumos();
         },
         error: (err) => this.toastService.error('Error: ' + (err.error?.error || 'Error desconocido')),
@@ -110,19 +127,12 @@ export class InsumoRegistrarPageComponent implements OnInit {
       this.insumoService.crear(payload).subscribe({
         next: () => {
           this.toastService.success('Insumo creado exitosamente');
-          this.resetForm();
+          this.cerrarModal();
           this.listarComponent?.cargarInsumos();
         },
         error: (err) => this.toastService.error('Error: ' + (err.error?.error || 'Error desconocido')),
       });
     }
-  }
-
-  resetForm(): void {
-    this.editando = false;
-    this.insumoId = undefined;
-    const restauranteId = this.esRoot ? null : (this.authService.getRestauranteId() ?? null);
-    this.myForm.reset({ stock: 0, medida: 'UNIDAD', activo: true, restauranteId });
   }
 
   isValidField(field: string): boolean | null {

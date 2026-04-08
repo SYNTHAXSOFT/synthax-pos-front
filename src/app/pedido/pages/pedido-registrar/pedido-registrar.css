@@ -174,6 +174,105 @@
   font-size: 0.8rem;
 }
 
+/* ══ Cabecera del catálogo (título + buscador) ════════════════════════════ */
+.spx-reg-catalog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.spx-reg-catalog-count {
+  background: rgba(13, 127, 242, 0.15);
+  color: var(--spx-primary);
+  border-radius: 1rem;
+  padding: 0.1rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
+/* ── Buscador ──────────────────────────────────────────────────────────── */
+.spx-reg-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 26rem;
+  min-width: 14rem;
+}
+
+.spx-reg-search__icon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--spx-muted);
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.spx-reg-search__input {
+  width: 100%;
+  background: var(--spx-surface);
+  border: 1px solid var(--spx-border);
+  border-radius: 0.5rem;
+  color: var(--spx-text);
+  font-size: 0.875rem;
+  font-family: inherit;
+  padding: 0.55rem 2.25rem 0.55rem 2.25rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.spx-reg-search__input:focus {
+  border-color: var(--spx-primary);
+  box-shadow: 0 0 0 3px rgba(13, 127, 242, 0.12);
+}
+
+.spx-reg-search__input::placeholder {
+  color: var(--spx-muted);
+}
+
+.spx-reg-search__clear {
+  position: absolute;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--spx-muted);
+  cursor: pointer;
+  padding: 0.2rem 0.3rem;
+  border-radius: 0.3rem;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s, background 0.15s;
+}
+
+.spx-reg-search__clear:hover {
+  color: var(--spx-text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Sin resultados ────────────────────────────────────────────────────── */
+.spx-reg-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2.5rem 1rem;
+  color: var(--spx-muted);
+  font-size: 0.9rem;
+  background: var(--spx-surface);
+  border: 1px dashed var(--spx-border);
+  border-radius: var(--spx-radius);
+}
+
+.spx-reg-empty i {
+  font-size: 1.1rem;
+  opacity: 0.6;
+}
+
 /* ══ Catálogo de productos ════════════════════════════════════════════════ */
 .spx-reg-catalog {
   display: grid;

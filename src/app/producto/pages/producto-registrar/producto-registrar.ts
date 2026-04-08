@@ -1,9 +1,7 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { forkJoin } from 'rxjs';
 
 import { ProductoService } from '../../services/producto.service';
 import { DetalleProductoService } from '../../services/detalle-producto.service';
@@ -21,30 +19,24 @@ import { ToastService } from '../../../shared/services/toast.service';
   templateUrl: './producto-registrar.html',
   styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
-export class ProductoRegistrarPageComponent implements OnInit {
-  private readonly fb                    = inject(FormBuilder);
-  private readonly productoService       = inject(ProductoService);
+export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
+  private readonly fb                     = inject(FormBuilder);
+  private readonly productoService        = inject(ProductoService);
   private readonly detalleProductoService = inject(DetalleProductoService);
-  private readonly insumoService         = inject(InsumoService);
-  private readonly route                 = inject(ActivatedRoute);
-  private readonly toastService          = inject(ToastService);
+  private readonly insumoService          = inject(InsumoService);
+  private readonly toastService           = inject(ToastService);
 
   @ViewChild(ProductoListarPageComponent) listarComponent?: ProductoListarPageComponent;
 
   public editando: boolean = false;
   private productoId?: number;
+  public modalAbierto: boolean = false;
 
-  /** Vista previa de la imagen seleccionada (Base64 o URL existente al editar) */
   public imagenPreview: string | null = null;
 
-  // ── Receta / Insumos ──────────────────────────────────────────────────────
-  /** Lista de insumos activos disponibles para agregar a la receta */
   public insumos: Insumo[] = [];
-  /** Líneas de receta actuales del producto */
   public receta: LineaReceta[] = [];
-  /** Insumo seleccionado en el selector */
   public insumoSeleccionadoId: number | null = null;
-  /** Cantidad del insumo a agregar */
   public cantidadInsumo: number = 1;
   public guardandoReceta: boolean = false;
 
@@ -58,42 +50,65 @@ export class ProductoRegistrarPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    // Cargar insumos activos disponibles
     this.insumoService.obtenerActivos().subscribe({
       next: (data) => (this.insumos = data),
       error: (err) => console.error('Error al cargar insumos:', err),
     });
+  }
 
-    // Si viene con queryParam ?id=X cargamos el producto para editar
-    this.route.queryParams.subscribe((params) => {
-      const id = params['id'];
-      if (id) {
+  ngOnDestroy(): void {
+    document.body.style.overflow = '';
+  }
+
+  abrirModal(): void {
+    this.editando = false;
+    this.productoId = undefined;
+    this.imagenPreview = null;
+    this.receta = [];
+    this.insumoSeleccionadoId = null;
+    this.cantidadInsumo = 1;
+    this.myForm.reset({ activo: true });
+    this.modalAbierto = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  abrirModalEditar(id: number): void {
+    this.productoService.obtenerPorId(id).subscribe({
+      next: (p) => {
         this.editando = true;
-        this.productoId = +id;
+        this.productoId = id;
+        this.imagenPreview = p.imagen ?? null;
+        this.receta = [];
+        this.insumoSeleccionadoId = null;
+        this.cantidadInsumo = 1;
+        this.myForm.patchValue(p);
 
-        this.productoService.obtenerPorId(this.productoId).subscribe({
-          next: (p) => {
-            this.myForm.patchValue(p);
-            if (p.imagen) this.imagenPreview = p.imagen;
-          },
-          error: (err) => console.error('Error al cargar producto:', err),
-        });
-
-        // Cargar receta existente
-        this.detalleProductoService.obtenerPorProducto(this.productoId).subscribe({
+        this.detalleProductoService.obtenerPorProducto(id).subscribe({
           next: (detalles) => {
             this.receta = detalles
               .filter(d => d.insumo)
-              .map(d => ({
-                insumo: d.insumo!,
-                cantidad: d.cantidad,
-                detalleId: d.id,
-              }));
+              .map(d => ({ insumo: d.insumo!, cantidad: d.cantidad, detalleId: d.id }));
           },
           error: (err) => console.error('Error al cargar receta:', err),
         });
-      }
+
+        this.modalAbierto = true;
+        document.body.style.overflow = 'hidden';
+      },
+      error: () => this.toastService.error('Error al cargar el producto'),
     });
+  }
+
+  cerrarModal(): void {
+    this.modalAbierto = false;
+    document.body.style.overflow = '';
+    this.editando = false;
+    this.productoId = undefined;
+    this.imagenPreview = null;
+    this.receta = [];
+    this.insumoSeleccionadoId = null;
+    this.cantidadInsumo = 1;
+    this.myForm.reset({ activo: true });
   }
 
   // ── Imagen ────────────────────────────────────────────────────────────────
@@ -107,8 +122,7 @@ export class ProductoRegistrarPageComponent implements OnInit {
       this.toastService.error('Por favor selecciona un archivo de imagen válido');
       return;
     }
-    const maxSize = 2 * 1024 * 1024;
-    if (file.size > maxSize) {
+    if (file.size > 2 * 1024 * 1024) {
       this.toastService.error('La imagen no debe superar los 2 MB');
       return;
     }
@@ -134,19 +148,12 @@ export class ProductoRegistrarPageComponent implements OnInit {
   }
 
   agregarInsumo(): void {
-    if (!this.insumoSeleccionadoId) {
-      this.toastService.error('Selecciona un insumo');
-      return;
-    }
-    if (!this.cantidadInsumo || this.cantidadInsumo <= 0) {
-      this.toastService.error('La cantidad debe ser mayor a 0');
-      return;
-    }
+    if (!this.insumoSeleccionadoId) { this.toastService.error('Selecciona un insumo'); return; }
+    if (!this.cantidadInsumo || this.cantidadInsumo <= 0) { this.toastService.error('La cantidad debe ser mayor a 0'); return; }
 
     const insumo = this.insumos.find(i => i.id === +this.insumoSeleccionadoId!);
     if (!insumo) return;
 
-    // Evitar duplicados — si ya existe, actualizar la cantidad
     const existente = this.receta.find(r => r.insumo.id === insumo.id);
     if (existente) {
       existente.cantidad = this.cantidadInsumo;
@@ -154,8 +161,6 @@ export class ProductoRegistrarPageComponent implements OnInit {
     } else {
       this.receta = [...this.receta, { insumo, cantidad: this.cantidadInsumo }];
     }
-
-    // Limpiar selector
     this.insumoSeleccionadoId = null;
     this.cantidadInsumo = 1;
   }
@@ -167,43 +172,29 @@ export class ProductoRegistrarPageComponent implements OnInit {
   // ── Guardar ───────────────────────────────────────────────────────────────
 
   onSave(): void {
-    if (this.myForm.invalid) {
-      this.myForm.markAllAsTouched();
-      return;
-    }
+    if (this.myForm.invalid) { this.myForm.markAllAsTouched(); return; }
 
     const producto: Producto = this.myForm.value;
 
     if (this.editando && this.productoId) {
       this.productoService.actualizar(this.productoId, producto).subscribe({
         next: (p) => {
-          this.guardarReceta(p.id!);
           this.toastService.success('Producto actualizado exitosamente');
+          this.guardarReceta(p.id!);
         },
-        error: (err) => {
-          console.error('Error:', err);
-          this.toastService.error('Error al actualizar: ' + (err.error?.error || 'Error desconocido'));
-        },
+        error: (err) => this.toastService.error('Error al actualizar: ' + (err.error?.error || 'Error desconocido')),
       });
     } else {
       this.productoService.crear(producto).subscribe({
         next: (p) => {
-          this.guardarReceta(p.id!);
           this.toastService.success('Producto creado exitosamente');
+          this.guardarReceta(p.id!);
         },
-        error: (err) => {
-          console.error('Error:', err);
-          this.toastService.error('Error al crear: ' + (err.error?.error || 'Error desconocido'));
-        },
+        error: (err) => this.toastService.error('Error al crear: ' + (err.error?.error || 'Error desconocido')),
       });
     }
   }
 
-  /**
-   * Guarda la receta del producto:
-   * 1. Elimina todas las líneas existentes en BD
-   * 2. Crea cada línea de la receta actual
-   */
   private guardarReceta(productoId: number): void {
     this.guardandoReceta = true;
 
@@ -211,7 +202,8 @@ export class ProductoRegistrarPageComponent implements OnInit {
       next: () => {
         if (this.receta.length === 0) {
           this.guardandoReceta = false;
-          this.finalizarGuardado();
+          this.cerrarModal();
+          this.listarComponent?.cargarProductos();
           return;
         }
 
@@ -226,13 +218,15 @@ export class ProductoRegistrarPageComponent implements OnInit {
         forkJoin(creaciones).subscribe({
           next: () => {
             this.guardandoReceta = false;
-            this.finalizarGuardado();
+            this.cerrarModal();
+            this.listarComponent?.cargarProductos();
           },
           error: (err) => {
             this.guardandoReceta = false;
             console.error('Error al guardar receta:', err);
             this.toastService.error('Producto guardado pero hubo un error al guardar la receta');
-            this.finalizarGuardado();
+            this.cerrarModal();
+            this.listarComponent?.cargarProductos();
           },
         });
       },
@@ -240,24 +234,10 @@ export class ProductoRegistrarPageComponent implements OnInit {
         this.guardandoReceta = false;
         console.error('Error al limpiar receta:', err);
         this.toastService.error('Producto guardado pero hubo un error al actualizar la receta');
-        this.finalizarGuardado();
+        this.cerrarModal();
+        this.listarComponent?.cargarProductos();
       },
     });
-  }
-
-  private finalizarGuardado(): void {
-    this.resetForm();
-    this.listarComponent?.cargarProductos();
-  }
-
-  resetForm(): void {
-    this.editando = false;
-    this.productoId = undefined;
-    this.imagenPreview = null;
-    this.receta = [];
-    this.insumoSeleccionadoId = null;
-    this.cantidadInsumo = 1;
-    this.myForm.reset({ activo: true });
   }
 
   isValidField(field: string): boolean | null {

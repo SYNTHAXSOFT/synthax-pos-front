@@ -6,10 +6,10 @@
       <h1 class="spx-mesa-header__title">Mesas</h1>
       <p class="spx-mesa-header__sub">Administra las mesas del restaurante</p>
     </div>
-    <a routerLink="/synthax-pos/mesa/registrar" class="spx-mesa-btn-primary">
+    <button class="spx-mesa-btn-primary" (click)="nuevaMesa.emit()">
       <i class="fa-solid fa-plus"></i>
       Nueva Mesa
-    </a>
+    </button>
   </div>
 
   <!-- Stats -->

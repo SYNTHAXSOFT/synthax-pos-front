@@ -41,6 +41,8 @@ export class VentaService {
     descuento?: number,
     motivoDescuento?: string,
     formaPagoId?: number,
+    clienteId?: number,
+    solicitaFacturaElectronica?: boolean,
   ): Observable<Venta> {
     let params = new HttpParams().set('valorTotal', valorTotal.toString());
     if (usuarioFacturadorId != null) {
@@ -54,6 +56,12 @@ export class VentaService {
     }
     if (formaPagoId != null) {
       params = params.set('formaPagoId', formaPagoId.toString());
+    }
+    if (clienteId != null) {
+      params = params.set('clienteId', clienteId.toString());
+    }
+    if (solicitaFacturaElectronica != null) {
+      params = params.set('solicitaFacturaElectronica', solicitaFacturaElectronica.toString());
     }
     return this.http.patch<Venta>(`${this.base}/${id}/cerrar`, {}, { params });
   }

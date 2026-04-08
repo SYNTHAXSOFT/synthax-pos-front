@@ -37,4 +37,8 @@ export class CompraService {
   desactivar(id: number): Observable<Compra> {
     return this.http.patch<Compra>(`${this.base}/${id}/desactivar`, {});
   }
+
+  anular(id: number): Observable<Compra> {
+    return this.http.patch<Compra>(`${this.base}/${id}/anular`, {});
+  }
 }

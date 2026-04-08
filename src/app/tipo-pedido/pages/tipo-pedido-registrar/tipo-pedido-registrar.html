@@ -1,118 +1,100 @@
-<div class="spx-form-page">
+<div class="spx-module-page">
 
-  <!-- Card principal -->
-  <div class="spx-form-card">
+  <!-- Lista de tipos de pedido (vista principal) -->
+  <app-tipo-pedido-listar
+    [modoModal]="true"
+    (nuevoTipoPedido)="abrirModal()"
+    (editarTipoPedido)="abrirModalEditar($event)">
+  </app-tipo-pedido-listar>
 
-    <!-- Header -->
-    <div class="spx-form-card__header">
-      <div class="spx-form-card__header-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-          <rect x="9" y="3" width="6" height="4" rx="1"/>
-          <line x1="9" y1="12" x2="15" y2="12"/>
-          <line x1="9" y1="16" x2="13" y2="16"/>
-        </svg>
-      </div>
-      <div>
-        <h2 class="spx-form-card__title">
-          {{ editando ? 'Editar Tipo de Pedido' : 'Nuevo Tipo de Pedido' }}
-        </h2>
-        <p class="spx-form-card__subtitle">
-          {{ editando ? 'Modifica los datos del tipo de pedido' : 'Registra un nuevo tipo de pedido en el sistema' }}
-        </p>
-      </div>
-    </div>
+  <!-- Modal overlay -->
+  @if (modalAbierto) {
+    <div class="spx-modal-backdrop" (click)="cerrarModal()">
+      <div class="spx-modal-container" (click)="$event.stopPropagation()">
 
-    <!-- Body -->
-    <div class="spx-form-card__body">
-      <form [formGroup]="myForm" (ngSubmit)="onSave()">
-
-        <div class="spx-form-section">
-          <h3 class="spx-form-section__title">Información del Tipo</h3>
-
-          <div class="spx-form-grid spx-form-grid--3">
-
-            <!-- Código -->
-            <div class="spx-form-field">
-              <label class="spx-form-label">
-                Código <span class="spx-form-required">*</span>
-                <span class="spx-form-hint-inline">identificador único</span>
-              </label>
-              <input
-                type="text"
-                formControlName="codigo"
-                class="spx-form-input"
-                [class.spx-form-input--error]="isValidField('codigo')"
-                placeholder="Ej: DOMICILIO, MESA"
-              />
-              @if (isValidField('codigo')) {
-                <span class="spx-form-error">{{ getFieldError('codigo') }}</span>
-              }
-            </div>
-
-            <!-- Nombre -->
-            <div class="spx-form-field spx-form-field--span2">
-              <label class="spx-form-label">
-                Nombre <span class="spx-form-required">*</span>
-              </label>
-              <input
-                type="text"
-                formControlName="nombre"
-                class="spx-form-input"
-                [class.spx-form-input--error]="isValidField('nombre')"
-                placeholder="Ej: Domicilio, Mesa, Para llevar"
-              />
-              @if (isValidField('nombre')) {
-                <span class="spx-form-error">{{ getFieldError('nombre') }}</span>
-              }
-            </div>
-
-          </div>
-
-          <!-- Activo toggle -->
-          <div class="spx-form-toggle-row">
-            <div class="spx-form-toggle-info">
-              <span class="spx-form-toggle-label">Estado activo</span>
-              <span class="spx-form-toggle-desc">El tipo de pedido estará disponible para su uso</span>
-            </div>
-            <label class="spx-form-toggle">
-              <input type="checkbox" formControlName="activo" />
-              <span class="spx-form-toggle__track">
-                <span class="spx-form-toggle__thumb"></span>
-              </span>
-            </label>
-          </div>
-
-        </div>
-
-        <!-- Acciones -->
-        <div class="spx-form-actions">
-          @if (editando) {
-            <button type="button" class="spx-form-btn spx-form-btn--secondary" (click)="resetForm()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+        <!-- Header -->
+        <div class="spx-modal-header">
+          <div class="spx-modal-header__info">
+            <div class="spx-modal-header__icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+                <rect x="9" y="3" width="6" height="4" rx="1"/>
+                <line x1="9" y1="12" x2="15" y2="12"/>
+                <line x1="9" y1="16" x2="13" y2="16"/>
               </svg>
-              Cancelar
-            </button>
-          }
-          <button type="submit" class="spx-form-btn spx-form-btn--primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            {{ editando ? 'Actualizar' : 'Guardar' }}
+            </div>
+            <div>
+              <p class="spx-modal-header__title">{{ editando ? 'Editar Tipo de Pedido' : 'Nuevo Tipo de Pedido' }}</p>
+              <p class="spx-modal-header__sub">Los campos con <span class="spx-form-required">*</span> son obligatorios</p>
+            </div>
+          </div>
+          <button class="spx-modal-close" (click)="cerrarModal()" title="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
 
-      </form>
-    </div>
-  </div>
+        <!-- Body -->
+        <div class="spx-modal-body">
+          <form [formGroup]="myForm" (ngSubmit)="onSave()">
+            <div class="spx-form-grid spx-form-grid--3" style="margin-bottom:1.25rem">
 
-  <!-- Tabla embebida -->
-  <div class="spx-form-embedded">
-    <app-tipo-pedido-listar></app-tipo-pedido-listar>
-  </div>
+              <!-- Código -->
+              <div class="spx-form-field">
+                <label class="spx-form-label">
+                  Código <span class="spx-form-required">*</span>
+                  <span class="spx-form-hint-inline">identificador único</span>
+                </label>
+                <input type="text" formControlName="codigo" class="spx-form-input"
+                  [class.spx-form-input--error]="isValidField('codigo')"
+                  placeholder="Ej: DOMICILIO, MESA">
+                @if (isValidField('codigo')) {
+                  <span class="spx-form-error">{{ getFieldError('codigo') }}</span>
+                }
+              </div>
+
+              <!-- Nombre -->
+              <div class="spx-form-field spx-form-field--span2">
+                <label class="spx-form-label">Nombre <span class="spx-form-required">*</span></label>
+                <input type="text" formControlName="nombre" class="spx-form-input"
+                  [class.spx-form-input--error]="isValidField('nombre')"
+                  placeholder="Ej: Domicilio, Mesa, Para llevar">
+                @if (isValidField('nombre')) {
+                  <span class="spx-form-error">{{ getFieldError('nombre') }}</span>
+                }
+              </div>
+
+            </div>
+
+            <!-- Activo toggle -->
+            <div class="spx-form-toggle-row" style="margin-bottom:1.25rem">
+              <div class="spx-form-toggle-info">
+                <span class="spx-form-toggle-label">Estado activo</span>
+                <span class="spx-form-toggle-desc">El tipo de pedido estará disponible para su uso</span>
+              </div>
+              <label class="spx-form-toggle">
+                <input type="checkbox" formControlName="activo" />
+                <span class="spx-form-toggle__track">
+                  <span class="spx-form-toggle__thumb"></span>
+                </span>
+              </label>
+            </div>
+
+            <!-- Acciones -->
+            <div class="spx-modal-actions">
+              <button type="button" class="spx-modal-btn-cancel" (click)="cerrarModal()">
+                <i class="fa-solid fa-xmark"></i> Cancelar
+              </button>
+              <button type="submit" class="spx-form-btn-submit">
+                <i class="fa-solid fa-floppy-disk"></i>
+                {{ editando ? 'Actualizar' : 'Guardar' }}
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  }
 
 </div>

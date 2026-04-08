@@ -6,10 +6,10 @@
       <h2 class="spx-users__title">Gestión de Usuarios</h2>
       <p class="spx-users__subtitle">Configura el acceso, roles y permisos de tu equipo.</p>
     </div>
-    <a routerLink="/synthax-pos/usuario/registrar" class="spx-btn-primary">
+    <button class="spx-btn-primary" (click)="nuevoUsuario.emit()">
       <i class="fa-solid fa-user-plus"></i>
       Nuevo Usuario
-    </a>
+    </button>
   </div>
 
   <!-- ── Stats Cards ──────────────────────── -->

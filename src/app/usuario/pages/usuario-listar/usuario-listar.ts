@@ -1,5 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuarioService } from '../../services/usuario.service';
@@ -10,18 +9,20 @@ import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-listar-page',
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './usuario-listar.html',
   styleUrls: ['./usuario-listar.css'],
 })
 export class ListarPage implements OnInit {
 
-  constructor(private router: Router) {}
-
   private readonly usuarioService = inject(UsuarioService);
   private readonly authService    = inject(AuthService);
-  private readonly toastService = inject(ToastService);
+  private readonly toastService   = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
+
+  @Input() modoModal: boolean = false;
+  @Output() nuevoUsuario  = new EventEmitter<void>();
+  @Output() editarUsuario = new EventEmitter<number>();
 
   isLoading    = signal(false);
   isError      = signal(false);
@@ -29,12 +30,10 @@ export class ListarPage implements OnInit {
   usuariosList = signal<Usuario[]>([]);
   currentUserRole = '';
 
-  // Filters
   searchTerm   = '';
   filtroRol    = '';
   filtroEstado = '';
 
-  // Pagination
   paginaActual = 1;
   readonly porPagina = 10;
 
@@ -58,9 +57,7 @@ export class ListarPage implements OnInit {
     });
   }
 
-  get totalActivos(): number {
-    return this.usuariosList().filter(u => u.activo).length;
-  }
+  get totalActivos(): number { return this.usuariosList().filter(u => u.activo).length; }
 
   get usuariosPaginados(): Usuario[] {
     const inicio = (this.paginaActual - 1) * this.porPagina;
@@ -115,7 +112,7 @@ export class ListarPage implements OnInit {
 
     this.usuarioService.listarUsuariosFiltrados().subscribe({
       next: (data) => { this.isLoading.set(false); this.usuariosList.set(data); },
-      error: (err) => {
+      error: (err)  => {
         this.isLoading.set(false);
         this.isError.set(true);
         this.errorMessage.set(err.error?.error ?? 'Error al cargar usuarios');
@@ -129,6 +126,10 @@ export class ListarPage implements OnInit {
       return ['CAJERO', 'MESERO', 'DOMICILIARIO'].includes(usuario.rol);
     }
     return false;
+  }
+
+  editar(id: number): void {
+    this.editarUsuario.emit(id);
   }
 
   async activarInactivar(usuario: Usuario): Promise<void> {
@@ -148,9 +149,5 @@ export class ListarPage implements OnInit {
         this.toastService.error('Error: ' + (err.error?.error ?? 'Error desconocido'));
       },
     });
-  }
-
-  editar(id: number): void {
-    this.router.navigate(['/synthax-pos/usuario/actualizar', id]);
   }
 }

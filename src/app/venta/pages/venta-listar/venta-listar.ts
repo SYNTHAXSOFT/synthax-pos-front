@@ -15,6 +15,8 @@ import { Impuesto } from '../../../impuesto/interfaces/impuesto.interface';
 import { Pedido } from '../../../pedido/interfaces/pedido.interface';
 import { FormaPagoService } from '../../../forma-pago/services/forma-pago.service';
 import { FormaPago } from '../../../forma-pago/interfaces/forma-pago.interface';
+import { ClienteService } from '../../../cliente/services/cliente.service';
+import { Cliente } from '../../../cliente/interfaces/cliente.interface';
 
 @Component({
   selector: 'app-venta-listar',
@@ -28,6 +30,7 @@ export class VentaListarPageComponent implements OnInit {
   private readonly pedidoService     = inject(PedidoService);
   private readonly impuestoService   = inject(ImpuestoService);
   private readonly formaPagoService  = inject(FormaPagoService);
+  private readonly clienteService    = inject(ClienteService);
   private readonly router            = inject(Router);
   private readonly authService       = inject(AuthService);
   private readonly toastService      = inject(ToastService);
@@ -93,6 +96,28 @@ export class VentaListarPageComponent implements OnInit {
   // ── Formas de pago ────────────────────────────────────────────────────────
   public formasPago: FormaPago[]        = [];
   public formaPagoSeleccionadaId: number | null = null;
+
+  // ── Cliente y factura electrónica ─────────────────────────────────────────
+  public clientesDisponibles: Cliente[]  = [];
+  public clienteBusqueda: string         = '';
+  public clienteSeleccionado: Cliente | null = null;
+  public mostrarDropdownCliente: boolean = false;
+  public solicitaFacturaElectronica: boolean = false;
+
+  // ── Crear cliente rápido ──────────────────────────────────────────────────
+  public mostrarFormNuevoCliente: boolean = false;
+  public guardandoCliente: boolean        = false;
+  public nuevoCliente = { nombre: '', apellido: '', cedula: '', email: '', telefono: '' };
+
+  get clientesFiltrados(): Cliente[] {
+    const term = this.clienteBusqueda.trim().toLowerCase();
+    if (!term) return this.clientesDisponibles.slice(0, 6);
+    return this.clientesDisponibles.filter(c =>
+      c.cedula.toLowerCase().includes(term) ||
+      c.nombre.toLowerCase().includes(term) ||
+      c.apellido.toLowerCase().includes(term)
+    ).slice(0, 6);
+  }
 
   // ── Datos para impresión de tirilla ──────────────────────────────────────
   public mostrarModalImprimir: boolean = false;
@@ -239,32 +264,40 @@ export class VentaListarPageComponent implements OnInit {
   // ── Apertura del modal de cierre ──────────────────────────────────────────
 
   abrirModalCerrar(venta: Venta): void {
-    this.ventaCierreId          = venta.id ?? null;
-    this.ventaCierreNumero      = venta.codigo ?? `#${venta.id}`;
-    this.subtotalCierre         = 0;
-    this.impuestosDisponibles   = [];
-    this.impuestosSeleccionados = new Set();
-    this.descuentoPct           = 0;
-    this.motivoDescuento        = '';
-    this.cargandoModalData      = true;
+    this.ventaCierreId           = venta.id ?? null;
+    this.ventaCierreNumero       = venta.codigo ?? `#${venta.id}`;
+    this.subtotalCierre          = 0;
+    this.impuestosDisponibles    = [];
+    this.impuestosSeleccionados  = new Set();
+    this.descuentoPct            = 0;
+    this.motivoDescuento         = '';
+    this.cargandoModalData       = true;
     this.formaPagoSeleccionadaId = null;
+    this.clienteBusqueda         = '';
+    this.clienteSeleccionado     = null;
+    this.mostrarDropdownCliente  = false;
+    this.solicitaFacturaElectronica = false;
+    this.mostrarFormNuevoCliente = false;
+    this.nuevoCliente            = { nombre: '', apellido: '', cedula: '', email: '', telefono: '' };
     this.modalCerrar             = true;
 
     forkJoin({
-      pedidos:     this.pedidoService.obtenerActivosPorVenta(venta.id!),
-      impuestos:   this.impuestoService.obtenerActivos(),
-      formasPago:  this.formaPagoService.obtenerActivas(),
+      pedidos:    this.pedidoService.obtenerActivosPorVenta(venta.id!),
+      impuestos:  this.impuestoService.obtenerActivos(),
+      formasPago: this.formaPagoService.obtenerActivas(),
+      clientes:   this.clienteService.listar(),
     }).subscribe({
-      next: ({ pedidos, impuestos, formasPago }) => {
+      next: ({ pedidos, impuestos, formasPago, clientes }) => {
         this.pedidosParaImprimir = pedidos as Pedido[];
         this.subtotalCierre = pedidos.reduce((sum, p) => {
           const precio   = p.producto?.precio ?? 0;
           const cantidad = p.cantidad         ?? 0;
           return sum + precio * cantidad;
         }, 0);
-        this.impuestosDisponibles = impuestos;
-        this.formasPago           = formasPago;
-        this.cargandoModalData    = false;
+        this.impuestosDisponibles  = impuestos;
+        this.formasPago            = formasPago;
+        this.clientesDisponibles   = clientes;
+        this.cargandoModalData     = false;
       },
       error: (err) => {
         console.error('Error al cargar datos del modal:', err);
@@ -274,19 +307,95 @@ export class VentaListarPageComponent implements OnInit {
     });
   }
 
+  // ── Métodos de cliente ────────────────────────────────────────────────────
+
+  onClienteBusquedaChange(): void {
+    this.mostrarDropdownCliente = this.clienteBusqueda.trim().length > 0;
+    if (this.clienteSeleccionado) {
+      this.clienteSeleccionado = null;
+      this.solicitaFacturaElectronica = false;
+    }
+  }
+
+  seleccionarCliente(c: Cliente): void {
+    this.clienteSeleccionado    = c;
+    this.clienteBusqueda        = '';
+    this.mostrarDropdownCliente = false;
+    this.mostrarFormNuevoCliente = false;
+  }
+
+  limpiarCliente(): void {
+    this.clienteSeleccionado        = null;
+    this.clienteBusqueda            = '';
+    this.mostrarDropdownCliente     = false;
+    this.solicitaFacturaElectronica = false;
+  }
+
+  abrirFormNuevoCliente(): void {
+    this.mostrarFormNuevoCliente = true;
+    this.nuevoCliente = {
+      nombre: '', apellido: '',
+      cedula: this.clienteBusqueda.trim(),
+      email: '', telefono: '',
+    };
+    this.mostrarDropdownCliente = false;
+  }
+
+  cerrarFormNuevoCliente(): void {
+    this.mostrarFormNuevoCliente = false;
+    this.nuevoCliente = { nombre: '', apellido: '', cedula: '', email: '', telefono: '' };
+  }
+
+  guardarNuevoCliente(): void {
+    if (!this.nuevoCliente.nombre.trim() || !this.nuevoCliente.apellido.trim() ||
+        !this.nuevoCliente.cedula.trim() || !this.nuevoCliente.email.trim()) {
+      this.toastService.warning('Nombre, apellido, cédula y email son obligatorios');
+      return;
+    }
+    this.guardandoCliente = true;
+    const payload: Cliente = {
+      nombre:   this.nuevoCliente.nombre.trim(),
+      apellido: this.nuevoCliente.apellido.trim(),
+      cedula:   this.nuevoCliente.cedula.trim(),
+      email:    this.nuevoCliente.email.trim(),
+      telefono: this.nuevoCliente.telefono.trim() || undefined,
+      activo:   true,
+    };
+    this.clienteService.crear(payload).subscribe({
+      next: (creado) => {
+        this.clientesDisponibles = [creado, ...this.clientesDisponibles];
+        this.seleccionarCliente(creado);
+        this.cerrarFormNuevoCliente();
+        this.guardandoCliente = false;
+        this.toastService.success('Cliente creado y seleccionado');
+      },
+      error: (err) => {
+        this.toastService.error('Error: ' + (err.error?.error ?? 'No se pudo crear el cliente'));
+        this.guardandoCliente = false;
+      },
+    });
+  }
+
   cerrarModal(): void {
-    this.modalCerrar             = false;
-    this.ventaCierreId           = null;
-    this.ventaCierreNumero       = null;
-    this.cerrandoVenta           = false;
-    this.cargandoModalData       = false;
-    this.subtotalCierre          = 0;
-    this.impuestosDisponibles    = [];
-    this.impuestosSeleccionados  = new Set();
-    this.descuentoPct            = 0;
-    this.motivoDescuento         = '';
-    this.formaPagoSeleccionadaId = null;
-    this.formasPago              = [];
+    this.modalCerrar                = false;
+    this.ventaCierreId              = null;
+    this.ventaCierreNumero          = null;
+    this.cerrandoVenta              = false;
+    this.cargandoModalData          = false;
+    this.subtotalCierre             = 0;
+    this.impuestosDisponibles       = [];
+    this.impuestosSeleccionados     = new Set();
+    this.descuentoPct               = 0;
+    this.motivoDescuento            = '';
+    this.formaPagoSeleccionadaId    = null;
+    this.formasPago                 = [];
+    this.clientesDisponibles        = [];
+    this.clienteBusqueda            = '';
+    this.clienteSeleccionado        = null;
+    this.mostrarDropdownCliente     = false;
+    this.solicitaFacturaElectronica = false;
+    this.mostrarFormNuevoCliente    = false;
+    this.nuevoCliente               = { nombre: '', apellido: '', cedula: '', email: '', telefono: '' };
   }
 
   toggleImpuesto(id: number): void {
@@ -324,6 +433,8 @@ export class VentaListarPageComponent implements OnInit {
       this.descuentoPct > 0 ? this.descuentoPct : undefined,
       this.motivoDescuento.trim() || undefined,
       this.formaPagoSeleccionadaId ?? undefined,
+      this.clienteSeleccionado?.id,
+      this.solicitaFacturaElectronica || undefined,
     ).subscribe({
       next: (ventaCerrada) => {
         this.toastService.success('Venta cerrada · Stock de insumos actualizado');

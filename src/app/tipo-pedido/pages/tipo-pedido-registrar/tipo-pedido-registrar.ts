@@ -1,7 +1,6 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { TipoPedidoService } from '../../services/tipo-pedido.service';
 import { TipoPedido } from '../../interfaces/tipo-pedido.interface';
 import { TipoPedidoListarPageComponent } from '../tipo-pedido-listar/tipo-pedido-listar';
@@ -14,16 +13,16 @@ import { ToastService } from '../../../shared/services/toast.service';
   templateUrl: './tipo-pedido-registrar.html',
   styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
-export class TipoPedidoRegistrarPageComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
+export class TipoPedidoRegistrarPageComponent implements OnInit, OnDestroy {
+  private readonly fb               = inject(FormBuilder);
   private readonly tipoPedidoService = inject(TipoPedidoService);
-  private readonly route = inject(ActivatedRoute);
-  private readonly toastService = inject(ToastService);
+  private readonly toastService     = inject(ToastService);
 
   @ViewChild(TipoPedidoListarPageComponent) listarComponent?: TipoPedidoListarPageComponent;
 
   public editando: boolean = false;
   private tipoPedidoId?: number;
+  public modalAbierto: boolean = false;
 
   public myForm: FormGroup = this.fb.group({
     codigo: ['', [Validators.required, Validators.minLength(2)]],
@@ -31,18 +30,39 @@ export class TipoPedidoRegistrarPageComponent implements OnInit {
     activo: [true],
   });
 
-  ngOnInit(): void {
-    this.route.queryParams.subscribe((params) => {
-      const id = params['id'];
-      if (id) {
+  ngOnInit(): void {}
+
+  ngOnDestroy(): void {
+    document.body.style.overflow = '';
+  }
+
+  abrirModal(): void {
+    this.editando = false;
+    this.tipoPedidoId = undefined;
+    this.myForm.reset({ activo: true });
+    this.modalAbierto = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  abrirModalEditar(id: number): void {
+    this.tipoPedidoService.obtenerPorId(id).subscribe({
+      next: (t) => {
         this.editando = true;
-        this.tipoPedidoId = +id;
-        this.tipoPedidoService.obtenerPorId(this.tipoPedidoId).subscribe({
-          next: (t) => this.myForm.patchValue(t),
-          error: (err) => console.error('Error al cargar tipo de pedido:', err),
-        });
-      }
+        this.tipoPedidoId = id;
+        this.myForm.patchValue(t);
+        this.modalAbierto = true;
+        document.body.style.overflow = 'hidden';
+      },
+      error: () => this.toastService.error('Error al cargar el tipo de pedido'),
     });
+  }
+
+  cerrarModal(): void {
+    this.modalAbierto = false;
+    document.body.style.overflow = '';
+    this.editando = false;
+    this.tipoPedidoId = undefined;
+    this.myForm.reset({ activo: true });
   }
 
   onSave(): void {
@@ -57,33 +77,21 @@ export class TipoPedidoRegistrarPageComponent implements OnInit {
       this.tipoPedidoService.actualizar(this.tipoPedidoId, tipoPedido).subscribe({
         next: () => {
           this.toastService.success('Tipo de pedido actualizado exitosamente');
-          this.resetForm();
+          this.cerrarModal();
           this.listarComponent?.cargarTiposPedido();
         },
-        error: (err) => {
-          console.error('Error:', err);
-          this.toastService.error('Error al actualizar: ' + (err.error?.error || 'Error desconocido'));
-        },
+        error: (err) => this.toastService.error('Error al actualizar: ' + (err.error?.error || 'Error desconocido')),
       });
     } else {
       this.tipoPedidoService.crear(tipoPedido).subscribe({
         next: () => {
           this.toastService.success('Tipo de pedido creado exitosamente');
-          this.resetForm();
+          this.cerrarModal();
           this.listarComponent?.cargarTiposPedido();
         },
-        error: (err) => {
-          console.error('Error:', err);
-          this.toastService.error('Error al crear: ' + (err.error?.error || 'Error desconocido'));
-        },
+        error: (err) => this.toastService.error('Error al crear: ' + (err.error?.error || 'Error desconocido')),
       });
     }
-  }
-
-  resetForm(): void {
-    this.editando = false;
-    this.tipoPedidoId = undefined;
-    this.myForm.reset({ activo: true });
   }
 
   isValidField(field: string): boolean | null {

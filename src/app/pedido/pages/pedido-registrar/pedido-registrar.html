@@ -53,12 +53,38 @@
 
   <!-- ══ Catálogo de productos ════════════════════════════════════════════ -->
   @if (!soloLectura && !ventaPagada && (ventaIdFijo || ventaIdActual)) {
-    <div class="spx-reg-section-title">
-      <i class="fa-solid fa-bowl-food"></i> Agregar productos
+    <div class="spx-reg-catalog-header">
+      <div class="spx-reg-section-title">
+        <i class="fa-solid fa-bowl-food"></i> Agregar productos
+        @if (filtroCatalogo && productosFiltrados.length !== productos.length) {
+          <span class="spx-reg-catalog-count">{{ productosFiltrados.length }} de {{ productos.length }}</span>
+        }
+      </div>
+      <div class="spx-reg-search">
+        <i class="fa-solid fa-magnifying-glass spx-reg-search__icon"></i>
+        <input
+          class="spx-reg-search__input"
+          type="text"
+          placeholder="Buscar por nombre, descripción o código..."
+          [(ngModel)]="filtroCatalogo"
+          autocomplete="off">
+        @if (filtroCatalogo) {
+          <button class="spx-reg-search__clear" (click)="filtroCatalogo = ''" title="Limpiar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        }
+      </div>
     </div>
 
+    @if (productosFiltrados.length === 0) {
+      <div class="spx-reg-empty">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <span>Sin resultados para <strong>"{{ filtroCatalogo }}"</strong></span>
+      </div>
+    }
+
     <div class="spx-reg-catalog">
-      @for (prod of productos; track prod.id) {
+      @for (prod of productosFiltrados; track prod.id) {
         <div class="spx-reg-card">
 
           <!-- Imagen -->

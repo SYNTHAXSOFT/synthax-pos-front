@@ -1,99 +1,116 @@
-<div class="spx-form-page">
+<div class="spx-module-page">
 
-  <h1 class="spx-form-title">{{ editando ? 'Editar' : 'Nuevo' }} Insumo</h1>
-  <p class="spx-form-subtitle">Gestiona los insumos y materias primas del restaurante</p>
+  <!-- Lista de insumos (vista principal) -->
+  <app-insumo-listar
+    [modoModal]="true"
+    (nuevoInsumo)="abrirModal()"
+    (editarInsumo)="abrirModalEditar($event)">
+  </app-insumo-listar>
 
-  <div class="spx-form-card spx-form-card--wide">
-    <div class="spx-form-card__header">
-      <div class="spx-form-card__icon"><i class="fa-solid fa-box-open"></i></div>
-      <div>
-        <p class="spx-form-card__title">{{ editando ? 'Actualizar insumo' : 'Registrar nuevo insumo' }}</p>
-        <p class="spx-form-card__subtitle">Los campos con * son obligatorios</p>
-      </div>
-    </div>
+  <!-- Modal overlay -->
+  @if (modalAbierto) {
+    <div class="spx-modal-backdrop" (click)="cerrarModal()">
+      <div class="spx-modal-container" (click)="$event.stopPropagation()">
 
-    <div class="spx-form-card__body">
-      <form [formGroup]="myForm" (ngSubmit)="onSave()">
-        <div class="spx-form-grid spx-form-grid--4" style="margin-bottom:1.25rem">
-
-          <!-- Código -->
-          <div class="spx-form-group">
-            <label class="spx-form-label">Código <span class="spx-form-required">*</span></label>
-            <input type="text" class="spx-form-input" placeholder="INS-001"
-              formControlName="codigo" [class.is-invalid]="isValidField('codigo')">
-            @if (isValidField('codigo')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Código obligatorio (mín. 2 caracteres)</span>
-            }
+        <!-- Header -->
+        <div class="spx-modal-header">
+          <div class="spx-modal-header__info">
+            <div class="spx-modal-header__icon">
+              <i class="fa-solid fa-box-open"></i>
+            </div>
+            <div>
+              <p class="spx-modal-header__title">{{ editando ? 'Editar Insumo' : 'Nuevo Insumo' }}</p>
+              <p class="spx-modal-header__sub">Los campos con <span class="spx-form-required">*</span> son obligatorios</p>
+            </div>
           </div>
-
-          <!-- Descripción -->
-          <div class="spx-form-group spx-form-col-span-2">
-            <label class="spx-form-label">Descripción <span class="spx-form-required">*</span></label>
-            <input type="text" class="spx-form-input" placeholder="Nombre del insumo..."
-              formControlName="descripcion" [class.is-invalid]="isValidField('descripcion')">
-            @if (isValidField('descripcion')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Descripción obligatoria</span>
-            }
-          </div>
-
-          <!-- Restaurante -->
-          <div class="spx-form-group">
-            <label class="spx-form-label">Restaurante <span class="spx-form-required">*</span></label>
-            <select class="spx-form-select" formControlName="restauranteId"
-              [class.is-invalid]="isValidField('restauranteId')">
-              <option [value]="null">Seleccione...</option>
-              @for (r of restaurantes; track r.id) {
-                <option [value]="r.id">{{ r.nombre }}</option>
-              }
-            </select>
-            @if (isValidField('restauranteId')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Restaurante obligatorio</span>
-            }
-          </div>
-
-          <!-- Stock -->
-          <div class="spx-form-group">
-            <label class="spx-form-label">Stock inicial</label>
-            <input type="number" class="spx-form-input" min="0" step="0.01" placeholder="0"
-              formControlName="stock">
-          </div>
-
-          <!-- Medida -->
-          <div class="spx-form-group">
-            <label class="spx-form-label">Unidad de medida <span class="spx-form-required">*</span></label>
-            <select class="spx-form-select" formControlName="medida"
-              [class.is-invalid]="isValidField('medida')">
-              @for (m of medidas; track m) {
-                <option [value]="m">{{ m }}</option>
-              }
-            </select>
-          </div>
-
-          <!-- Activo -->
-          <div class="spx-form-group" style="justify-content:flex-end">
-            <label class="spx-form-check">
-              <input type="checkbox" class="spx-form-check__input" formControlName="activo" id="activoInsumo">
-              <span class="spx-form-check__label">Insumo activo</span>
-            </label>
-          </div>
-        </div>
-
-        <div class="spx-form-actions">
-          @if (editando) {
-            <button type="button" class="spx-form-btn-cancel" (click)="resetForm()">
-              <i class="fa-solid fa-xmark"></i> Cancelar
-            </button>
-          }
-          <button type="submit" class="spx-form-btn-submit">
-            <i class="fa-solid fa-floppy-disk"></i>
-            {{ editando ? 'Actualizar Insumo' : 'Crear Insumo' }}
+          <button class="spx-modal-close" (click)="cerrarModal()" title="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
-      </form>
-    </div>
-  </div>
 
-  <div class="spx-form-divider">
-    <app-insumo-listar></app-insumo-listar>
-  </div>
+        <!-- Body -->
+        <div class="spx-modal-body">
+          <form [formGroup]="myForm" (ngSubmit)="onSave()">
+            <div class="spx-form-grid spx-form-grid--4" style="margin-bottom:1.25rem">
+
+              <!-- Código -->
+              <div class="spx-form-group">
+                <label class="spx-form-label">Código <span class="spx-form-required">*</span></label>
+                <input type="text" class="spx-form-input" placeholder="INS-001"
+                  formControlName="codigo" [class.is-invalid]="isValidField('codigo')">
+                @if (isValidField('codigo')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Código obligatorio (mín. 2 caracteres)</span>
+                }
+              </div>
+
+              <!-- Descripción -->
+              <div class="spx-form-group spx-form-col-span-2">
+                <label class="spx-form-label">Descripción <span class="spx-form-required">*</span></label>
+                <input type="text" class="spx-form-input" placeholder="Nombre del insumo..."
+                  formControlName="descripcion" [class.is-invalid]="isValidField('descripcion')">
+                @if (isValidField('descripcion')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Descripción obligatoria</span>
+                }
+              </div>
+
+              <!-- Restaurante -->
+              <div class="spx-form-group">
+                <label class="spx-form-label">Restaurante <span class="spx-form-required">*</span></label>
+                <select class="spx-form-select" formControlName="restauranteId"
+                  [class.is-invalid]="isValidField('restauranteId')">
+                  <option [value]="null">Seleccione...</option>
+                  @for (r of restaurantes; track r.id) {
+                    <option [value]="r.id">{{ r.nombre }}</option>
+                  }
+                </select>
+                @if (isValidField('restauranteId')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Restaurante obligatorio</span>
+                }
+              </div>
+
+              <!-- Stock -->
+              <div class="spx-form-group">
+                <label class="spx-form-label">Stock inicial</label>
+                <input type="number" class="spx-form-input" min="0" step="0.01" placeholder="0"
+                  formControlName="stock">
+              </div>
+
+              <!-- Medida -->
+              <div class="spx-form-group">
+                <label class="spx-form-label">Unidad de medida <span class="spx-form-required">*</span></label>
+                <select class="spx-form-select" formControlName="medida"
+                  [class.is-invalid]="isValidField('medida')">
+                  @for (m of medidas; track m) {
+                    <option [value]="m">{{ m }}</option>
+                  }
+                </select>
+              </div>
+
+              <!-- Activo -->
+              <div class="spx-form-group spx-form-col-span-2">
+                <label class="spx-form-check">
+                  <input type="checkbox" class="spx-form-check__input" formControlName="activo" id="activoInsumo">
+                  <span class="spx-form-check__label">Insumo activo</span>
+                </label>
+              </div>
+
+            </div>
+
+            <!-- Acciones -->
+            <div class="spx-modal-actions">
+              <button type="button" class="spx-modal-btn-cancel" (click)="cerrarModal()">
+                <i class="fa-solid fa-xmark"></i> Cancelar
+              </button>
+              <button type="submit" class="spx-form-btn-submit">
+                <i class="fa-solid fa-floppy-disk"></i>
+                {{ editando ? 'Actualizar Insumo' : 'Crear Insumo' }}
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  }
+
 </div>

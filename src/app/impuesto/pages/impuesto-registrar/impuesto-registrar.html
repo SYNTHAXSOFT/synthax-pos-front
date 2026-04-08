@@ -1,135 +1,104 @@
-<div class="spx-form-page">
+<div class="spx-module-page">
 
-  <!-- Card principal -->
-  <div class="spx-form-card">
+  <!-- Lista de impuestos (vista principal) -->
+  <app-impuesto-listar
+    [modoModal]="true"
+    (nuevoImpuesto)="abrirModal()"
+    (editarImpuesto)="abrirModalEditar($event)">
+  </app-impuesto-listar>
 
-    <!-- Header -->
-    <div class="spx-form-card__header">
-      <div class="spx-form-card__header-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="19" y1="5" x2="5" y2="19"/>
-          <circle cx="6.5" cy="6.5" r="2.5"/>
-          <circle cx="17.5" cy="17.5" r="2.5"/>
-        </svg>
-      </div>
-      <div>
-        <h2 class="spx-form-card__title">
-          {{ editando ? 'Editar Impuesto' : 'Nuevo Impuesto' }}
-        </h2>
-        <p class="spx-form-card__subtitle">
-          {{ editando ? 'Modifica los datos del impuesto' : 'Registra un nuevo impuesto o tasa tributaria' }}
-        </p>
-      </div>
-    </div>
+  <!-- Modal overlay -->
+  @if (modalAbierto) {
+    <div class="spx-modal-backdrop" (click)="cerrarModal()">
+      <div class="spx-modal-container" (click)="$event.stopPropagation()">
 
-    <!-- Body -->
-    <div class="spx-form-card__body">
-      <form [formGroup]="myForm" (ngSubmit)="onSave()">
-
-        <div class="spx-form-section">
-          <h3 class="spx-form-section__title">Datos del Impuesto</h3>
-
-          <div class="spx-form-grid spx-form-grid--4">
-
-            <!-- Descripción -->
-            <div class="spx-form-field spx-form-field--span2">
-              <label class="spx-form-label">
-                Descripción <span class="spx-form-required">*</span>
-              </label>
-              <input
-                type="text"
-                formControlName="descripcion"
-                class="spx-form-input"
-                [class.spx-form-input--error]="isValidField('descripcion')"
-                placeholder="Ej: IVA 19%, INC 8%, IVA Reducido"
-              />
-              @if (isValidField('descripcion')) {
-                <span class="spx-form-error">{{ getFieldError('descripcion') }}</span>
-              }
-            </div>
-
-            <!-- Porcentaje -->
-            <div class="spx-form-field">
-              <label class="spx-form-label">
-                Porcentaje (%) <span class="spx-form-required">*</span>
-              </label>
-              <input
-                type="number"
-                formControlName="porcentajeImpuesto"
-                class="spx-form-input"
-                [class.spx-form-input--error]="isValidField('porcentajeImpuesto')"
-                placeholder="19"
-                min="0"
-                max="100"
-                step="0.01"
-              />
-              @if (isValidField('porcentajeImpuesto')) {
-                <span class="spx-form-error">{{ getFieldError('porcentajeImpuesto') }}</span>
-              }
-              <!-- Atajos rápidos Colombia -->
-              <div class="spx-tax-quick-btns">
-                @for (p of porcentajesComunes; track p) {
-                  <button
-                    type="button"
-                    class="spx-tax-quick-btn"
-                    [class.spx-tax-quick-btn--active]="myForm.get('porcentajeImpuesto')?.value === p"
-                    (click)="myForm.get('porcentajeImpuesto')?.setValue(p)"
-                  >
-                    {{ p }}%
-                  </button>
-                }
-              </div>
-            </div>
-
-            <!-- Estado -->
-            <div class="spx-form-field">
-              <label class="spx-form-label">
-                Estado <span class="spx-form-required">*</span>
-              </label>
-              <select
-                formControlName="estado"
-                class="spx-form-select"
-                [class.spx-form-input--error]="isValidField('estado')"
-              >
-                <option value="ACTIVO">ACTIVO</option>
-                <option value="INACTIVO">INACTIVO</option>
-              </select>
-              @if (isValidField('estado')) {
-                <span class="spx-form-error">{{ getFieldError('estado') }}</span>
-              }
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Acciones -->
-        <div class="spx-form-actions">
-          @if (editando) {
-            <button type="button" class="spx-form-btn spx-form-btn--secondary" (click)="resetForm()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+        <!-- Header -->
+        <div class="spx-modal-header">
+          <div class="spx-modal-header__info">
+            <div class="spx-modal-header__icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                <line x1="19" y1="5" x2="5" y2="19"/>
+                <circle cx="6.5" cy="6.5" r="2.5"/>
+                <circle cx="17.5" cy="17.5" r="2.5"/>
               </svg>
-              Cancelar
-            </button>
-          }
-          <button type="submit" class="spx-form-btn spx-form-btn--primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            {{ editando ? 'Actualizar' : 'Guardar' }}
+            </div>
+            <div>
+              <p class="spx-modal-header__title">{{ editando ? 'Editar Impuesto' : 'Nuevo Impuesto' }}</p>
+              <p class="spx-modal-header__sub">Los campos con <span class="spx-form-required">*</span> son obligatorios</p>
+            </div>
+          </div>
+          <button class="spx-modal-close" (click)="cerrarModal()" title="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
 
-      </form>
-    </div>
-  </div>
+        <!-- Body -->
+        <div class="spx-modal-body">
+          <form [formGroup]="myForm" (ngSubmit)="onSave()">
+            <div class="spx-form-grid spx-form-grid--4" style="margin-bottom:1.25rem">
 
-  <!-- Tabla embebida -->
-  <div class="spx-form-embedded">
-    <app-impuesto-listar></app-impuesto-listar>
-  </div>
+              <!-- Descripción -->
+              <div class="spx-form-field spx-form-field--span2">
+                <label class="spx-form-label">Descripción <span class="spx-form-required">*</span></label>
+                <input type="text" formControlName="descripcion" class="spx-form-input"
+                  [class.spx-form-input--error]="isValidField('descripcion')"
+                  placeholder="Ej: IVA 19%, INC 8%, IVA Reducido">
+                @if (isValidField('descripcion')) {
+                  <span class="spx-form-error">{{ getFieldError('descripcion') }}</span>
+                }
+              </div>
+
+              <!-- Porcentaje -->
+              <div class="spx-form-field">
+                <label class="spx-form-label">Porcentaje (%) <span class="spx-form-required">*</span></label>
+                <input type="number" formControlName="porcentajeImpuesto" class="spx-form-input"
+                  [class.spx-form-input--error]="isValidField('porcentajeImpuesto')"
+                  placeholder="19" min="0" max="100" step="0.01">
+                @if (isValidField('porcentajeImpuesto')) {
+                  <span class="spx-form-error">{{ getFieldError('porcentajeImpuesto') }}</span>
+                }
+                <div class="spx-tax-quick-btns">
+                  @for (p of porcentajesComunes; track p) {
+                    <button type="button" class="spx-tax-quick-btn"
+                      [class.spx-tax-quick-btn--active]="myForm.get('porcentajeImpuesto')?.value === p"
+                      (click)="myForm.get('porcentajeImpuesto')?.setValue(p)">
+                      {{ p }}%
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Estado -->
+              <div class="spx-form-field">
+                <label class="spx-form-label">Estado <span class="spx-form-required">*</span></label>
+                <select formControlName="estado" class="spx-form-select"
+                  [class.spx-form-input--error]="isValidField('estado')">
+                  <option value="ACTIVO">ACTIVO</option>
+                  <option value="INACTIVO">INACTIVO</option>
+                </select>
+                @if (isValidField('estado')) {
+                  <span class="spx-form-error">{{ getFieldError('estado') }}</span>
+                }
+              </div>
+
+            </div>
+
+            <!-- Acciones -->
+            <div class="spx-modal-actions">
+              <button type="button" class="spx-modal-btn-cancel" (click)="cerrarModal()">
+                <i class="fa-solid fa-xmark"></i> Cancelar
+              </button>
+              <button type="submit" class="spx-form-btn-submit">
+                <i class="fa-solid fa-floppy-disk"></i>
+                {{ editando ? 'Actualizar' : 'Guardar' }}
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  }
 
 </div>

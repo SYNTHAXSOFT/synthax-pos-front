@@ -1,136 +1,153 @@
-<div class="spx-form-page">
+<div class="spx-module-page">
 
-  <!-- Page Title -->
-  <h1 class="spx-form-title">{{ myform.get('id')?.value ? 'Editar' : 'Registrar' }} Usuario</h1>
-  <p class="spx-form-subtitle">Complete los datos para {{ myform.get('id')?.value ? 'actualizar el' : 'crear un nuevo' }} usuario</p>
+  <!-- Lista de usuarios (vista principal) -->
+  <app-listar-page
+    [modoModal]="true"
+    (nuevoUsuario)="abrirModal()"
+    (editarUsuario)="abrirModalEditar($event)">
+  </app-listar-page>
 
-  <!-- Form Card -->
-  <div class="spx-form-card">
-    <div class="spx-form-card__header">
-      <div class="spx-form-card__icon"><i class="fa-solid fa-user-plus"></i></div>
-      <div>
-        <p class="spx-form-card__title">Datos del usuario</p>
-        <p class="spx-form-card__subtitle">Todos los campos marcados con * son obligatorios</p>
-      </div>
-    </div>
+  <!-- Modal overlay -->
+  @if (modalAbierto) {
+    <div class="spx-modal-backdrop" (click)="cerrarModal()">
+      <div class="spx-modal-container" (click)="$event.stopPropagation()">
 
-    <div class="spx-form-card__body">
-      <form autocomplete="off" [formGroup]="myform" (ngSubmit)="onSave()">
-
-        <!-- Rol -->
-        <div class="spx-form-grid spx-form-grid--2" style="margin-bottom:1.25rem">
-          <div class="spx-form-group">
-            <label class="spx-form-label">Rol <span class="spx-form-required">*</span></label>
-            <select class="spx-form-select" formControlName="rol"
-              [class.is-invalid]="formUtils.isValidField(myform, 'rol')">
-              <option value="">Seleccione un rol</option>
-              @for (rol of rolesDisponibles; track rol) {
-                <option [value]="rol">{{ rol }}</option>
-              }
-            </select>
-            @if (formUtils.isValidField(myform, 'rol')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ formUtils.getFieldError(myform, 'rol') }}</span>
-            }
-          </div>
-        </div>
-
-        <!-- Ubicación -->
-        <div class="spx-form-section" style="margin-bottom:1.25rem">
-          <p class="spx-form-section__title"><i class="fa-solid fa-location-dot"></i> Ubicación</p>
-          <div class="spx-form-grid spx-form-grid--2">
-            <div class="spx-form-group">
-              <label class="spx-form-label">Departamento <span class="spx-form-required">*</span></label>
-              <select class="spx-form-select" formControlName="departamentoId"
-                (change)="onDepartamentoChange()"
-                [class.is-invalid]="formUtils.isValidField(myform, 'departamentoId')">
-                <option [ngValue]="null">Seleccione un departamento</option>
-                @for (d of departamentos; track d.id) {
-                  <option [value]="d.id">{{ d.nombre }}</option>
-                }
-              </select>
-              @if (formUtils.isValidField(myform, 'departamentoId')) {
-                <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ formUtils.getFieldError(myform, 'departamentoId') }}</span>
-              }
+        <!-- Header -->
+        <div class="spx-modal-header">
+          <div class="spx-modal-header__info">
+            <div class="spx-modal-header__icon">
+              <i class="fa-solid fa-user-plus"></i>
             </div>
-            <div class="spx-form-group">
-              <label class="spx-form-label">Municipio <span class="spx-form-required">*</span></label>
-              <select class="spx-form-select" formControlName="municipioId"
-                [class.is-invalid]="formUtils.isValidField(myform, 'municipioId')">
-                <option [ngValue]="null">{{ !deptoSeleccionado ? 'Seleccione primero un departamento' : 'Seleccione un municipio' }}</option>
-                @for (m of municipiosFiltrados; track m.id) {
-                  <option [value]="m.id">{{ m.nombre }}</option>
-                }
-              </select>
-              @if (formUtils.isValidField(myform, 'municipioId')) {
-                <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ formUtils.getFieldError(myform, 'municipioId') }}</span>
-              }
+            <div>
+              <p class="spx-modal-header__title">{{ editando ? 'Editar Usuario' : 'Nuevo Usuario' }}</p>
+              <p class="spx-modal-header__sub">Los campos con <span class="spx-form-required">*</span> son obligatorios</p>
             </div>
           </div>
-        </div>
-
-        <!-- Nombre / Apellido / Cédula -->
-        <div class="spx-form-grid spx-form-grid--2" style="margin-bottom:1.25rem">
-          <div class="spx-form-group">
-            <label class="spx-form-label">Nombre <span class="spx-form-required">*</span></label>
-            <input type="text" class="spx-form-input" placeholder="Nombre del usuario"
-              formControlName="nombre" [class.is-invalid]="formUtils.isValidField(myform, 'nombre')">
-            @if (formUtils.isValidField(myform, 'nombre')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ formUtils.getFieldError(myform, 'nombre') }}</span>
-            }
-          </div>
-          <div class="spx-form-group">
-            <label class="spx-form-label">Apellido <span class="spx-form-required">*</span></label>
-            <input type="text" class="spx-form-input" placeholder="Apellido del usuario"
-              formControlName="apellido" [class.is-invalid]="formUtils.isValidField(myform, 'apellido')">
-            @if (formUtils.isValidField(myform, 'apellido')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ formUtils.getFieldError(myform, 'apellido') }}</span>
-            }
-          </div>
-          <div class="spx-form-group">
-            <label class="spx-form-label">Cédula <span class="spx-form-required">*</span></label>
-            <input type="text" class="spx-form-input" placeholder="Número de cédula"
-              formControlName="cedula" [class.is-invalid]="formUtils.isValidField(myform, 'cedula')">
-            @if (formUtils.isValidField(myform, 'cedula')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ formUtils.getFieldError(myform, 'cedula') }}</span>
-            }
-          </div>
-          <div class="spx-form-group">
-            <label class="spx-form-label">Email <span class="spx-form-required">*</span></label>
-            <input type="email" class="spx-form-input" placeholder="correo@ejemplo.com"
-              formControlName="email" [class.is-invalid]="formUtils.isValidField(myform, 'email')">
-            @if (formUtils.isValidField(myform, 'email')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ formUtils.getFieldError(myform, 'email') }}</span>
-            }
-          </div>
-          <div class="spx-form-group">
-            <label class="spx-form-label">Contraseña <span class="spx-form-required">*</span></label>
-            <input type="password" class="spx-form-input" placeholder="••••••••"
-              formControlName="password" [class.is-invalid]="formUtils.isValidField(myform, 'password')">
-            @if (formUtils.isValidField(myform, 'password')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ formUtils.getFieldError(myform, 'password') }}</span>
-            }
-          </div>
-          <div class="spx-form-group" style="justify-content:flex-end">
-            <label class="spx-form-check">
-              <input type="checkbox" class="spx-form-check__input" formControlName="activo" id="activo">
-              <span class="spx-form-check__label">Usuario activo</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="spx-form-actions">
-          <button type="submit" class="spx-form-btn-submit">
-            <i class="fa-solid fa-floppy-disk"></i>
-            Guardar
+          <button class="spx-modal-close" (click)="cerrarModal()" title="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
-      </form>
-    </div>
-  </div>
 
-  <!-- Embedded list -->
-  <div class="spx-form-divider">
-    <app-listar-page/>
-  </div>
+        <!-- Body -->
+        <div class="spx-modal-body">
+          <form autocomplete="off" [formGroup]="myform" (ngSubmit)="onSave()">
+
+            <!-- Rol -->
+            <div class="spx-form-grid spx-form-grid--2" style="margin-bottom:1.25rem">
+              <div class="spx-form-group">
+                <label class="spx-form-label">Rol <span class="spx-form-required">*</span></label>
+                <select class="spx-form-select" formControlName="rol"
+                  [class.is-invalid]="formUtils.isValidField(myform, 'rol')">
+                  <option value="">Seleccione un rol</option>
+                  @for (rol of rolesDisponibles; track rol) {
+                    <option [value]="rol">{{ rol }}</option>
+                  }
+                </select>
+                @if (formUtils.isValidField(myform, 'rol')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ formUtils.getFieldError(myform, 'rol') }}</span>
+                }
+              </div>
+            </div>
+
+            <!-- Ubicación -->
+            <div class="spx-form-section" style="margin-bottom:1.25rem">
+              <p class="spx-form-section__title"><i class="fa-solid fa-location-dot"></i> Ubicación</p>
+              <div class="spx-form-grid spx-form-grid--2">
+                <div class="spx-form-group">
+                  <label class="spx-form-label">Departamento</label>
+                  <select class="spx-form-select" formControlName="departamentoId" (change)="onDepartamentoChange()">
+                    <option [ngValue]="null">Seleccione un departamento</option>
+                    @for (d of departamentos; track d.id) {
+                      <option [value]="d.id">{{ d.nombre }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="spx-form-group">
+                  <label class="spx-form-label">Municipio</label>
+                  <select class="spx-form-select" formControlName="municipioId">
+                    <option [ngValue]="null">{{ !deptoSeleccionado ? 'Seleccione primero un departamento' : 'Seleccione un municipio' }}</option>
+                    @for (m of municipiosFiltrados; track m.id) {
+                      <option [value]="m.id">{{ m.nombre }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Datos personales -->
+            <div class="spx-form-grid spx-form-grid--2" style="margin-bottom:1.25rem">
+              <div class="spx-form-group">
+                <label class="spx-form-label">Nombre <span class="spx-form-required">*</span></label>
+                <input type="text" class="spx-form-input" placeholder="Nombre del usuario"
+                  formControlName="nombre" [class.is-invalid]="formUtils.isValidField(myform, 'nombre')">
+                @if (formUtils.isValidField(myform, 'nombre')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ formUtils.getFieldError(myform, 'nombre') }}</span>
+                }
+              </div>
+              <div class="spx-form-group">
+                <label class="spx-form-label">Apellido <span class="spx-form-required">*</span></label>
+                <input type="text" class="spx-form-input" placeholder="Apellido del usuario"
+                  formControlName="apellido" [class.is-invalid]="formUtils.isValidField(myform, 'apellido')">
+                @if (formUtils.isValidField(myform, 'apellido')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ formUtils.getFieldError(myform, 'apellido') }}</span>
+                }
+              </div>
+              <div class="spx-form-group">
+                <label class="spx-form-label">Cédula <span class="spx-form-required">*</span></label>
+                <input type="text" class="spx-form-input" placeholder="Número de cédula"
+                  formControlName="cedula" [class.is-invalid]="formUtils.isValidField(myform, 'cedula')">
+                @if (formUtils.isValidField(myform, 'cedula')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ formUtils.getFieldError(myform, 'cedula') }}</span>
+                }
+              </div>
+              <div class="spx-form-group">
+                <label class="spx-form-label">Email <span class="spx-form-required">*</span></label>
+                <input type="email" class="spx-form-input" placeholder="correo@ejemplo.com"
+                  formControlName="email" [class.is-invalid]="formUtils.isValidField(myform, 'email')">
+                @if (formUtils.isValidField(myform, 'email')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ formUtils.getFieldError(myform, 'email') }}</span>
+                }
+              </div>
+              <div class="spx-form-group">
+                <label class="spx-form-label">
+                  Contraseña <span class="spx-form-required">*</span>
+                </label>
+                <input type="password" class="spx-form-input"
+                  [placeholder]="editando ? 'Ingresa la nueva contraseña o la actual' : '••••••••'"
+                  formControlName="password" [class.is-invalid]="formUtils.isValidField(myform, 'password')">
+                @if (formUtils.isValidField(myform, 'password')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ formUtils.getFieldError(myform, 'password') }}</span>
+                }
+                @if (editando) {
+                  <span class="spx-form-hint-text">
+                    <i class="fa-solid fa-circle-info" style="color:#0d7ff2;margin-right:0.3rem"></i>
+                    Para cambiar la contraseña escribe la nueva. Para mantenerla, escribe la contraseña actual.
+                  </span>
+                }
+              </div>
+              <div class="spx-form-group" style="justify-content:flex-end">
+                <label class="spx-form-check">
+                  <input type="checkbox" class="spx-form-check__input" formControlName="activo" id="activoUsuario">
+                  <span class="spx-form-check__label">Usuario activo</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="spx-modal-actions">
+              <button type="button" class="spx-modal-btn-cancel" (click)="cerrarModal()">
+                <i class="fa-solid fa-xmark"></i> Cancelar
+              </button>
+              <button type="submit" class="spx-form-btn-submit">
+                <i class="fa-solid fa-floppy-disk"></i>
+                {{ editando ? 'Actualizar Usuario' : 'Crear Usuario' }}
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  }
+
 </div>

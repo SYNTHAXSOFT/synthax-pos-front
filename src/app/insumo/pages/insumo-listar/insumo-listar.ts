@@ -1,8 +1,6 @@
-import { Component, inject, OnInit, Input } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { Router } from '@angular/router';
 import { InsumoService } from '../../services/insumo.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Insumo } from '../../interfaces/insumo.interface';
@@ -12,23 +10,24 @@ import { ConfirmService } from '../../../shared/services/confirm.service';
 @Component({
   selector: 'app-insumo-listar',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './insumo-listar.html',
   styleUrls: ['./insumo-listar.css'],
 })
 export class InsumoListarPageComponent implements OnInit {
-  private readonly insumoService = inject(InsumoService);
-  private readonly authService   = inject(AuthService);
-  private readonly router = inject(Router);
-  private readonly toastService = inject(ToastService);
+  private readonly insumoService  = inject(InsumoService);
+  private readonly authService    = inject(AuthService);
+  private readonly toastService   = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
 
   @Input() restauranteId?: number;
+  @Input() modoModal: boolean = false;
+  @Output() nuevoInsumo  = new EventEmitter<void>();
+  @Output() editarInsumo = new EventEmitter<number>();
 
   public insumos: Insumo[] = [];
   public cargando: boolean = false;
 
-  // Filters
   searchTerm: string = '';
   filtroEstado: 'todos' | 'ok' | 'bajo' | 'sin' = 'todos';
 
@@ -46,14 +45,8 @@ export class InsumoListarPageComponent implements OnInit {
       : this.insumoService.obtenerTodos();
 
     obs.subscribe({
-      next: (data) => {
-        this.insumos = data;
-        this.cargando = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar insumos:', err);
-        this.cargando = false;
-      },
+      next: (data) => { this.insumos = data; this.cargando = false; },
+      error: (err) => { console.error('Error al cargar insumos:', err); this.cargando = false; },
     });
   }
 
@@ -76,9 +69,9 @@ export class InsumoListarPageComponent implements OnInit {
     });
   }
 
-  get totalActivos(): number { return this.insumos.filter(i => i.activo).length; }
-  get totalBajoStock(): number { return this.insumos.filter(i => (i.stock ?? 0) > 0 && (i.stock ?? 0) <= 5).length; }
-  get totalSinStock(): number { return this.insumos.filter(i => (i.stock ?? 0) === 0).length; }
+  get totalActivos(): number    { return this.insumos.filter(i => i.activo).length; }
+  get totalBajoStock(): number  { return this.insumos.filter(i => (i.stock ?? 0) > 0 && (i.stock ?? 0) <= 5).length; }
+  get totalSinStock(): number   { return this.insumos.filter(i => (i.stock ?? 0) === 0).length; }
 
   setFiltroEstado(f: 'todos' | 'ok' | 'bajo' | 'sin'): void {
     this.filtroEstado = f;
@@ -86,7 +79,7 @@ export class InsumoListarPageComponent implements OnInit {
 
   editar(id?: number): void {
     if (!id) return;
-    this.router.navigate(['/synthax-pos/insumo/registrar'], { queryParams: { id } });
+    this.editarInsumo.emit(id);
   }
 
   async desactivar(id?: number): Promise<void> {
@@ -94,10 +87,7 @@ export class InsumoListarPageComponent implements OnInit {
     const ok = await this.confirmService.confirm({ message: '¿Desea desactivar este insumo?', type: 'danger' });
     if (!ok) return;
     this.insumoService.desactivar(id).subscribe({
-      next: () => {
-        this.toastService.success('Insumo desactivado');
-        this.cargarInsumos();
-      },
+      next: () => { this.toastService.success('Insumo desactivado'); this.cargarInsumos(); },
       error: (err) => this.toastService.error('Error: ' + (err.error?.error || 'No se pudo desactivar')),
     });
   }

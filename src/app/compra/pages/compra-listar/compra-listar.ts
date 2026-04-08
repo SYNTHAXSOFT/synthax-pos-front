@@ -120,10 +120,13 @@ export class CompraListarPageComponent implements OnInit {
 
   async desactivar(id?: number): Promise<void> {
     if (!id) return;
-    const ok = await this.confirmService.confirm({ message: '¿Desea anular esta compra? El stock NO se revertirá automáticamente.', type: 'danger' });
+    const ok = await this.confirmService.confirm({
+      message: '¿Desea anular esta compra? Se revertirá el stock del insumo y se restaurará el saldo de la forma de pago.',
+      type: 'danger'
+    });
     if (!ok) return;
-    this.compraService.desactivar(id).subscribe({
-      next: () => { this.toastService.success('Compra anulada'); this.cargarCompras(); },
+    this.compraService.anular(id).subscribe({
+      next: () => { this.toastService.success('Compra anulada. Stock e importe revertidos correctamente.'); this.cargarCompras(); },
       error: (err) => this.toastService.error('Error: ' + (err.error?.error || 'No se pudo anular')),
     });
   }

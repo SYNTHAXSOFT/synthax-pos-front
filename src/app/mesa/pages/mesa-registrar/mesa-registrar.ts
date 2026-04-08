@@ -1,7 +1,6 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { MesaService } from '../../services/mesa.service';
 import { Mesa } from '../../interfaces/mesa.interface';
 import { MesaListarPageComponent } from '../mesa-listar/mesa-listar';
@@ -14,16 +13,16 @@ import { ToastService } from '../../../shared/services/toast.service';
   templateUrl: './mesa-registrar.html',
   styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
-export class MesaRegistrarPageComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
+export class MesaRegistrarPageComponent implements OnInit, OnDestroy {
+  private readonly fb          = inject(FormBuilder);
   private readonly mesaService = inject(MesaService);
-  private readonly route = inject(ActivatedRoute);
   private readonly toastService = inject(ToastService);
 
   @ViewChild(MesaListarPageComponent) listarComponent?: MesaListarPageComponent;
 
   public editando: boolean = false;
   private mesaId?: number;
+  public modalAbierto: boolean = false;
 
   public myForm: FormGroup = this.fb.group({
     codigo: ['', [Validators.required, Validators.minLength(2)]],
@@ -31,18 +30,39 @@ export class MesaRegistrarPageComponent implements OnInit {
     activo: [true],
   });
 
-  ngOnInit(): void {
-    this.route.queryParams.subscribe((params) => {
-      const id = params['id'];
-      if (id) {
+  ngOnInit(): void {}
+
+  ngOnDestroy(): void {
+    document.body.style.overflow = '';
+  }
+
+  abrirModal(): void {
+    this.editando = false;
+    this.mesaId = undefined;
+    this.myForm.reset({ activo: true });
+    this.modalAbierto = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  abrirModalEditar(id: number): void {
+    this.mesaService.obtenerPorId(id).subscribe({
+      next: (m) => {
         this.editando = true;
-        this.mesaId = +id;
-        this.mesaService.obtenerPorId(this.mesaId).subscribe({
-          next: (m) => this.myForm.patchValue(m),
-          error: (err) => console.error('Error al cargar mesa:', err),
-        });
-      }
+        this.mesaId = id;
+        this.myForm.patchValue(m);
+        this.modalAbierto = true;
+        document.body.style.overflow = 'hidden';
+      },
+      error: () => this.toastService.error('Error al cargar la mesa'),
     });
+  }
+
+  cerrarModal(): void {
+    this.modalAbierto = false;
+    document.body.style.overflow = '';
+    this.editando = false;
+    this.mesaId = undefined;
+    this.myForm.reset({ activo: true });
   }
 
   onSave(): void {
@@ -57,33 +77,21 @@ export class MesaRegistrarPageComponent implements OnInit {
       this.mesaService.actualizar(this.mesaId, mesa).subscribe({
         next: () => {
           this.toastService.success('Mesa actualizada exitosamente');
-          this.resetForm();
+          this.cerrarModal();
           this.listarComponent?.cargarMesas();
         },
-        error: (err) => {
-          console.error('Error:', err);
-          this.toastService.error('Error al actualizar: ' + (err.error?.error || 'Error desconocido'));
-        },
+        error: (err) => this.toastService.error('Error al actualizar: ' + (err.error?.error || 'Error desconocido')),
       });
     } else {
       this.mesaService.crear(mesa).subscribe({
         next: () => {
           this.toastService.success('Mesa creada exitosamente');
-          this.resetForm();
+          this.cerrarModal();
           this.listarComponent?.cargarMesas();
         },
-        error: (err) => {
-          console.error('Error:', err);
-          this.toastService.error('Error al crear: ' + (err.error?.error || 'Error desconocido'));
-        },
+        error: (err) => this.toastService.error('Error al crear: ' + (err.error?.error || 'Error desconocido')),
       });
     }
-  }
-
-  resetForm(): void {
-    this.editando = false;
-    this.mesaId = undefined;
-    this.myForm.reset({ activo: true });
   }
 
   isValidField(field: string): boolean | null {

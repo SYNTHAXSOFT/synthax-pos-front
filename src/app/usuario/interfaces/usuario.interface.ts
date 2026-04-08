@@ -7,6 +7,7 @@ export interface Usuario {
   email: string;
   password: string;
   rol: string; // ROOT | ADMINISTRADOR | CAJERO | MESERO | DOMICILIARIO
+  telefono?: string;
   activo?: boolean;
   departamento?: { id: string; nombre?: string; };
   municipio?:    { id: string; nombre?: string; };

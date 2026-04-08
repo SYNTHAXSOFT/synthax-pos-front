@@ -1,66 +1,83 @@
-<div class="spx-form-page">
+<div class="spx-module-page">
 
-  <h1 class="spx-form-title">{{ editando ? 'Editar Mesa' : 'Registrar Mesa' }}</h1>
-  <p class="spx-form-subtitle">Gestiona las mesas del restaurante</p>
+  <!-- Lista de mesas (vista principal) -->
+  <app-mesa-listar
+    [modoModal]="true"
+    (nuevaMesa)="abrirModal()"
+    (editarMesa)="abrirModalEditar($event)">
+  </app-mesa-listar>
 
-  <div class="spx-form-card">
-    <div class="spx-form-card__header">
-      <div class="spx-form-card__icon"><i class="fa-solid fa-chair"></i></div>
-      <div>
-        <p class="spx-form-card__title">{{ editando ? 'Actualizar mesa' : 'Nueva mesa' }}</p>
-        <p class="spx-form-card__subtitle">Los campos con * son obligatorios</p>
-      </div>
-    </div>
+  <!-- Modal overlay -->
+  @if (modalAbierto) {
+    <div class="spx-modal-backdrop" (click)="cerrarModal()">
+      <div class="spx-modal-container" (click)="$event.stopPropagation()">
 
-    <div class="spx-form-card__body">
-      <form [formGroup]="myForm" (ngSubmit)="onSave()">
-        <div class="spx-form-grid spx-form-grid--3" style="margin-bottom:1.25rem">
-
-          <!-- Código -->
-          <div class="spx-form-group">
-            <label class="spx-form-label">Código <span class="spx-form-required">*</span></label>
-            <input type="text" class="spx-form-input" placeholder="M-01"
-              formControlName="codigo">
-            @if (isValidField('codigo')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ getFieldError('codigo') }}</span>
-            }
+        <!-- Header -->
+        <div class="spx-modal-header">
+          <div class="spx-modal-header__info">
+            <div class="spx-modal-header__icon">
+              <i class="fa-solid fa-chair"></i>
+            </div>
+            <div>
+              <p class="spx-modal-header__title">{{ editando ? 'Editar Mesa' : 'Nueva Mesa' }}</p>
+              <p class="spx-modal-header__sub">Los campos con <span class="spx-form-required">*</span> son obligatorios</p>
+            </div>
           </div>
-
-          <!-- Nombre -->
-          <div class="spx-form-group spx-form-col-span-2">
-            <label class="spx-form-label">Nombre <span class="spx-form-required">*</span></label>
-            <input type="text" class="spx-form-input" placeholder="Ej: Mesa 1 — Terraza"
-              formControlName="nombre">
-            @if (isValidField('nombre')) {
-              <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ getFieldError('nombre') }}</span>
-            }
-          </div>
-
-          <!-- Activo -->
-          <div class="spx-form-group spx-form-col-span-3">
-            <label class="spx-form-check">
-              <input type="checkbox" class="spx-form-check__input" formControlName="activo" id="activoMesa">
-              <span class="spx-form-check__label">Mesa activa</span>
-            </label>
-          </div>
-        </div>
-
-        <div class="spx-form-actions">
-          @if (editando) {
-            <button type="button" class="spx-form-btn-cancel" (click)="resetForm()">
-              <i class="fa-solid fa-xmark"></i> Cancelar
-            </button>
-          }
-          <button type="submit" class="spx-form-btn-submit">
-            <i class="fa-solid fa-floppy-disk"></i>
-            {{ editando ? 'Actualizar' : 'Guardar Mesa' }}
+          <button class="spx-modal-close" (click)="cerrarModal()" title="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
-      </form>
-    </div>
-  </div>
 
-  <div class="spx-form-divider">
-    <app-mesa-listar></app-mesa-listar>
-  </div>
+        <!-- Body -->
+        <div class="spx-modal-body">
+          <form [formGroup]="myForm" (ngSubmit)="onSave()">
+            <div class="spx-form-grid spx-form-grid--3" style="margin-bottom:1.25rem">
+
+              <!-- Código -->
+              <div class="spx-form-group">
+                <label class="spx-form-label">Código <span class="spx-form-required">*</span></label>
+                <input type="text" class="spx-form-input" placeholder="M-01"
+                  formControlName="codigo" [class.is-invalid]="isValidField('codigo')">
+                @if (isValidField('codigo')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ getFieldError('codigo') }}</span>
+                }
+              </div>
+
+              <!-- Nombre -->
+              <div class="spx-form-group spx-form-col-span-2">
+                <label class="spx-form-label">Nombre <span class="spx-form-required">*</span></label>
+                <input type="text" class="spx-form-input" placeholder="Ej: Mesa 1 — Terraza"
+                  formControlName="nombre" [class.is-invalid]="isValidField('nombre')">
+                @if (isValidField('nombre')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ getFieldError('nombre') }}</span>
+                }
+              </div>
+
+              <!-- Activo -->
+              <div class="spx-form-group spx-form-col-span-3">
+                <label class="spx-form-check">
+                  <input type="checkbox" class="spx-form-check__input" formControlName="activo" id="activoMesa">
+                  <span class="spx-form-check__label">Mesa activa</span>
+                </label>
+              </div>
+
+            </div>
+
+            <!-- Acciones -->
+            <div class="spx-modal-actions">
+              <button type="button" class="spx-modal-btn-cancel" (click)="cerrarModal()">
+                <i class="fa-solid fa-xmark"></i> Cancelar
+              </button>
+              <button type="submit" class="spx-form-btn-submit">
+                <i class="fa-solid fa-floppy-disk"></i>
+                {{ editando ? 'Actualizar Mesa' : 'Guardar Mesa' }}
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  }
+
 </div>

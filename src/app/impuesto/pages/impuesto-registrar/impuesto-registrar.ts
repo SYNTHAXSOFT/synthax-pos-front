@@ -1,7 +1,6 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { ImpuestoService } from '../../services/impuesto.service';
 import { Impuesto } from '../../interfaces/impuesto.interface';
 import { ImpuestoListarPageComponent } from '../impuesto-listar/impuesto-listar';
@@ -14,38 +13,58 @@ import { ToastService } from '../../../shared/services/toast.service';
   templateUrl: './impuesto-registrar.html',
   styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
-export class ImpuestoRegistrarPageComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
+export class ImpuestoRegistrarPageComponent implements OnInit, OnDestroy {
+  private readonly fb             = inject(FormBuilder);
   private readonly impuestoService = inject(ImpuestoService);
-  private readonly route = inject(ActivatedRoute);
-  private readonly toastService = inject(ToastService);
+  private readonly toastService   = inject(ToastService);
 
   @ViewChild(ImpuestoListarPageComponent) listarComponent?: ImpuestoListarPageComponent;
 
   public editando: boolean = false;
   private impuestoId?: number;
+  public modalAbierto: boolean = false;
 
-  // Porcentajes comunes en Colombia: IVA 19%, IVA 5%, INC 8%
   public porcentajesComunes = [5, 8, 19];
 
   public myForm: FormGroup = this.fb.group({
-    descripcion:         ['', [Validators.required, Validators.minLength(3)]],
-    porcentajeImpuesto:  [null, [Validators.required, Validators.min(0), Validators.max(100)]],
-    estado:              ['ACTIVO', [Validators.required]],
+    descripcion:        ['', [Validators.required, Validators.minLength(3)]],
+    porcentajeImpuesto: [null, [Validators.required, Validators.min(0), Validators.max(100)]],
+    estado:             ['ACTIVO', [Validators.required]],
   });
 
-  ngOnInit(): void {
-    this.route.queryParams.subscribe((params) => {
-      const id = params['id'];
-      if (id) {
+  ngOnInit(): void {}
+
+  ngOnDestroy(): void {
+    document.body.style.overflow = '';
+  }
+
+  abrirModal(): void {
+    this.editando = false;
+    this.impuestoId = undefined;
+    this.myForm.reset({ estado: 'ACTIVO' });
+    this.modalAbierto = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  abrirModalEditar(id: number): void {
+    this.impuestoService.obtenerPorId(id).subscribe({
+      next: (imp) => {
         this.editando = true;
-        this.impuestoId = +id;
-        this.impuestoService.obtenerPorId(this.impuestoId).subscribe({
-          next: (imp) => this.myForm.patchValue(imp),
-          error: (err) => console.error('Error al cargar impuesto:', err),
-        });
-      }
+        this.impuestoId = id;
+        this.myForm.patchValue(imp);
+        this.modalAbierto = true;
+        document.body.style.overflow = 'hidden';
+      },
+      error: () => this.toastService.error('Error al cargar el impuesto'),
     });
+  }
+
+  cerrarModal(): void {
+    this.modalAbierto = false;
+    document.body.style.overflow = '';
+    this.editando = false;
+    this.impuestoId = undefined;
+    this.myForm.reset({ estado: 'ACTIVO' });
   }
 
   onSave(): void {
@@ -60,33 +79,21 @@ export class ImpuestoRegistrarPageComponent implements OnInit {
       this.impuestoService.actualizar(this.impuestoId, impuesto).subscribe({
         next: () => {
           this.toastService.success('Impuesto actualizado exitosamente');
-          this.resetForm();
+          this.cerrarModal();
           this.listarComponent?.cargarImpuestos();
         },
-        error: (err) => {
-          console.error('Error:', err);
-          this.toastService.error('Error al actualizar: ' + (err.error?.error || 'Error desconocido'));
-        },
+        error: (err) => this.toastService.error('Error al actualizar: ' + (err.error?.error || 'Error desconocido')),
       });
     } else {
       this.impuestoService.crear(impuesto).subscribe({
         next: () => {
           this.toastService.success('Impuesto creado exitosamente');
-          this.resetForm();
+          this.cerrarModal();
           this.listarComponent?.cargarImpuestos();
         },
-        error: (err) => {
-          console.error('Error:', err);
-          this.toastService.error('Error al crear: ' + (err.error?.error || 'Error desconocido'));
-        },
+        error: (err) => this.toastService.error('Error al crear: ' + (err.error?.error || 'Error desconocido')),
       });
     }
-  }
-
-  resetForm(): void {
-    this.editando = false;
-    this.impuestoId = undefined;
-    this.myForm.reset({ estado: 'ACTIVO' });
   }
 
   isValidField(field: string): boolean | null {

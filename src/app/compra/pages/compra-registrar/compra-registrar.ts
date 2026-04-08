@@ -119,6 +119,16 @@ export class CompraRegistrarPageComponent implements OnInit, OnDestroy {
       this.toastService.error('Debe seleccionar una forma de pago.');
       return;
     }
+
+    // Validar saldo suficiente en la forma de pago
+    const fp = this.formasPago.find(f => f.id === this.formaPagoSeleccionadaId);
+    if (fp && (fp.saldoActual ?? 0) < this.subtotal) {
+      this.toastService.error(
+        `Saldo insuficiente en "${fp.nombre}". Disponible: $${(fp.saldoActual ?? 0).toLocaleString('es-CO')} — Requerido: $${this.subtotal.toLocaleString('es-CO')}`
+      );
+      return;
+    }
+
     const v = this.myForm.value;
     const payload: CompraRequest = {
       codigo:      v.codigo,

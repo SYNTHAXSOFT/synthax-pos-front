@@ -1,7 +1,6 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { TipoPedidoService } from '../../services/tipo-pedido.service';
 import { TipoPedido } from '../../interfaces/tipo-pedido.interface';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -17,10 +16,13 @@ import { ConfirmService } from '../../../shared/services/confirm.service';
 })
 export class TipoPedidoListarPageComponent implements OnInit {
   private readonly tipoPedidoService = inject(TipoPedidoService);
-  private readonly router = inject(Router);
-  private readonly authService = inject(AuthService);
-  private readonly toastService = inject(ToastService);
-  private readonly confirmService = inject(ConfirmService);
+  private readonly authService       = inject(AuthService);
+  private readonly toastService      = inject(ToastService);
+  private readonly confirmService    = inject(ConfirmService);
+
+  @Input() modoModal: boolean = false;
+  @Output() nuevoTipoPedido  = new EventEmitter<void>();
+  @Output() editarTipoPedido = new EventEmitter<number>();
 
   public tiposPedido: TipoPedido[] = [];
   public cargando: boolean = false;
@@ -36,13 +38,8 @@ export class TipoPedidoListarPageComponent implements OnInit {
     );
   }
 
-  get totalActivos(): number {
-    return this.tiposPedido.filter(t => t.activo).length;
-  }
-
-  get totalInactivos(): number {
-    return this.tiposPedido.filter(t => !t.activo).length;
-  }
+  get totalActivos(): number   { return this.tiposPedido.filter(t => t.activo).length; }
+  get totalInactivos(): number { return this.tiposPedido.filter(t => !t.activo).length; }
 
   ngOnInit(): void {
     this.restauranteId = this.authService.getRestauranteId() ?? undefined;
@@ -52,15 +49,14 @@ export class TipoPedidoListarPageComponent implements OnInit {
   cargarTiposPedido(): void {
     this.cargando = true;
     this.tipoPedidoService.obtenerTodos().subscribe({
-      next: (data) => {
-        this.tiposPedido = data;
-        this.cargando = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar tipos de pedido:', err);
-        this.cargando = false;
-      },
+      next: (data) => { this.tiposPedido = data; this.cargando = false; },
+      error: (err)  => { console.error('Error al cargar tipos de pedido:', err); this.cargando = false; },
     });
+  }
+
+  editar(id?: number): void {
+    if (!id) return;
+    this.editarTipoPedido.emit(id);
   }
 
   async desactivar(id?: number): Promise<void> {
@@ -68,19 +64,8 @@ export class TipoPedidoListarPageComponent implements OnInit {
     const ok = await this.confirmService.confirm({ message: '¿Desea desactivar este tipo de pedido?', type: 'danger' });
     if (!ok) return;
     this.tipoPedidoService.desactivar(id).subscribe({
-      next: () => {
-        this.toastService.success('Tipo de pedido desactivado');
-        this.cargarTiposPedido();
-      },
-      error: (err) => {
-        console.error('Error al desactivar:', err);
-        this.toastService.error('Error al desactivar el tipo de pedido');
-      },
+      next: () => { this.toastService.success('Tipo de pedido desactivado'); this.cargarTiposPedido(); },
+      error: (err) => { console.error('Error al desactivar:', err); this.toastService.error('Error al desactivar el tipo de pedido'); },
     });
-  }
-
-  editar(id?: number): void {
-    if (!id) return;
-    this.router.navigate(['/synthax-pos/tipo-pedido/registrar'], { queryParams: { id } });
   }
 }

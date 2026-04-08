@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClienteService } from '../../services/cliente.service';
-import { Usuario } from '../../../usuario/interfaces/usuario.interface';
+import { Cliente } from '../../interfaces/cliente.interface';
 import { ToastService } from '../../../shared/services/toast.service';
 import { ConfirmService } from '../../../shared/services/confirm.service';
 
@@ -11,7 +11,7 @@ interface ClienteForm {
   apellido: string;
   cedula:   string;
   email:    string;
-  password: string;
+  telefono: string;
 }
 
 @Component({
@@ -29,9 +29,9 @@ export class ClienteListarComponent implements OnInit {
 
   // ── State ────────────────────────────────────────────────────────────────
 
-  cargando    = true;
-  guardando   = false;
-  clientes: Usuario[] = [];
+  cargando  = true;
+  guardando = false;
+  clientes: Cliente[] = [];
 
   // ── Filters ──────────────────────────────────────────────────────────────
 
@@ -40,13 +40,13 @@ export class ClienteListarComponent implements OnInit {
 
   // ── Pagination ───────────────────────────────────────────────────────────
 
-  paginaActual    = 1;
+  paginaActual       = 1;
   readonly porPagina = 10;
 
   // ── Modal ────────────────────────────────────────────────────────────────
 
-  mostrarModal  = false;
-  modoEditar    = false;
+  mostrarModal = false;
+  modoEditar   = false;
   editandoId: number | null = null;
 
   form: ClienteForm = {
@@ -54,7 +54,7 @@ export class ClienteListarComponent implements OnInit {
     apellido: '',
     cedula:   '',
     email:    '',
-    password: '',
+    telefono: '',
   };
 
   // ── Lifecycle ────────────────────────────────────────────────────────────
@@ -73,21 +73,22 @@ export class ClienteListarComponent implements OnInit {
 
   // ── Computed ─────────────────────────────────────────────────────────────
 
-  get clientesFiltrados(): Usuario[] {
+  get clientesFiltrados(): Cliente[] {
     const term = this.searchTerm.toLowerCase();
     return this.clientes.filter(c => {
       const matchSearch = !term ||
         c.nombre.toLowerCase().includes(term) ||
         c.apellido.toLowerCase().includes(term) ||
         c.cedula.toLowerCase().includes(term) ||
-        (c.email ?? '').toLowerCase().includes(term);
+        (c.email ?? '').toLowerCase().includes(term) ||
+        (c.telefono ?? '').toLowerCase().includes(term);
       const matchEstado = !this.filtroEstado ||
-        (this.filtroEstado === 'activo'   ? c.activo === true  : c.activo === false);
+        (this.filtroEstado === 'activo' ? c.activo === true : c.activo === false);
       return matchSearch && matchEstado;
     });
   }
 
-  get clientesPaginados(): Usuario[] {
+  get clientesPaginados(): Cliente[] {
     const inicio = (this.paginaActual - 1) * this.porPagina;
     return this.clientesFiltrados.slice(inicio, inicio + this.porPagina);
   }
@@ -112,28 +113,28 @@ export class ClienteListarComponent implements OnInit {
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
-  iniciales(c: Usuario): string {
+  iniciales(c: Cliente): string {
     return `${c.nombre?.[0] ?? ''}${c.apellido?.[0] ?? ''}`.toUpperCase();
   }
 
   // ── Modal ────────────────────────────────────────────────────────────────
 
   abrirCrear(): void {
-    this.modoEditar  = false;
-    this.editandoId  = null;
-    this.form = { nombre: '', apellido: '', cedula: '', email: '', password: '' };
+    this.modoEditar = false;
+    this.editandoId = null;
+    this.form = { nombre: '', apellido: '', cedula: '', email: '', telefono: '' };
     this.mostrarModal = true;
   }
 
-  abrirEditar(c: Usuario): void {
-    this.modoEditar  = true;
-    this.editandoId  = c.id ?? null;
+  abrirEditar(c: Cliente): void {
+    this.modoEditar = true;
+    this.editandoId = c.id ?? null;
     this.form = {
       nombre:   c.nombre,
       apellido: c.apellido,
       cedula:   c.cedula,
       email:    c.email,
-      password: '',   // leave blank on edit — backend only updates if non-empty
+      telefono: c.telefono ?? '',
     };
     this.mostrarModal = true;
   }
@@ -142,20 +143,12 @@ export class ClienteListarComponent implements OnInit {
     this.mostrarModal = false;
   }
 
-  // Auto-fill password with cedula on new clients
-  onCedulaChange(): void {
-    if (!this.modoEditar) {
-      this.form.password = this.form.cedula;
-    }
-  }
-
   esFormValido(): boolean {
     return !!(
       this.form.nombre.trim() &&
       this.form.apellido.trim() &&
       this.form.cedula.trim() &&
-      this.form.email.trim() &&
-      (this.modoEditar || this.form.password.trim())
+      this.form.email.trim()
     );
   }
 
@@ -163,13 +156,12 @@ export class ClienteListarComponent implements OnInit {
     if (!this.esFormValido() || this.guardando) return;
     this.guardando = true;
 
-    const payload: Usuario = {
+    const payload: Cliente = {
       nombre:   this.form.nombre.trim(),
       apellido: this.form.apellido.trim(),
       cedula:   this.form.cedula.trim(),
       email:    this.form.email.trim(),
-      password: this.form.password.trim() || this.form.cedula.trim(),
-      rol:      'CLIENTE',
+      telefono: this.form.telefono.trim() || undefined,
       activo:   true,
     };
 
@@ -202,7 +194,7 @@ export class ClienteListarComponent implements OnInit {
     }
   }
 
-  async desactivar(c: Usuario): Promise<void> {
+  async desactivar(c: Cliente): Promise<void> {
     const ok = await this.confirmService.confirm({
       message: `¿Desactivar a ${c.nombre} ${c.apellido}?`,
       type: 'danger',

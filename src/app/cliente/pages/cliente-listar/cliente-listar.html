@@ -185,9 +185,6 @@
             <i [class]="modoEditar ? 'fa-solid fa-pen' : 'fa-solid fa-user-plus'"></i>
             {{ modoEditar ? 'Editar Cliente' : 'Nuevo Cliente' }}
           </h3>
-          @if (!modoEditar) {
-            <p class="spx-cli-modal__subtitle">La contraseña se genera automáticamente con la cédula</p>
-          }
         </div>
         <button class="spx-cli-modal__close" (click)="cerrarModal()">
           <i class="fa-solid fa-xmark"></i>
@@ -226,9 +223,20 @@
               class="spx-cli-input"
               placeholder="Número de cédula"
               [(ngModel)]="form.cedula"
-              (input)="onCedulaChange()"
             />
           </div>
+          <div class="spx-cli-field">
+            <label class="spx-cli-label">Teléfono</label>
+            <input
+              type="tel"
+              class="spx-cli-input"
+              placeholder="Número de teléfono"
+              [(ngModel)]="form.telefono"
+            />
+          </div>
+        </div>
+
+        <div class="spx-cli-form-row">
           <div class="spx-cli-field">
             <label class="spx-cli-label">Email <span class="spx-cli-required">*</span></label>
             <input
@@ -240,19 +248,6 @@
           </div>
         </div>
 
-        <div class="spx-cli-field">
-          <label class="spx-cli-label">
-            Contraseña
-            @if (!modoEditar) { <span class="spx-cli-required">*</span> }
-            @if (modoEditar) { <span class="spx-cli-hint">(dejar en blanco para no cambiar)</span> }
-          </label>
-          <input
-            type="password"
-            class="spx-cli-input"
-            [placeholder]="modoEditar ? 'Nueva contraseña (opcional)' : 'Contraseña (auto: cédula)'"
-            [(ngModel)]="form.password"
-          />
-        </div>
 
       </div>
 

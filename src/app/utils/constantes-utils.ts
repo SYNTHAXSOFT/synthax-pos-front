@@ -24,6 +24,9 @@ export const API_ENDPOINTS = {
   DETALLE_PRODUCTO: 'detalle-producto',
   FACTURAS:       'facturas',
 
+  // Clientes
+  CLIENTES:       'clientes',
+
   // Multi-tenancy
   RESTAURANTES:   'restaurantes',
   INSUMOS:        'insumos',

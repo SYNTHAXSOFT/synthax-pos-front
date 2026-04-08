@@ -6,10 +6,10 @@
       <h1 class="spx-inv-header__title">Inventario</h1>
       <p class="spx-inv-header__sub">Gestiona tu stock, unidades y materias primas</p>
     </div>
-    <a routerLink="/synthax-pos/insumo/registrar" class="spx-inv-btn-primary">
+    <button class="spx-inv-btn-primary" (click)="nuevoInsumo.emit()">
       <i class="fa-solid fa-plus"></i>
       Nuevo Insumo
-    </a>
+    </button>
   </div>
 
   <!-- Stats Row -->

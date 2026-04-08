@@ -68,38 +68,6 @@
               </div>
             }
 
-            <!-- Factura DIAN switch -->
-            <div class="spx-form-group spx-form-col-span-2">
-              <label class="spx-form-check">
-                <input type="checkbox" class="spx-form-check__input" formControlName="solicitaFacturaElectronica">
-                <span class="spx-form-check__label">
-                  <i class="fa-solid fa-file-invoice" style="margin-right:0.3rem;color:#f59e0b"></i>
-                  El cliente solicita factura electrónica DIAN
-                </span>
-              </label>
-            </div>
-
-            <!-- Cliente (visible solo si solicita factura) -->
-            @if (solicitaFactura) {
-              <div class="spx-form-group spx-form-col-span-2">
-                <label class="spx-form-label">
-                  Cliente <span class="spx-form-required">*</span>
-                  <span style="color:#64748b;font-weight:400;margin-left:0.3rem">(requerido para factura electrónica)</span>
-                </label>
-                <select class="spx-form-select" formControlName="usuarioClienteId">
-                  <option [value]="null">Seleccione un cliente</option>
-                  @for (cliente of clientes; track cliente.id) {
-                    <option [value]="cliente.id">
-                      {{ cliente.nombre }} {{ cliente.apellido }}
-                      @if (cliente.cedula) { · {{ cliente.cedula }} }
-                    </option>
-                  }
-                </select>
-                <span style="font-size:0.78rem;color:#64748b;margin-top:0.2rem">
-                  Los datos fiscales del cliente se usarán para generar la factura DIAN.
-                </span>
-              </div>
-            }
 
             <!-- Observaciones -->
             <div class="spx-form-group spx-form-col-span-2">
@@ -117,11 +85,6 @@
               </textarea>
             </div>
 
-          </div>
-
-          <div class="spx-form-hint">
-            <i class="fa-solid fa-circle-info"></i>
-            Se creará en estado <strong>ABIERTA</strong> y se asignará al usuario activo como creador.
           </div>
 
           <!-- Footer del modal -->
