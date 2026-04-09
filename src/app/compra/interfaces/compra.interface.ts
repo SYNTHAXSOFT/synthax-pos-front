@@ -19,6 +19,7 @@ export interface Compra {
   cantidad?: number;
   insumo?: InsumoRef;
   restaurante?: RestauranteRef;
+  imagenSoporte?: string;
   activo?: boolean;
   fechaCreacion?: string;
 }
@@ -31,5 +32,6 @@ export interface CompraRequest {
   insumo: { id: number };
   restaurante: { id: number };
   formaPago?: { id: number };
+  imagenSoporte?: string;
   activo?: boolean;
 }

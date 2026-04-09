@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CompraService } from '../../services/compra.service';
@@ -34,6 +34,7 @@ export class CompraRegistrarPageComponent implements OnInit, OnDestroy {
   private readonly formaPagoService   = inject(FormaPagoService);
 
   @ViewChild(CompraListarPageComponent) listarComponent?: CompraListarPageComponent;
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   public restaurantes:             Restaurante[] = [];
   public insumos:                  Insumo[]      = [];
@@ -45,6 +46,10 @@ export class CompraRegistrarPageComponent implements OnInit, OnDestroy {
   /** Control de visibilidad del modal */
   public modalAbierto: boolean = false;
 
+  /** Imagen de soporte / factura (Base64) */
+  public soportePreview: string = '';
+  public soporteNombre:  string = '';
+
   abrirModal(): void {
     this.modalAbierto = true;
     document.body.style.overflow = 'hidden';
@@ -53,6 +58,43 @@ export class CompraRegistrarPageComponent implements OnInit, OnDestroy {
   cerrarModal(): void {
     this.modalAbierto = false;
     document.body.style.overflow = '';
+    this.quitarSoporte();
+  }
+
+  /** Abre el selector de archivo del sistema */
+  abrirSelectorSoporte(): void {
+    this.fileInput.nativeElement.click();
+  }
+
+  /** Lee la imagen y la convierte a Base64 */
+  onSoporteSeleccionado(event: Event): void {
+    const archivo = (event.target as HTMLInputElement).files?.[0];
+    if (!archivo) return;
+
+    if (!archivo.type.startsWith('image/')) {
+      this.toastService.error('Solo se permiten archivos de imagen (JPG, PNG, WEBP...)');
+      return;
+    }
+    if (archivo.size > 5 * 1024 * 1024) {
+      this.toastService.error('La imagen no debe superar los 5 MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.soportePreview = reader.result as string;
+      this.soporteNombre  = archivo.name;
+    };
+    reader.readAsDataURL(archivo);
+  }
+
+  /** Elimina la imagen de soporte seleccionada */
+  quitarSoporte(): void {
+    this.soportePreview = '';
+    this.soporteNombre  = '';
+    if (this.fileInput?.nativeElement) {
+      this.fileInput.nativeElement.value = '';
+    }
   }
 
   ngOnDestroy(): void {
@@ -131,14 +173,15 @@ export class CompraRegistrarPageComponent implements OnInit, OnDestroy {
 
     const v = this.myForm.value;
     const payload: CompraRequest = {
-      codigo:      v.codigo,
-      valorUnidad: v.valorUnidad,
-      cantidad:    v.cantidad,
-      valorTotal:  this.subtotal,
-      insumo:      { id: v.insumoId },
-      restaurante: { id: v.restauranteId },
-      formaPago:   { id: this.formaPagoSeleccionadaId },
-      activo:      true,
+      codigo:         v.codigo,
+      valorUnidad:    v.valorUnidad,
+      cantidad:       v.cantidad,
+      valorTotal:     this.subtotal,
+      insumo:         { id: v.insumoId },
+      restaurante:    { id: v.restauranteId },
+      formaPago:      { id: this.formaPagoSeleccionadaId },
+      imagenSoporte:  this.soportePreview || undefined,
+      activo:         true,
     };
 
     this.compraService.crear(payload).subscribe({

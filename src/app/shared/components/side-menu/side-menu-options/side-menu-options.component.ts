@@ -32,16 +32,22 @@ export class SideMenuOptionsComponent {
   private authService = inject(AuthService);
   private readonly confirmService = inject(ConfirmService);
 
-  // Genera los ítems del menú desde las rutas, excluyendo comodines, redirects y los marcados con hideFromMenu
+  // Genera los ítems del menú desde las rutas, excluyendo comodines, redirects,
+  // los marcados con hideFromMenu y los que no aplican para el rol actual (hideForRoles)
   reactiveMenu: MenuItem[] = reactiveItems
     .filter((item) => item.path && item.path !== '**' && !item.redirectTo && !item.data?.['hideFromMenu'])
+    .filter((item) => {
+      const hideForRoles = item.data?.['hideForRoles'] as string[] | undefined;
+      if (!hideForRoles) return true;
+      return !this.authService.hasRole(hideForRoles);
+    })
     .map((item) => ({
-      route: `synthax-pos/${item.path}`,   // prefijo actualizado a synthax-pos
+      route: `synthax-pos/${item.path}`,
       title: `${item.title}`,
       roles: item.data?.['roles'] as string[],
     }));
 
-  // Filtra el menú según el rol del usuario logueado
+  // Filtra además según qué roles tienen permiso de ver cada ítem
   menuOptions: MenuOption[] = this.reactiveMenu
     .filter((item) => {
       if (!item.roles) return true;

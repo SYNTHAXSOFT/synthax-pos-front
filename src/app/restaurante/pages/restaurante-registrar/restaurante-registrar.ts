@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -24,10 +24,15 @@ export class RestauranteRegistrarPageComponent implements OnInit {
   private readonly toastService       = inject(ToastService);
 
   @ViewChild(RestauranteListarPageComponent) listarComponent?: RestauranteListarPageComponent;
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   public editando: boolean = false;
   private restauranteId?: number;
   public propietarios: Usuario[] = [];
+
+  /** Vista previa del logo (Base64 o URL existente) */
+  public logoPreview: string = '';
+  public logoNombre:  string = '';
 
   public myForm: FormGroup = this.fb.group({
     codigo:      ['', [Validators.required, Validators.minLength(2)]],
@@ -50,15 +55,20 @@ export class RestauranteRegistrarPageComponent implements OnInit {
         this.restauranteService.obtenerPorId(this.restauranteId).subscribe({
           next: (r) => {
             this.myForm.patchValue({
-              codigo:      r.codigo,
-              nombre:      r.nombre,
-              logo:        r.logo,
-              telefono:    r.telefono,
-              correo:      r.correo,
-              descripcion: r.descripcion,
+              codigo:        r.codigo,
+              nombre:        r.nombre,
+              logo:          r.logo,
+              telefono:      r.telefono,
+              correo:        r.correo,
+              descripcion:   r.descripcion,
               propietarioId: r.propietario?.id ?? null,
-              activo:      r.activo,
+              activo:        r.activo,
             });
+            // Mostrar logo existente en la vista previa
+            if (r.logo) {
+              this.logoPreview = r.logo;
+              this.logoNombre  = 'Logo actual';
+            }
           },
           error: (err) => console.error('Error al cargar restaurante:', err),
         });
@@ -68,6 +78,47 @@ export class RestauranteRegistrarPageComponent implements OnInit {
 
   cargarPropietarios(): void {
     this.usuarioService.listarPorRolActivos('PROPIETARIO').subscribe({ next: (d) => this.propietarios = d });
+  }
+
+  /** Abre el selector de archivo del dispositivo */
+  abrirSelectorArchivo(): void {
+    this.fileInput.nativeElement.click();
+  }
+
+  /** Lee la imagen seleccionada y la convierte a Base64 */
+  onLogoSeleccionado(event: Event): void {
+    const archivo = (event.target as HTMLInputElement).files?.[0];
+    if (!archivo) return;
+
+    // Validar tipo
+    if (!archivo.type.startsWith('image/')) {
+      this.toastService.error('Solo se permiten archivos de imagen (JPG, PNG, WEBP, SVG...)');
+      return;
+    }
+    // Validar tamaño (máx. 2 MB)
+    if (archivo.size > 2 * 1024 * 1024) {
+      this.toastService.error('La imagen no debe superar los 2 MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      this.myForm.patchValue({ logo: base64 });
+      this.logoPreview = base64;
+      this.logoNombre  = archivo.name;
+    };
+    reader.readAsDataURL(archivo);
+  }
+
+  /** Elimina el logo seleccionado */
+  quitarLogo(): void {
+    this.logoPreview = '';
+    this.logoNombre  = '';
+    this.myForm.patchValue({ logo: '' });
+    if (this.fileInput?.nativeElement) {
+      this.fileInput.nativeElement.value = '';
+    }
   }
 
   buildPayload(): RestauranteRequest {
@@ -113,9 +164,14 @@ export class RestauranteRegistrarPageComponent implements OnInit {
   }
 
   resetForm(): void {
-    this.editando = false;
+    this.editando      = false;
     this.restauranteId = undefined;
+    this.logoPreview   = '';
+    this.logoNombre    = '';
     this.myForm.reset({ activo: true });
+    if (this.fileInput?.nativeElement) {
+      this.fileInput.nativeElement.value = '';
+    }
   }
 
   isValidField(field: string): boolean | null {

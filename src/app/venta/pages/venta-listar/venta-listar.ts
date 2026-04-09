@@ -628,6 +628,25 @@ export class VentaListarPageComponent implements OnInit {
     this.pedidosParaImprimir    = [];
   }
 
+  /** Carga los pedidos de una venta ya cerrada (PAGADA) y lanza la impresión directa */
+  imprimirTirillaExistente(venta: Venta): void {
+    this.pedidoService.obtenerPorVenta(venta.id!).subscribe({
+      next: (pedidos) => {
+        this.ventaParaImprimir          = venta;
+        this.pedidosParaImprimir        = pedidos as Pedido[];
+        this.subtotalParaImprimir       = pedidos.reduce(
+          (s, p) => s + (p.producto?.precio ?? 0) * (p.cantidad ?? 0), 0
+        );
+        this.impuestosParaImprimir      = [];
+        this.descuentoValorParaImprimir = 0;
+        this.totalParaImprimir          = venta.valorTotal ?? 0;
+        this.fechaImpresion             = venta.fechaCreacion ? new Date(venta.fechaCreacion) : new Date();
+        this.imprimirTirilla();
+      },
+      error: () => this.toastService.error('No se pudo cargar la información de la venta'),
+    });
+  }
+
   get ventasAbiertas(): Venta[] {
     return this.ventas.filter(v => v.estado === 'ABIERTA');
   }

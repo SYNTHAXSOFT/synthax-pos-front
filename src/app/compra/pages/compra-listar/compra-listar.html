@@ -162,12 +162,24 @@
                   </span>
                 </td>
                 <td class="spx-compra-td">
-                  @if (c.activo) {
-                    <button class="spx-compra-btn-void" (click)="desactivar(c.id)" title="Anular compra">
-                      <i class="fa-solid fa-ban"></i>
-                      Anular
-                    </button>
-                  }
+                  <div class="spx-compra-actions">
+                    @if (c.imagenSoporte) {
+                      <button class="spx-compra-btn-action spx-compra-btn-action--view"
+                              (click)="verSoporte(c)" title="Ver soporte">
+                        <i class="fa-solid fa-eye"></i>
+                      </button>
+                      <button class="spx-compra-btn-action spx-compra-btn-action--download"
+                              (click)="descargarSoporte(c)" title="Descargar soporte">
+                        <i class="fa-solid fa-download"></i>
+                      </button>
+                    }
+                    @if (c.activo) {
+                      <button class="spx-compra-btn-void" (click)="desactivar(c.id)" title="Anular compra">
+                        <i class="fa-solid fa-ban"></i>
+                        Anular
+                      </button>
+                    }
+                  </div>
                 </td>
               </tr>
             }
@@ -187,3 +199,35 @@
   }
 
 </div>
+
+<!-- ══ Modal: Visor de soporte ═══════════════════════════════════════ -->
+@if (soporteViewing) {
+  <div class="spx-soporte-overlay" (click)="cerrarSoporte()">
+    <div class="spx-soporte-modal" (click)="$event.stopPropagation()">
+
+      <div class="spx-soporte-modal__header">
+        <div class="spx-soporte-modal__title">
+          <i class="fa-solid fa-file-image"></i>
+          Soporte — {{ soporteViewingCodigo }}
+        </div>
+        <div class="spx-soporte-modal__actions">
+          <button class="spx-soporte-btn spx-soporte-btn--download"
+                  (click)="descargarSoporte({ imagenSoporte: soporteViewing!, codigo: soporteViewingCodigo })"
+                  title="Descargar imagen">
+            <i class="fa-solid fa-download"></i>
+            Descargar
+          </button>
+          <button class="spx-soporte-btn spx-soporte-btn--close"
+                  (click)="cerrarSoporte()" title="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="spx-soporte-modal__body">
+        <img [src]="soporteViewing" alt="Soporte de compra" class="spx-soporte-modal__img">
+      </div>
+
+    </div>
+  </div>
+}

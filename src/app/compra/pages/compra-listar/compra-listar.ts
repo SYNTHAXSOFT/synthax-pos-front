@@ -132,8 +132,37 @@ export class CompraListarPageComponent implements OnInit {
   }
 
   totalCompras(): number {
-    return this.compras
+    return this.comprasFiltradas
       .filter(c => c.activo)
       .reduce((acc, c) => acc + (c.valorTotal ?? 0), 0);
+  }
+
+  // ── Visor de soporte ──────────────────────────────────────────────
+
+  public soporteViewing: string | null = null;
+  public soporteViewingCodigo: string  = '';
+
+  verSoporte(compra: Compra): void {
+    if (!compra.imagenSoporte) return;
+    this.soporteViewing      = compra.imagenSoporte;
+    this.soporteViewingCodigo = compra.codigo ?? `#${compra.id}`;
+    document.body.style.overflow = 'hidden';
+  }
+
+  cerrarSoporte(): void {
+    this.soporteViewing = null;
+    document.body.style.overflow = '';
+  }
+
+  descargarSoporte(compra: Compra): void {
+    if (!compra.imagenSoporte) return;
+    const base64 = compra.imagenSoporte;
+    // Extraer extensión del tipo MIME (data:image/png;base64,...)
+    const mimeMatch = base64.match(/data:(image\/\w+);base64,/);
+    const ext       = mimeMatch ? mimeMatch[1].split('/')[1] : 'jpg';
+    const link      = document.createElement('a');
+    link.href       = base64;
+    link.download   = `soporte-${compra.codigo ?? compra.id}.${ext}`;
+    link.click();
   }
 }

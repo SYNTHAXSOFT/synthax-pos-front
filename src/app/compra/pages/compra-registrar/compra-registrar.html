@@ -27,9 +27,9 @@
         <!-- Modal body -->
         <div class="spx-modal-body">
           <form [formGroup]="myForm" (ngSubmit)="onSave()">
-            <div class="spx-form-grid spx-form-grid--4" style="margin-bottom:1.25rem">
 
-              <!-- Código -->
+            <!-- Fila 1: Código + Restaurante -->
+            <div class="spx-form-grid spx-form-grid--4" style="margin-bottom:1rem">
               <div class="spx-form-group">
                 <label class="spx-form-label">Código de compra <span class="spx-form-required">*</span></label>
                 <input type="text" class="spx-form-input" placeholder="CMP-001"
@@ -39,8 +39,7 @@
                 }
               </div>
 
-              <!-- Restaurante -->
-              <div class="spx-form-group spx-form-col-span-2">
+              <div class="spx-form-group spx-form-col-span-3">
                 <label class="spx-form-label">Restaurante <span class="spx-form-required">*</span></label>
                 <select class="spx-form-select" formControlName="restauranteId"
                   [class.is-invalid]="isValidField('restauranteId')"
@@ -54,33 +53,26 @@
                   <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Restaurante obligatorio</span>
                 }
               </div>
+            </div>
 
-              <!-- Subtotal box -->
-              <div class="spx-form-group">
-                <label class="spx-form-label">Valor total</label>
-                <div class="spx-form-total-box">
-                  <span class="spx-form-total-box__label">Calculado</span>
-                  <span class="spx-form-total-box__value">{{ subtotal | currency:'COP':'symbol':'1.0-0' }}</span>
-                </div>
-              </div>
-
-              <!-- Insumo -->
-              <div class="spx-form-group spx-form-col-span-2">
-                <label class="spx-form-label">Insumo <span class="spx-form-required">*</span></label>
-                <select class="spx-form-select" formControlName="insumoId"
-                  [class.is-invalid]="isValidField('insumoId')"
-                  [attr.disabled]="!myForm.value.restauranteId ? true : null">
-                  <option [value]="null">{{ myForm.value.restauranteId ? 'Seleccione un insumo...' : 'Primero seleccione un restaurante' }}</option>
-                  @for (i of insumos; track i.id) {
-                    <option [value]="i.id">{{ i.descripcion }} — Stock: {{ i.stock }} {{ i.medida }}</option>
-                  }
-                </select>
-                @if (isValidField('insumoId')) {
-                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Insumo obligatorio</span>
+            <!-- Fila 2: Insumo (ancho completo) -->
+            <div class="spx-form-group" style="margin-bottom:1rem">
+              <label class="spx-form-label">Insumo <span class="spx-form-required">*</span></label>
+              <select class="spx-form-select" formControlName="insumoId"
+                [class.is-invalid]="isValidField('insumoId')"
+                [attr.disabled]="!myForm.value.restauranteId ? true : null">
+                <option [value]="null">{{ myForm.value.restauranteId ? 'Seleccione un insumo...' : 'Primero seleccione un restaurante' }}</option>
+                @for (i of insumos; track i.id) {
+                  <option [value]="i.id">{{ i.descripcion }} — Stock: {{ i.stock }} {{ i.medida }}</option>
                 }
-              </div>
+              </select>
+              @if (isValidField('insumoId')) {
+                <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Insumo obligatorio</span>
+              }
+            </div>
 
-              <!-- Cantidad -->
+            <!-- Fila 3: Cantidad (30%) + Valor unitario (70%) -->
+            <div class="spx-compra-row-cantval" style="margin-bottom:1rem">
               <div class="spx-form-group">
                 <label class="spx-form-label">Cantidad <span class="spx-form-required">*</span></label>
                 <input type="number" class="spx-form-input" min="0.01" step="0.01" placeholder="0"
@@ -90,7 +82,6 @@
                 }
               </div>
 
-              <!-- Valor unitario -->
               <div class="spx-form-group">
                 <label class="spx-form-label">Valor unitario (COP) <span class="spx-form-required">*</span></label>
                 <div class="spx-form-input-group">
@@ -102,7 +93,17 @@
                   <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Valor unitario requerido</span>
                 }
               </div>
+            </div>
 
+            <!-- Resumen: Valor Total calculado -->
+            <div class="spx-compra-total">
+              <span class="spx-compra-total__label">
+                <i class="fa-solid fa-calculator"></i>
+                Valor total de la compra
+              </span>
+              <span class="spx-compra-total__value">
+                {{ subtotal | currency:'COP':'symbol':'1.0-0' }}
+              </span>
             </div>
 
             <!-- Forma de pago -->
@@ -133,9 +134,54 @@
               </div>
             </div>
 
+            <!-- Imagen de soporte / factura (opcional) -->
+            <div class="spx-compra-soporte">
+              <p class="spx-compra-soporte__title">
+                <i class="fa-solid fa-file-image"></i>
+                Imagen de soporte
+                <span class="spx-compra-soporte__badge">Opcional</span>
+              </p>
+
+              <!-- Input file oculto -->
+              <input #fileInput type="file" accept="image/*" style="display:none"
+                     (change)="onSoporteSeleccionado($event)">
+
+              @if (!soportePreview) {
+                <!-- Zona de carga vacía -->
+                <div class="spx-compra-drop" (click)="abrirSelectorSoporte()">
+                  <div class="spx-compra-drop__icon">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                  </div>
+                  <p class="spx-compra-drop__title">Haz clic para adjuntar la factura o soporte</p>
+                  <p class="spx-compra-drop__hint">JPG, PNG, WEBP — máx. 5 MB</p>
+                </div>
+              } @else {
+                <!-- Vista previa de la imagen cargada -->
+                <div class="spx-compra-preview">
+                  <img [src]="soportePreview" alt="Soporte" class="spx-compra-preview__img">
+                  <div class="spx-compra-preview__info">
+                    <div class="spx-compra-preview__meta">
+                      <i class="fa-solid fa-image"></i>
+                      <span>{{ soporteNombre }}</span>
+                    </div>
+                    <div class="spx-compra-preview__actions">
+                      <button type="button" class="spx-compra-preview__btn spx-compra-preview__btn--change"
+                              (click)="abrirSelectorSoporte()">
+                        <i class="fa-solid fa-arrow-up-from-bracket"></i> Cambiar
+                      </button>
+                      <button type="button" class="spx-compra-preview__btn spx-compra-preview__btn--remove"
+                              (click)="quitarSoporte()">
+                        <i class="fa-solid fa-trash"></i> Quitar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+
             <div class="spx-form-hint">
               <i class="fa-solid fa-circle-info"></i>
-              Al registrar la compra, el <strong>stock del insumo</strong> se incrementará y el saldo de la forma de pago se descontará automáticamente.
+              Al registrar, el stock del insumo se incrementará y el saldo de la forma de pago se descontará automáticamente.
             </div>
 
             <!-- Modal actions -->

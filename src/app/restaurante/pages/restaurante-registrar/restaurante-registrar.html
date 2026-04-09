@@ -67,13 +67,46 @@
             }
           </div>
 
+          <!-- Logo uploader -->
           <div class="spx-form-field spx-form-col-span-2">
-            <label class="spx-form-label">
-              Logo
-              <span class="spx-form-hint-inline">(URL o Base64)</span>
-            </label>
-            <input type="text" formControlName="logo" class="spx-form-input"
-                   placeholder="https://...">
+            <label class="spx-form-label">Logo del restaurante</label>
+
+            <!-- Input file oculto -->
+            <input #fileInput type="file" accept="image/*" style="display:none"
+                   (change)="onLogoSeleccionado($event)">
+
+            <!-- Zona de carga / preview -->
+            @if (!logoPreview) {
+              <!-- Estado vacío: zona clickeable -->
+              <div class="spx-logo-drop" (click)="abrirSelectorArchivo()">
+                <div class="spx-logo-drop__icon">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <p class="spx-logo-drop__title">Haz clic para subir una imagen</p>
+                <p class="spx-logo-drop__hint">JPG, PNG, WEBP, SVG — máx. 2 MB</p>
+              </div>
+            } @else {
+              <!-- Estado con imagen: muestra preview -->
+              <div class="spx-logo-preview">
+                <img [src]="logoPreview" alt="Logo" class="spx-logo-preview__img">
+                <div class="spx-logo-preview__info">
+                  <div class="spx-logo-preview__meta">
+                    <i class="fa-solid fa-image"></i>
+                    <span class="spx-logo-preview__name">{{ logoNombre }}</span>
+                  </div>
+                  <div class="spx-logo-preview__actions">
+                    <button type="button" class="spx-logo-btn spx-logo-btn--change"
+                            (click)="abrirSelectorArchivo()">
+                      <i class="fa-solid fa-arrow-up-from-bracket"></i> Cambiar
+                    </button>
+                    <button type="button" class="spx-logo-btn spx-logo-btn--remove"
+                            (click)="quitarLogo()">
+                      <i class="fa-solid fa-trash"></i> Quitar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
 
         </div>
