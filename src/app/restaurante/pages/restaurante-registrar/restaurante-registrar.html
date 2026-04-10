@@ -118,26 +118,89 @@
         </div>
       </div>
 
-      <!-- Propietario -->
+      <!-- Propietarios -->
       <div class="spx-form-section">
         <p class="spx-form-section__title">
           <i class="fa-solid fa-user-tie"></i>
-          Propietario y Estado
+          Propietarios y Estado
         </p>
-        <div class="spx-form-grid spx-form-grid--2">
-          <div class="spx-form-field">
-            <label class="spx-form-label">
-              Propietario
-              <span class="spx-form-hint-inline">(opcional)</span>
-            </label>
-            <select formControlName="propietarioId" class="spx-form-select">
-              <option [value]="null">Sin propietario asignado</option>
-              @for (u of propietarios; track u.id) {
-                <option [value]="u.id">{{ u.nombre }} {{ u.apellido }} — {{ u.cedula }}</option>
-              }
-            </select>
+
+        <!-- Buscador -->
+        <div class="spx-prop-search-wrap">
+          <div class="spx-prop-search-box">
+            <i class="fa-solid fa-magnifying-glass spx-prop-search-icon"></i>
+            <input type="text"
+                   class="spx-prop-search-input"
+                   placeholder="Buscar propietario por nombre o cédula..."
+                   [(ngModel)]="busquedaPropietario"
+                   [ngModelOptions]="{standalone: true}">
+            @if (busquedaPropietario) {
+              <button type="button" class="spx-prop-search-clear" (click)="busquedaPropietario = ''">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            }
           </div>
+
+          <!-- Resultados del buscador -->
+          @if (busquedaPropietario && propietariosFiltrados.length > 0) {
+            <div class="spx-prop-results">
+              @for (u of propietariosFiltrados; track u.id) {
+                <button type="button" class="spx-prop-result-item" (click)="agregarPropietario(u)">
+                  <i class="fa-solid fa-plus spx-prop-result-icon"></i>
+                  <span class="spx-prop-result-name">{{ u.nombre }} {{ u.apellido }}</span>
+                  <span class="spx-prop-result-cedula">{{ u.cedula }}</span>
+                </button>
+              }
+            </div>
+          }
+          @if (busquedaPropietario && propietariosFiltrados.length === 0) {
+            <div class="spx-prop-results spx-prop-results--empty">
+              <i class="fa-solid fa-circle-info"></i>
+              Sin resultados para "{{ busquedaPropietario }}"
+            </div>
+          }
         </div>
+
+        <!-- Tabla de propietarios asignados -->
+        @if (propietariosAsignados.length > 0) {
+          <div class="spx-prop-table-wrap">
+            <table class="spx-prop-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Nombre</th>
+                  <th>Cédula</th>
+                  <th>Correo</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of propietariosAsignados; track p.id; let i = $index) {
+                  <tr>
+                    <td class="spx-prop-td-num">{{ i + 1 }}</td>
+                    <td>
+                      <span class="spx-prop-td-name">{{ p.nombre }} {{ p.apellido }}</span>
+                    </td>
+                    <td class="spx-prop-td-cedula">{{ p.cedula }}</td>
+                    <td class="spx-prop-td-correo">{{ p.email ?? '—' }}</td>
+                    <td class="spx-prop-td-action">
+                      <button type="button" class="spx-prop-btn-remove" (click)="quitarPropietario(p.id!)"
+                              title="Quitar propietario">
+                        <i class="fa-solid fa-xmark"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="spx-prop-empty">
+            <i class="fa-solid fa-user-slash"></i>
+            Sin propietarios asignados — use el buscador para agregar.
+          </p>
+        }
+
         <div class="spx-form-check">
           <input class="spx-form-check__input" type="checkbox" formControlName="activo" id="activoCheck">
           <label class="spx-form-check__label" for="activoCheck">

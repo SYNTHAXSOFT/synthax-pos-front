@@ -1,6 +1,6 @@
 import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { RestauranteService } from '../../services/restaurante.service';
 import { RestauranteRequest } from '../../interfaces/restaurante.interface';
@@ -12,7 +12,7 @@ import { ToastService } from '../../../shared/services/toast.service';
 @Component({
   selector: 'app-restaurante-registrar',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RestauranteListarPageComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RestauranteListarPageComponent],
   templateUrl: './restaurante-registrar.html',
   styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
@@ -28,7 +28,25 @@ export class RestauranteRegistrarPageComponent implements OnInit {
 
   public editando: boolean = false;
   private restauranteId?: number;
+
+  /** Todos los usuarios con rol PROPIETARIO disponibles. */
   public propietarios: Usuario[] = [];
+
+  /** Propietarios actualmente asignados al restaurante. */
+  public propietariosAsignados: Usuario[] = [];
+
+  /** Texto del buscador de propietarios. */
+  public busquedaPropietario: string = '';
+
+  /** Propietarios disponibles (no asignados) filtrados por búsqueda. */
+  get propietariosFiltrados(): Usuario[] {
+    const q = this.busquedaPropietario.toLowerCase().trim();
+    const asignadosIds = new Set(this.propietariosAsignados.map(p => p.id));
+    return this.propietarios.filter(u =>
+      !asignadosIds.has(u.id) &&
+      (!q || `${u.nombre} ${u.apellido} ${u.cedula}`.toLowerCase().includes(q))
+    );
+  }
 
   /** Vista previa del logo (Base64 o URL existente) */
   public logoPreview: string = '';
@@ -41,37 +59,44 @@ export class RestauranteRegistrarPageComponent implements OnInit {
     telefono:    [''],
     correo:      ['', [Validators.email]],
     descripcion: [''],
-    propietarioId: [null],
     activo:      [true],
   });
 
   ngOnInit(): void {
-    this.cargarPropietarios();
     this.route.queryParams.subscribe((params) => {
       const id = params['id'];
       if (id) {
         this.editando = true;
         this.restauranteId = +id;
-        this.restauranteService.obtenerPorId(this.restauranteId).subscribe({
-          next: (r) => {
-            this.myForm.patchValue({
-              codigo:        r.codigo,
-              nombre:        r.nombre,
-              logo:          r.logo,
-              telefono:      r.telefono,
-              correo:        r.correo,
-              descripcion:   r.descripcion,
-              propietarioId: r.propietario?.id ?? null,
-              activo:        r.activo,
+        // Cargar propietarios primero, luego el restaurante para poder cruzar datos
+        this.usuarioService.listarPorRolActivos('PROPIETARIO').subscribe({
+          next: (lista) => {
+            this.propietarios = lista;
+            this.restauranteService.obtenerPorId(this.restauranteId!).subscribe({
+              next: (r) => {
+                this.myForm.patchValue({
+                  codigo:      r.codigo,
+                  nombre:      r.nombre,
+                  logo:        r.logo,
+                  telefono:    r.telefono,
+                  correo:      r.correo,
+                  descripcion: r.descripcion,
+                  activo:      r.activo,
+                });
+                // Cruzar IDs asignados con la lista completa para tener objetos completos
+                const asignadosIds = new Set((r.propietarios ?? []).map(p => p.id));
+                this.propietariosAsignados = this.propietarios.filter(u => asignadosIds.has(u.id));
+                if (r.logo) {
+                  this.logoPreview = r.logo;
+                  this.logoNombre  = 'Logo actual';
+                }
+              },
+              error: (err) => console.error('Error al cargar restaurante:', err),
             });
-            // Mostrar logo existente en la vista previa
-            if (r.logo) {
-              this.logoPreview = r.logo;
-              this.logoNombre  = 'Logo actual';
-            }
           },
-          error: (err) => console.error('Error al cargar restaurante:', err),
         });
+      } else {
+        this.cargarPropietarios();
       }
     });
   }
@@ -121,17 +146,28 @@ export class RestauranteRegistrarPageComponent implements OnInit {
     }
   }
 
+  agregarPropietario(usuario: Usuario): void {
+    if (!this.propietariosAsignados.find(p => p.id === usuario.id)) {
+      this.propietariosAsignados = [...this.propietariosAsignados, usuario];
+    }
+    this.busquedaPropietario = '';
+  }
+
+  quitarPropietario(id: number): void {
+    this.propietariosAsignados = this.propietariosAsignados.filter(p => p.id !== id);
+  }
+
   buildPayload(): RestauranteRequest {
     const v = this.myForm.value;
     return {
-      codigo:      v.codigo,
-      nombre:      v.nombre,
-      logo:        v.logo || undefined,
-      telefono:    v.telefono || undefined,
-      correo:      v.correo || undefined,
-      descripcion: v.descripcion || undefined,
-      activo:      v.activo,
-      ...(v.propietarioId ? { propietario: { id: v.propietarioId } } : {}),
+      codigo:       v.codigo,
+      nombre:       v.nombre,
+      logo:         v.logo || undefined,
+      telefono:     v.telefono || undefined,
+      correo:       v.correo || undefined,
+      descripcion:  v.descripcion || undefined,
+      activo:       v.activo,
+      propietarios: this.propietariosAsignados.map(p => ({ id: p.id! })),
     };
   }
 
@@ -164,10 +200,12 @@ export class RestauranteRegistrarPageComponent implements OnInit {
   }
 
   resetForm(): void {
-    this.editando      = false;
-    this.restauranteId = undefined;
-    this.logoPreview   = '';
-    this.logoNombre    = '';
+    this.editando                  = false;
+    this.restauranteId             = undefined;
+    this.logoPreview               = '';
+    this.logoNombre                = '';
+    this.propietariosAsignados  = [];
+    this.busquedaPropietario    = '';
     this.myForm.reset({ activo: true });
     if (this.fileInput?.nativeElement) {
       this.fileInput.nativeElement.value = '';

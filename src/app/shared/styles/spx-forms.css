@@ -1062,3 +1062,176 @@
   background: #3b82f6;
   transition: opacity 0.15s, transform 0.15s;
 }
+
+/* ── Multi-propietario: search + table (restaurante-registrar) ──────────── */
+
+/* Search wrapper (positions the dropdown) */
+.spx-prop-search-wrap {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+/* Search box row */
+.spx-prop-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.spx-prop-search-icon {
+  position: absolute;
+  left: 0.875rem;
+  color: #64748b;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+.spx-prop-search-input {
+  width: 100%;
+  padding: 0.625rem 2.5rem 0.625rem 2.25rem;
+  background: #0e1822;
+  border: 1px solid #283543;
+  border-radius: 0.5rem;
+  color: #f1f5f9;
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: border-color 0.15s;
+  outline: none;
+}
+.spx-prop-search-input::placeholder { color: #4b5a6a; }
+.spx-prop-search-input:focus { border-color: #0d7ff2; }
+.spx-prop-search-clear {
+  position: absolute;
+  right: 0.625rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  border: none;
+  color: #64748b;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.spx-prop-search-clear:hover { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+/* Results dropdown */
+.spx-prop-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  z-index: 50;
+  background: #1a242f;
+  border: 1px solid #283543;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  max-height: 12rem;
+  overflow-y: auto;
+}
+.spx-prop-results::-webkit-scrollbar { width: 5px; }
+.spx-prop-results::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+.spx-prop-result-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.6rem 0.875rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #1e2d3d;
+  color: #f1f5f9;
+  font-size: 0.875rem;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+.spx-prop-result-item:last-child { border-bottom: none; }
+.spx-prop-result-item:hover { background: rgba(13,127,242,0.1); }
+.spx-prop-result-icon { color: #0d7ff2; font-size: 0.8rem; flex-shrink: 0; }
+.spx-prop-result-name { font-weight: 600; flex: 1; }
+.spx-prop-result-cedula { font-size: 0.78rem; color: #64748b; }
+
+.spx-prop-results--empty {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0.875rem;
+  font-size: 0.82rem;
+  color: #64748b;
+  font-style: italic;
+  cursor: default;
+}
+.spx-prop-results--empty i { color: #4b5a6a; }
+
+/* Assigned propietarios table */
+.spx-prop-table-wrap {
+  border: 1px solid #283543;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+.spx-prop-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.spx-prop-table thead {
+  background: #101922;
+}
+.spx-prop-table th {
+  padding: 0.55rem 0.875rem;
+  text-align: left;
+  color: #64748b;
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #283543;
+}
+.spx-prop-table td {
+  padding: 0.6rem 0.875rem;
+  color: #f1f5f9;
+  border-bottom: 1px solid #1e2d3d;
+  vertical-align: middle;
+}
+.spx-prop-table tbody tr:last-child td { border-bottom: none; }
+.spx-prop-table tbody tr:hover { background: rgba(13,127,242,0.05); }
+
+.spx-prop-td-num   { color: #64748b; font-size: 0.78rem; width: 2rem; text-align: center; }
+.spx-prop-td-name  { font-weight: 600; }
+.spx-prop-td-cedula, .spx-prop-td-correo { color: #94a3b8; font-size: 0.8rem; }
+.spx-prop-td-action { width: 2.5rem; text-align: center; }
+
+.spx-prop-btn-remove {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.375rem;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #ef4444;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.spx-prop-btn-remove:hover { background: #ef4444; border-color: #ef4444; color: #fff; }
+
+/* Empty state */
+.spx-prop-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0.875rem;
+  background: rgba(40,53,67,0.2);
+  border: 1px dashed #283543;
+  border-radius: 0.5rem;
+  font-size: 0.82rem;
+  color: #4b5a6a;
+  margin-bottom: 0.75rem;
+}
+.spx-prop-empty i { color: #374151; }

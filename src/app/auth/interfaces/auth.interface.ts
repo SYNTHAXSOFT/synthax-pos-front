@@ -37,8 +37,10 @@ export interface LoginResponse {
     email:    string;
     rol:      string;
   };
-  /** Restaurante del usuario con logo y colores. Null para rol ROOT. */
+  /** Restaurante activo del usuario. Null para ROOT. */
   restaurante: RestauranteLogin | null;
+  /** Lista de todos los restaurantes del propietario. Vacía para otros roles. */
+  restaurantes: RestauranteLogin[];
   token:   string;
   mensaje: string;
 }

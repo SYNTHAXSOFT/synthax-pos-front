@@ -15,6 +15,7 @@ export interface Restaurante {
   correo?:          string;
   descripcion?:     string;
   propietario?:     UsuarioPropietario;
+  propietarios?:    UsuarioPropietario[];
   activo?:          boolean;
   fechaCreacion?:   string;
 
@@ -33,6 +34,7 @@ export interface RestauranteRequest {
   correo?:         string;
   descripcion?:    string;
   propietario?:    { id: number };
+  propietarios?:   { id: number }[];
   activo?:         boolean;
 
   // Branding

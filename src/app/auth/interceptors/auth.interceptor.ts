@@ -22,6 +22,12 @@ export function authInterceptor(): HttpInterceptorFn {
     const userId  = parsedUser?.id ?? null;
     const userRol = parsedUser?.rol ?? null;
 
+    const rawRestaurante = localStorage.getItem('current_restaurante');
+    const parsedRestaurante = rawRestaurante && rawRestaurante !== 'null'
+      ? (() => { try { return JSON.parse(rawRestaurante); } catch { return null; } })()
+      : null;
+    const restauranteId = parsedRestaurante?.id ?? null;
+
     if (token && !isLogin) {
       const headers: Record<string, string> = {
         Authorization: `Bearer ${token}`,
@@ -33,6 +39,11 @@ export function authInterceptor(): HttpInterceptorFn {
       }
       if (userRol != null) {
         headers['Usuario-Rol'] = String(userRol);
+      }
+      // Restaurante-Id: permite al backend filtrar datos del restaurante activo
+      // (crítico para PROPIETARIO con múltiples restaurantes)
+      if (restauranteId != null) {
+        headers['Restaurante-Id'] = String(restauranteId);
       }
 
       const authReq = req.clone({ setHeaders: headers });

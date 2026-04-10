@@ -12,8 +12,22 @@
     </div>
   }
   <div class="spx-smh-brand__text">
-    <h1 class="spx-smh-brand__name">{{ restauranteNombre }}</h1>
-    <p class="spx-smh-brand__sub">SYNTHAX POS</p>
+    @if (esPropietarioMulti) {
+      <!-- Selector de sucursal para propietarios con múltiples restaurantes -->
+      <select
+        class="spx-smh-brand__select"
+        (change)="onCambiarRestaurante($event)"
+        title="Cambiar sucursal activa"
+      >
+        @for (r of restaurantes; track r.id) {
+          <option [value]="r.id" [selected]="r.id === restauranteActivoId">{{ r.nombre }}</option>
+        }
+      </select>
+      <p class="spx-smh-brand__sub">Sucursal activa</p>
+    } @else {
+      <h1 class="spx-smh-brand__name">{{ restauranteNombre }}</h1>
+      <p class="spx-smh-brand__sub">SYNTHAX POS</p>
+    }
   </div>
 </div>
 
@@ -60,6 +74,24 @@
 .spx-smh-brand__sub {
   font-size: 0.65rem; color: #475569; margin: 0;
   text-transform: uppercase; letter-spacing: 0.08em;
+}
+.spx-smh-brand__select {
+  width: 100%;
+  background: #1a2635;
+  border: 1px solid #283543;
+  border-radius: 6px;
+  color: #f1f5f9;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+  margin-bottom: 2px;
+}
+.spx-smh-brand__select:hover,
+.spx-smh-brand__select:focus {
+  border-color: #0d7ff2;
 }
 .spx-smh-user {
   padding: 0.875rem 1.25rem;
