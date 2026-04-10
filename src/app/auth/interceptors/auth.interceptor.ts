@@ -23,10 +23,15 @@ export function authInterceptor(): HttpInterceptorFn {
     const userRol = parsedUser?.rol ?? null;
 
     const rawRestaurante = localStorage.getItem('current_restaurante');
-    const parsedRestaurante = rawRestaurante && rawRestaurante !== 'null'
-      ? (() => { try { return JSON.parse(rawRestaurante); } catch { return null; } })()
-      : null;
-    const restauranteId = parsedRestaurante?.id ?? null;
+    let restauranteId: number | null = null;
+    if (rawRestaurante && rawRestaurante !== 'null') {
+      try {
+        const parsed = JSON.parse(rawRestaurante);
+        restauranteId = parsed?.id ?? null;
+      } catch (e) {
+        restauranteId = null;
+      }
+    }
 
     if (token && !isLogin) {
       const headers: Record<string, string> = {
