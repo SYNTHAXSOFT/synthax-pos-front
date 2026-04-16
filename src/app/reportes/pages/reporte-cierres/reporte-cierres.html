@@ -154,60 +154,179 @@
                     </div>
                   </div>
 
+                  <!-- Ventas de la Sesión -->
+                  <h4 class="spx-cierre-detail__section">
+                    <i class="fa-solid fa-receipt"></i>
+                    Ventas de la Sesión
+                    <span class="spx-cierre-detail__count">{{ reporteDetalle.listaVentas?.length || 0 }}</span>
+                  </h4>
+                  @if (reporteDetalle.listaVentas?.length) {
+                    <div class="spx-cierre-detail__scroll">
+                      <table class="spx-rpt__table spx-cierre-detail__table spx-cierre-detail__table--inner">
+                        <colgroup>
+                          <col style="width:110px">
+                          <col style="width:110px">
+                          <col style="width:140px">
+                          <col style="width:130px">
+                          <col>
+                          <col style="width:110px">
+                        </colgroup>
+                        <thead>
+                          <tr>
+                            <th>Código</th>
+                            <th>Tipo</th>
+                            <th>Cliente</th>
+                            <th>Método de Pago</th>
+                            <th>Productos</th>
+                            <th class="text-right">Valor</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (v of reporteDetalle.listaVentas; track v.ventaId) {
+                            <tr>
+                              <td class="spx-rpt__id">{{ v.codigo }}</td>
+                              <td>
+                                <span class="spx-rpt__badge"
+                                  [class.spx-rpt__badge--blue]="v.tipoVenta === 'DOMICILIO'"
+                                  [class.spx-rpt__badge--purple]="v.tipoVenta === 'LLEVAR'"
+                                  [class.spx-rpt__badge--gray]="v.tipoVenta === 'LOCAL'">
+                                  {{ v.tipoVenta }}
+                                </span>
+                              </td>
+                              <td>{{ v.cliente || '—' }}</td>
+                              <td>{{ v.metodoPago || '—' }}</td>
+                              <td class="spx-cierre-detail__productos">{{ v.productos?.join(', ') || '—' }}</td>
+                              <td class="text-right spx-rpt__money">$ {{ fmt(v.valor) }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  } @else {
+                    <p class="spx-cierre-detail__empty-inline">Sin ventas registradas en esta sesión.</p>
+                  }
+
+                  <!-- Compras de la Sesión -->
+                  <h4 class="spx-cierre-detail__section">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    Compras de la Sesión
+                    <span class="spx-cierre-detail__count">{{ reporteDetalle.listaCompras?.length || 0 }}</span>
+                  </h4>
+                  @if (reporteDetalle.listaCompras?.length) {
+                    <div class="spx-cierre-detail__scroll">
+                      <table class="spx-rpt__table spx-cierre-detail__table spx-cierre-detail__table--inner">
+                        <colgroup>
+                          <col style="width:120px">
+                          <col>
+                          <col style="width:100px">
+                          <col style="width:130px">
+                          <col style="width:130px">
+                        </colgroup>
+                        <thead>
+                          <tr>
+                            <th>Código</th>
+                            <th>Insumo</th>
+                            <th class="text-right">Cantidad</th>
+                            <th class="text-right">Valor Unitario</th>
+                            <th class="text-right">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (c of reporteDetalle.listaCompras; track c.id) {
+                            <tr>
+                              <td class="spx-rpt__id">{{ c.codigo }}</td>
+                              <td>{{ c.insumo?.descripcion || '—' }}</td>
+                              <td class="text-right">{{ c.cantidad }}</td>
+                              <td class="text-right">$ {{ fmt(c.valorUnidad) }}</td>
+                              <td class="text-right spx-rpt__money">$ {{ fmt(c.valorTotal) }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  } @else {
+                    <p class="spx-cierre-detail__empty-inline">Sin compras registradas en esta sesión.</p>
+                  }
+
                   <!-- Métodos de pago -->
                   @if (reporteDetalle.metodosPago?.length) {
-                    <h4 class="spx-cierre-detail__section">Métodos de Pago</h4>
-                    <table class="spx-rpt__table spx-cierre-detail__table">
-                      <thead>
-                        <tr>
-                          <th>Método</th>
-                          <th class="text-right">Saldo Inicial</th>
-                          <th class="text-right">Ingresos</th>
-                          <th class="text-right">Egresos</th>
-                          <th class="text-right">Saldo Final</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @for (mp of reporteDetalle.metodosPago; track mp.formaPagoId) {
+                    <h4 class="spx-cierre-detail__section">
+                      <i class="fa-solid fa-credit-card"></i>
+                      Métodos de Pago
+                    </h4>
+                    <div class="spx-cierre-detail__scroll">
+                      <table class="spx-rpt__table spx-cierre-detail__table spx-cierre-detail__table--inner">
+                        <colgroup>
+                          <col>
+                          <col style="width:130px">
+                          <col style="width:130px">
+                          <col style="width:130px">
+                          <col style="width:130px">
+                        </colgroup>
+                        <thead>
                           <tr>
-                            <td>{{ mp.formaPagoNombre }}</td>
-                            <td class="text-right">$ {{ fmt(mp.saldoInicial) }}</td>
-                            <td class="text-right spx-rpt__money">$ {{ fmt(mp.ingresosDelDia) }}</td>
-                            <td class="text-right" style="color:#ef4444">$ {{ fmt(mp.egresosDelDia) }}</td>
-                            <td class="text-right">$ {{ fmt(mp.saldoFinal) }}</td>
+                            <th>Método</th>
+                            <th class="text-right">Saldo Inicial</th>
+                            <th class="text-right">Ingresos</th>
+                            <th class="text-right">Egresos</th>
+                            <th class="text-right">Saldo Final</th>
                           </tr>
-                        }
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          @for (mp of reporteDetalle.metodosPago; track mp.formaPagoId) {
+                            <tr>
+                              <td>{{ mp.formaPagoNombre }}</td>
+                              <td class="text-right">$ {{ fmt(mp.saldoInicial) }}</td>
+                              <td class="text-right spx-rpt__money">$ {{ fmt(mp.ingresosDelDia) }}</td>
+                              <td class="text-right" style="color:#ef4444">$ {{ fmt(mp.egresosDelDia) }}</td>
+                              <td class="text-right">$ {{ fmt(mp.saldoFinal) }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
                   }
 
                   <!-- Insumos -->
                   @if (reporteDetalle.listaInsumos?.length) {
-                    <h4 class="spx-cierre-detail__section">Movimiento de Insumos</h4>
-                    <table class="spx-rpt__table spx-cierre-detail__table">
-                      <thead>
-                        <tr>
-                          <th>Insumo</th>
-                          <th>Medida</th>
-                          <th class="text-right">Stock Inicial</th>
-                          <th class="text-right">Comprado</th>
-                          <th class="text-right">Vendido</th>
-                          <th class="text-right">Stock Final</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @for (ins of reporteDetalle.listaInsumos; track ins.insumoId) {
+                    <h4 class="spx-cierre-detail__section">
+                      <i class="fa-solid fa-boxes-stacked"></i>
+                      Movimiento de Insumos
+                    </h4>
+                    <div class="spx-cierre-detail__scroll">
+                      <table class="spx-rpt__table spx-cierre-detail__table spx-cierre-detail__table--inner">
+                        <colgroup>
+                          <col>
+                          <col style="width:90px">
+                          <col style="width:110px">
+                          <col style="width:110px">
+                          <col style="width:110px">
+                          <col style="width:110px">
+                        </colgroup>
+                        <thead>
                           <tr>
-                            <td>{{ ins.insumoDescripcion }}</td>
-                            <td>{{ ins.medida }}</td>
-                            <td class="text-right">{{ ins.stockInicial }}</td>
-                            <td class="text-right spx-rpt__money">+{{ ins.stockComprado }}</td>
-                            <td class="text-right" style="color:#ef4444">-{{ ins.stockVendido }}</td>
-                            <td class="text-right">{{ ins.stockFinal }}</td>
+                            <th>Insumo</th>
+                            <th>Medida</th>
+                            <th class="text-right">Stock Inicial</th>
+                            <th class="text-right">Comprado</th>
+                            <th class="text-right">Vendido</th>
+                            <th class="text-right">Stock Final</th>
                           </tr>
-                        }
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          @for (ins of reporteDetalle.listaInsumos; track ins.insumoId) {
+                            <tr>
+                              <td>{{ ins.insumoDescripcion }}</td>
+                              <td>{{ ins.medida }}</td>
+                              <td class="text-right">{{ ins.stockInicial }}</td>
+                              <td class="text-right spx-rpt__money">+{{ ins.stockComprado }}</td>
+                              <td class="text-right" style="color:#ef4444">-{{ ins.stockVendido }}</td>
+                              <td class="text-right">{{ ins.stockFinal }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
                   }
                 }
               </div>

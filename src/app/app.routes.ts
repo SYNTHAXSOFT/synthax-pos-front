@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { HomePageComponent } from './shared/pages/home-page/home-page.component';
+import { DefaultRedirectComponent } from './shared/pages/default-redirect/default-redirect.component';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { RoleGuard } from './auth/guards/role.guard';
 import { CajaGuard } from './caja/guards/caja.guard';
@@ -34,8 +35,8 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
 
-      // ── Inicio ──────────────────────────────────────────────────────────────
-      { path: '', pathMatch: 'full', redirectTo: 'inicio' },
+      // ── Redirect inteligente: redirige según el rol del usuario ─────────────
+      { path: '', pathMatch: 'full', component: DefaultRedirectComponent },
       {
         path: 'inicio',
         title: 'Inicio',
@@ -43,7 +44,20 @@ export const routes: Routes = [
           import('./shared/pages/inicio-page/inicio-page.component').then(
             (m) => m.InicioPageComponent
           ),
-        data: { hideForRoles: ['ROOT'] },
+        // COCINERO no necesita el panel de control — su flujo empieza en Ventas
+        data: { hideForRoles: ['ROOT', 'COCINERO'] },
+      },
+
+      // ── Administración (accesos rápidos a configuración) ─────────────────────
+      {
+        path: 'administracion',
+        title: 'Administración',
+        loadComponent: () =>
+          import('./shared/pages/administracion-page/administracion-page.component').then(
+            (m) => m.AdministracionPageComponent
+          ),
+        canActivate: [RoleGuard, CajaGuard],
+        data: { roles: ['PROPIETARIO', 'ADMINISTRADOR'] },
       },
 
       // ── Administración de usuarios ───────────────────────────────────────────
@@ -53,8 +67,8 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./usuario/usuario.routes').then((m) => m.usuarioRoutes),
         canActivate: [RoleGuard, CajaGuard],
-        // PROPIETARIO puede gestionar el personal de su restaurante
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'] },
+        // PROPIETARIO puede gestionar el personal de su restaurante — oculto del menú (acceso desde Administración)
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideFromMenu: true },
       },
 
       // ── Geografía (solo ROOT) ────────────────────────────────────────────────
@@ -112,7 +126,7 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./compra/compra.routes').then((m) => m.compraRoutes),
         canActivate: [RoleGuard, CajaGuard],
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideForRoles: ['ROOT'] },
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO'], hideForRoles: ['ROOT'] },
       },
       {
         path: 'forma-pago',
@@ -194,8 +208,8 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./pedido/pedido.routes').then((m) => m.pedidoRoutes),
         canActivate: [RoleGuard, CajaGuard],
-        // COCINERO puede ver los pedidos del día
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO'], hideForRoles: ['ROOT'] },
+        // COCINERO puede ver los pedidos del día — oculto del menú (acceso solo desde ventas)
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO'], hideForRoles: ['ROOT'], hideFromMenu: true },
       },
 
       { path: '**', redirectTo: 'inicio' },

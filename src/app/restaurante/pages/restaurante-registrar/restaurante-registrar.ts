@@ -58,6 +58,8 @@ export class RestauranteRegistrarPageComponent implements OnInit {
     logo:        [''],
     telefono:    [''],
     correo:      ['', [Validators.email]],
+    nit:         [''],
+    direccion:   [''],
     descripcion: [''],
     activo:      [true],
   });
@@ -80,6 +82,8 @@ export class RestauranteRegistrarPageComponent implements OnInit {
                   logo:        r.logo,
                   telefono:    r.telefono,
                   correo:      r.correo,
+                  nit:         r.nit,
+                  direccion:   r.direccion,
                   descripcion: r.descripcion,
                   activo:      r.activo,
                 });
@@ -165,6 +169,8 @@ export class RestauranteRegistrarPageComponent implements OnInit {
       logo:         v.logo || undefined,
       telefono:     v.telefono || undefined,
       correo:       v.correo || undefined,
+      nit:          v.nit     || undefined,
+      direccion:    v.direccion || undefined,
       descripcion:  v.descripcion || undefined,
       activo:       v.activo,
       propietarios: this.propietariosAsignados.map(p => ({ id: p.id! })),

@@ -45,7 +45,11 @@ export class CajaGuard implements CanActivate {
 
   private evaluarEstado(abierta: boolean): boolean {
     if (abierta) return true;
-    this.router.navigate(['/synthax-pos/inicio']);
+    // COCINERO no tiene página de inicio — redirigir a ventas donde verá el aviso
+    const rutaFallback = this.authService.hasRole(['COCINERO'])
+      ? '/synthax-pos/venta/listar'
+      : '/synthax-pos/inicio';
+    this.router.navigate([rutaFallback]);
     return false;
   }
 }

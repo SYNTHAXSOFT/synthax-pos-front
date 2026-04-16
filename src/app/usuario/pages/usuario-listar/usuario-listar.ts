@@ -1,6 +1,7 @@
 import { Component, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { UsuarioService } from '../../services/usuario.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Usuario } from '../../interfaces/usuario.interface';
@@ -19,6 +20,7 @@ export class ListarPage implements OnInit {
   private readonly authService    = inject(AuthService);
   private readonly toastService   = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly router         = inject(Router);
 
   @Input() modoModal: boolean = false;
   @Output() nuevoUsuario  = new EventEmitter<void>();
@@ -129,7 +131,19 @@ export class ListarPage implements OnInit {
   }
 
   editar(id: number): void {
+    if (!this.modoModal) {
+      this.router.navigate(['/synthax-pos/usuario/actualizar', id]);
+      return;
+    }
     this.editarUsuario.emit(id);
+  }
+
+  nuevoUsuarioAction(): void {
+    if (!this.modoModal) {
+      this.router.navigate(['/synthax-pos/usuario/registrar']);
+      return;
+    }
+    this.nuevoUsuario.emit();
   }
 
   async activarInactivar(usuario: Usuario): Promise<void> {

@@ -1,0 +1,238 @@
+<div class="spx-admin">
+
+  <div class="spx-admin__header">
+    <div>
+      <h2 class="spx-admin__title"><i class="fa-solid fa-screwdriver-wrench"></i> Administración</h2>
+      <p class="spx-admin__subtitle">Gestión de configuración y catálogos del sistema</p>
+    </div>
+  </div>
+
+  <div class="spx-admin__grid">
+
+    <a routerLink="/synthax-pos/producto/registrar" class="spx-admin-card spx-admin-card--blue">
+      <div class="spx-admin-card__icon"><i class="fa-solid fa-box-open"></i></div>
+      <div class="spx-admin-card__info">
+        <p class="spx-admin-card__name">Productos</p>
+        <p class="spx-admin-card__desc">Gestionar catálogo de productos</p>
+      </div>
+      <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
+    </a>
+
+    <a routerLink="/synthax-pos/insumo/registrar" class="spx-admin-card spx-admin-card--amber">
+      <div class="spx-admin-card__icon"><i class="fa-solid fa-warehouse"></i></div>
+      <div class="spx-admin-card__info">
+        <p class="spx-admin-card__name">Insumos / Inventario</p>
+        <p class="spx-admin-card__desc">Insumos y stock del almacén</p>
+      </div>
+      <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
+    </a>
+
+    <a routerLink="/synthax-pos/cliente/listar" class="spx-admin-card spx-admin-card--green">
+      <div class="spx-admin-card__icon"><i class="fa-solid fa-user-tie"></i></div>
+      <div class="spx-admin-card__info">
+        <p class="spx-admin-card__name">Clientes</p>
+        <p class="spx-admin-card__desc">Gestionar base de clientes</p>
+      </div>
+      <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
+    </a>
+
+    <a routerLink="/synthax-pos/mesa/registrar" class="spx-admin-card spx-admin-card--purple">
+      <div class="spx-admin-card__icon"><i class="fa-solid fa-chair"></i></div>
+      <div class="spx-admin-card__info">
+        <p class="spx-admin-card__name">Mesas</p>
+        <p class="spx-admin-card__desc">Configurar mesas del salón</p>
+      </div>
+      <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
+    </a>
+
+    <a routerLink="/synthax-pos/forma-pago/listar" class="spx-admin-card spx-admin-card--green">
+      <div class="spx-admin-card__icon"><i class="fa-solid fa-wallet"></i></div>
+      <div class="spx-admin-card__info">
+        <p class="spx-admin-card__name">Formas de Pago</p>
+        <p class="spx-admin-card__desc">Gestionar métodos de cobro</p>
+      </div>
+      <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
+    </a>
+
+    <a routerLink="/synthax-pos/tipo-pedido/registrar" class="spx-admin-card spx-admin-card--amber">
+      <div class="spx-admin-card__icon"><i class="fa-solid fa-tags"></i></div>
+      <div class="spx-admin-card__info">
+        <p class="spx-admin-card__name">Tipos de Pedido</p>
+        <p class="spx-admin-card__desc">Canales de venta (local, domicilio…)</p>
+      </div>
+      <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
+    </a>
+
+    <a routerLink="/synthax-pos/impuesto/registrar" class="spx-admin-card spx-admin-card--rose">
+      <div class="spx-admin-card__icon"><i class="fa-solid fa-percent"></i></div>
+      <div class="spx-admin-card__info">
+        <p class="spx-admin-card__name">Impuestos</p>
+        <p class="spx-admin-card__desc">Configurar tarifas tributarias</p>
+      </div>
+      <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
+    </a>
+
+    <a routerLink="/synthax-pos/identidad-visual" class="spx-admin-card spx-admin-card--purple">
+      <div class="spx-admin-card__icon"><i class="fa-solid fa-palette"></i></div>
+      <div class="spx-admin-card__info">
+        <p class="spx-admin-card__name">Identidad Visual</p>
+        <p class="spx-admin-card__desc">Logo y colores del restaurante</p>
+      </div>
+      <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
+    </a>
+
+    <a routerLink="/synthax-pos/usuario/listar" class="spx-admin-card spx-admin-card--blue">
+      <div class="spx-admin-card__icon"><i class="fa-solid fa-users"></i></div>
+      <div class="spx-admin-card__info">
+        <p class="spx-admin-card__name">Usuarios</p>
+        <p class="spx-admin-card__desc">Gestionar personal del sistema</p>
+      </div>
+      <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
+    </a>
+
+  </div>
+
+</div>
+
+<style>
+:host {
+  --spx-bg:         #101922;
+  --spx-surface:    #1a242f;
+  --spx-border:     #283543;
+  --spx-primary:    #0d7ff2;
+  --spx-text:       #f1f5f9;
+  --spx-text-muted: #64748b;
+  --spx-text-sub:   #94a3b8;
+  --spx-radius:     0.75rem;
+  --spx-radius-sm:  0.5rem;
+  display: block;
+}
+
+.spx-admin {
+  padding: 2rem;
+  min-height: 100%;
+  background: var(--spx-bg);
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--spx-text);
+}
+
+.spx-admin__header {
+  margin-bottom: 1.75rem;
+}
+
+.spx-admin__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--spx-text);
+  margin: 0 0 0.25rem;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.spx-admin__title i { color: var(--spx-primary); }
+
+.spx-admin__subtitle {
+  font-size: 0.82rem;
+  color: var(--spx-text-muted);
+  margin: 0;
+}
+
+.spx-admin__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.875rem;
+}
+
+.spx-admin-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--spx-surface);
+  border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius);
+  padding: 1.125rem 1.25rem;
+  text-decoration: none;
+  transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+  position: relative;
+  overflow: hidden;
+}
+
+.spx-admin-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.spx-admin-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.spx-admin-card--blue   { color: #3b82f6; border-color: rgba(59,130,246,0.2); }
+.spx-admin-card--blue:hover   { border-color: rgba(59,130,246,0.5); }
+.spx-admin-card--green  { color: #22c55e; border-color: rgba(34,197,94,0.2); }
+.spx-admin-card--green:hover  { border-color: rgba(34,197,94,0.5); }
+.spx-admin-card--amber  { color: #f59e0b; border-color: rgba(245,158,11,0.2); }
+.spx-admin-card--amber:hover  { border-color: rgba(245,158,11,0.5); }
+.spx-admin-card--purple { color: #a855f7; border-color: rgba(168,85,247,0.2); }
+.spx-admin-card--purple:hover { border-color: rgba(168,85,247,0.5); }
+.spx-admin-card--rose   { color: #f43f5e; border-color: rgba(244,63,94,0.2); }
+.spx-admin-card--rose:hover   { border-color: rgba(244,63,94,0.5); }
+
+.spx-admin-card__icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--spx-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.spx-admin-card--blue   .spx-admin-card__icon { background: rgba(59,130,246,0.12);  color: #3b82f6; }
+.spx-admin-card--green  .spx-admin-card__icon { background: rgba(34,197,94,0.12);   color: #22c55e; }
+.spx-admin-card--amber  .spx-admin-card__icon { background: rgba(245,158,11,0.12);  color: #f59e0b; }
+.spx-admin-card--purple .spx-admin-card__icon { background: rgba(168,85,247,0.12);  color: #a855f7; }
+.spx-admin-card--rose   .spx-admin-card__icon { background: rgba(244,63,94,0.12);   color: #f43f5e; }
+
+.spx-admin-card__info { flex: 1; min-width: 0; }
+
+.spx-admin-card__name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--spx-text);
+  margin: 0 0 0.2rem;
+}
+
+.spx-admin-card__desc {
+  font-size: 0.75rem;
+  color: var(--spx-text-muted);
+  margin: 0;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spx-admin-card__arrow {
+  font-size: 0.75rem;
+  color: var(--spx-text-muted);
+  flex-shrink: 0;
+  transition: transform 0.18s, color 0.18s;
+}
+
+.spx-admin-card:hover .spx-admin-card__arrow {
+  transform: translateX(3px);
+  color: currentColor;
+}
+
+@media (max-width: 640px) {
+  .spx-admin { padding: 1.25rem; }
+  .spx-admin__grid { grid-template-columns: 1fr; }
+}
+</style>

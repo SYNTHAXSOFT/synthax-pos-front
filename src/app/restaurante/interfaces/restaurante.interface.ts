@@ -13,6 +13,8 @@ export interface Restaurante {
   logo?:            string | null;
   telefono?:        string;
   correo?:          string;
+  nit?:             string;
+  direccion?:       string;
   descripcion?:     string;
   propietario?:     UsuarioPropietario;
   propietarios?:    UsuarioPropietario[];
@@ -32,6 +34,8 @@ export interface RestauranteRequest {
   logo?:           string | null;
   telefono?:       string;
   correo?:         string;
+  nit?:            string;
+  direccion?:      string;
   descripcion?:    string;
   propietario?:    { id: number };
   propietarios?:   { id: number }[];

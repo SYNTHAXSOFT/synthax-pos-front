@@ -1,7 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AuthService } from '../../../auth/services/auth.service';
 import { VentaService } from '../../../venta/services/venta.service';
 import { CompraService } from '../../../compra/services/compra.service';
@@ -47,6 +48,10 @@ export class InicioPageComponent implements OnInit {
   public mostrarApertura    = false;
   public mostrarCierre      = false;
 
+  /** Fecha de apertura de la sesión activa. Cuando está disponible, las métricas
+   *  se calculan desde este momento en lugar del inicio del día. */
+  public fechaApertura: Date | null = null;
+
   get userName(): string {
     const user = this.authService.getCurrentUser();
     if (!user) return 'Usuario';
@@ -62,21 +67,34 @@ export class InicioPageComponent implements OnInit {
     return this.authService.hasRole(['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO']);
   }
 
-  // ── Helpers de fecha ──────────────────────────────────────────────────────
-
-  private esHoy(fechaStr?: string): boolean {
-    if (!fechaStr) return false;
-    const hoy  = new Date();
-    const fecha = new Date(fechaStr);
-    return fecha.getFullYear() === hoy.getFullYear()
-        && fecha.getMonth()    === hoy.getMonth()
-        && fecha.getDate()     === hoy.getDate();
+  /** Solo roles administrativos pueden gestionar formas de pago. */
+  get puedeGestionarFormasPago(): boolean {
+    return this.authService.hasRole(['ROOT', 'PROPIETARIO', 'ADMINISTRADOR']);
   }
 
-  // ── Ventas del día ────────────────────────────────────────────────────────
+  /** Accesos rápidos solo para roles administrativos. */
+  get puedeVerAccesosRapidos(): boolean {
+    return this.authService.hasRole(['ROOT', 'PROPIETARIO', 'ADMINISTRADOR']);
+  }
+
+  // ── Helpers de fecha ──────────────────────────────────────────────────────
+
+  /**
+   * Retorna true si la fecha es posterior o igual al inicio del período actual.
+   * Si hay una sesión de caja abierta, el período arranca desde la apertura.
+   * Si no, se usa el inicio del día (00:00:00).
+   */
+  private esDesdeApertura(fechaStr?: string): boolean {
+    if (!fechaStr) return false;
+    // Si la caja está cerrada no hay sesión activa: los contadores deben quedar en cero.
+    if (!this.cajaAbierta || !this.fechaApertura) return false;
+    return new Date(fechaStr) >= this.fechaApertura;
+  }
+
+  // ── Ventas del período (desde apertura de caja) ───────────────────────────
 
   get ventasHoy(): Venta[] {
-    return this.ventas.filter(v => this.esHoy(v.fechaCreacion));
+    return this.ventas.filter(v => this.esDesdeApertura(v.fechaCreacion));
   }
 
   get ventasHoyPagadas(): Venta[] {
@@ -95,21 +113,21 @@ export class InicioPageComponent implements OnInit {
     return this.ventasHoyPagadas.reduce((s, v) => s + (v.valorTotal ?? 0), 0);
   }
 
-  // ── Compras del día ───────────────────────────────────────────────────────
+  // ── Compras del período (desde apertura de caja) ─────────────────────────
 
   get comprasHoy(): Compra[] {
-    return this.compras.filter(c => this.esHoy(c.fechaCreacion) && c.activo !== false);
+    return this.compras.filter(c => this.esDesdeApertura(c.fechaCreacion) && c.activo !== false);
   }
 
   get totalComprasHoy(): number {
     return this.comprasHoy.reduce((s, c) => s + (c.valorTotal ?? 0), 0);
   }
 
-  // ── Pedidos devueltos del día ─────────────────────────────────────────────
+  // ── Pedidos devueltos del período (desde apertura de caja) ───────────────
 
   get pedidosDevueltosHoy(): number {
     return this.pedidos.filter(p =>
-      p.estado === 'DEVUELTO' && this.esHoy(p.fechaCreacion)
+      p.estado === 'DEVUELTO' && this.esDesdeApertura(p.fechaCreacion)
     ).length;
   }
 
@@ -120,16 +138,24 @@ export class InicioPageComponent implements OnInit {
 
     // Cargar estado de caja y datos del dashboard en paralelo
     const dataSources: any = {
-      ventas:     this.ventaService.obtenerTodos(),
-      compras:    restauranteId
+      ventas:     this.ventaService.obtenerTodos().pipe(
+                    catchError(() => of([]))),
+      compras:    (restauranteId
                     ? this.compraService.obtenerPorRestaurante(restauranteId)
-                    : this.compraService.obtenerTodas(),
-      formasPago: this.formaPagoService.obtenerActivas(),
-      pedidos:    this.pedidoService.obtenerTodos(),
+                    : this.compraService.obtenerTodas()).pipe(
+                    catchError(() => of([]))),
+      formasPago: this.formaPagoService.obtenerActivas().pipe(
+                    catchError(() => of([]))),
+      pedidos:    this.pedidoService.obtenerTodos().pipe(
+                    catchError(() => of([]))),
     };
 
     if (this.puedeOperarCaja) {
-      dataSources['cajaEstado'] = this.cajaService.obtenerEstado();
+      // catchError: si el endpoint falla (ej. cajero sin restaurante asignado)
+      // no rompe el forkJoin — simplemente marca la caja como cerrada.
+      dataSources['cajaEstado'] = this.cajaService.obtenerEstado().pipe(
+        catchError(() => of({ abierta: false, sesion: null }))
+      );
     }
 
     forkJoin(dataSources).subscribe({
@@ -142,6 +168,9 @@ export class InicioPageComponent implements OnInit {
         if (res['cajaEstado']) {
           this.cajaAbierta = res['cajaEstado'].abierta;
           this.cajaSesion  = res['cajaEstado'].sesion;
+          this.fechaApertura = this.cajaSesion?.fechaApertura
+            ? new Date(this.cajaSesion.fechaApertura)
+            : null;
         }
 
         this.cargando = false;
@@ -159,6 +188,7 @@ export class InicioPageComponent implements OnInit {
     this.cajaSesion      = sesion;
     this.cajaAbierta     = true;
     this.mostrarApertura = false;
+    this.fechaApertura   = sesion.fechaApertura ? new Date(sesion.fechaApertura) : null;
     this.recargarDatos();
   }
 
@@ -166,6 +196,7 @@ export class InicioPageComponent implements OnInit {
     this.cajaAbierta   = false;
     this.cajaSesion    = null;
     this.mostrarCierre = false;
+    this.fechaApertura = null;
     this.recargarDatos();
   }
 

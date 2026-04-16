@@ -93,6 +93,7 @@ export class SideMenuOptionsComponent {
     if (n.includes('cliente'))           return 'fa-solid fa-user-tie';
     if (n.includes('forma'))             return 'fa-solid fa-wallet';
     if (n.includes('pago'))              return 'fa-solid fa-wallet';
+    if (n.includes('administr'))         return 'fa-solid fa-screwdriver-wrench';
     return 'fa-solid fa-circle-dot';
   }
 }

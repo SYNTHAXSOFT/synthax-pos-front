@@ -200,251 +200,35 @@
       </div>
     </div>
 
-    <!-- ── Main Grid ─────────────────────────────────────────── -->
-    <div class="spx-main-grid">
-
-      <!-- ═══ Columna izquierda ════════════════════════════════ -->
-      <div class="spx-main-grid__left">
-
-        <!-- Resumen de ventas del día -->
-        <div class="spx-panel">
-          <div class="spx-panel__header">
-            <h3 class="spx-panel__title">
-              <i class="fa-solid fa-chart-pie"></i> Resumen de Ventas — Hoy
-            </h3>
-            <a routerLink="/synthax-pos/venta" class="spx-link">Ver todas</a>
-          </div>
-
-          <div class="spx-stat-grid">
-            <div class="spx-stat-item spx-stat-item--paid">
-              <i class="fa-solid fa-circle-check"></i>
-              <div>
-                <span class="spx-stat-item__val">{{ ventasHoyPagadas.length }}</span>
-                <span class="spx-stat-item__lbl">Pagadas</span>
-              </div>
-            </div>
-            <div class="spx-stat-item spx-stat-item--open">
-              <i class="fa-solid fa-lock-open"></i>
-              <div>
-                <span class="spx-stat-item__val">{{ ventasHoyAbiertas.length }}</span>
-                <span class="spx-stat-item__lbl">Abiertas</span>
-              </div>
-            </div>
-            <div class="spx-stat-item spx-stat-item--void">
-              <i class="fa-solid fa-ban"></i>
-              <div>
-                <span class="spx-stat-item__val">{{ ventasHoyAnuladas.length }}</span>
-                <span class="spx-stat-item__lbl">Anuladas</span>
-              </div>
-            </div>
-            <div class="spx-stat-item spx-stat-item--devuelto">
-              <i class="fa-solid fa-rotate-left"></i>
-              <div>
-                <span class="spx-stat-item__val">{{ pedidosDevueltosHoy }}</span>
-                <span class="spx-stat-item__lbl">Devueltos</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Últimas ventas del día -->
-        <div class="spx-panel" style="margin-top:1.25rem;">
-          <div class="spx-panel__header">
-            <h3 class="spx-panel__title">
-              <i class="fa-solid fa-clock-rotate-left"></i> Ventas Recientes
-            </h3>
-            <a routerLink="/synthax-pos/venta" class="spx-link">Ver todas</a>
-          </div>
-
-          @if (ventasHoy.length === 0) {
-            <div class="spx-empty-row">
-              <i class="fa-solid fa-receipt"></i>
-              <span>Aún no hay ventas hoy</span>
-            </div>
-          } @else {
-            <div class="spx-venta-list">
-              @for (v of ventasHoy.slice().reverse().slice(0, 6); track v.id) {
-                <div class="spx-venta-item">
-                  <div class="spx-venta-item__left">
-                    <span class="spx-venta-item__id">#{{ v.id }}</span>
-                    <span class="spx-venta-item__tipo">{{ v.tipoPedido?.nombre ?? '—' }}</span>
-                    @if (v.mesa?.nombre) {
-                      <span class="spx-venta-item__mesa">
-                        <i class="fa-solid fa-chair"></i> {{ v.mesa!.nombre }}
-                      </span>
-                    }
-                  </div>
-                  <div class="spx-venta-item__right">
-                    @if (v.valorTotal && v.valorTotal > 0) {
-                      <span class="spx-venta-item__val">$ {{ fmt(v.valorTotal) }}</span>
-                    }
-                    <span class="spx-venta-badge-sm"
-                      [class.spx-venta-badge-sm--paid]="v.estado==='PAGADA'"
-                      [class.spx-venta-badge-sm--open]="v.estado==='ABIERTA'"
-                      [class.spx-venta-badge-sm--void]="v.estado==='ANULADA'">
-                      {{ v.estado }}
-                    </span>
-                  </div>
-                </div>
-              }
-            </div>
-          }
-        </div>
-
-      </div>
-
-      <!-- ═══ Columna derecha ══════════════════════════════════ -->
-      <div class="spx-main-grid__right">
-
-        <!-- Métodos de pago con saldos -->
-        <div class="spx-panel">
-          <div class="spx-panel__header">
-            <h3 class="spx-panel__title">
+    <!-- ── Métodos de Pago ─────────────────────────────────────── -->
+    @if (formasPago.length > 0) {
+      <div class="spx-metodos-section">
+        <div class="spx-metodos-section__header">
+          <div>
+            <h3 class="spx-reports__title">
               <i class="fa-solid fa-wallet"></i> Métodos de Pago
             </h3>
+            <p class="spx-reports__subtitle">Saldos actuales por forma de pago</p>
+          </div>
+          @if (puedeGestionarFormasPago) {
             <a routerLink="/synthax-pos/forma-pago" class="spx-link">Gestionar</a>
-          </div>
-
-          @if (formasPago.length === 0) {
-            <div class="spx-empty-row">
-              <i class="fa-solid fa-wallet"></i>
-              <span>No hay métodos de pago activos</span>
-            </div>
-          } @else {
-            <div class="spx-fp-list">
-              @for (fp of formasPago; track fp.id) {
-                <div class="spx-fp-item">
-                  <div class="spx-fp-item__left">
-                    <div class="spx-fp-item__icon"><i class="fa-solid fa-money-bill-wave"></i></div>
-                    <span class="spx-fp-item__nombre">{{ fp.nombre }}</span>
-                  </div>
-                  <span class="spx-fp-item__saldo">$ {{ fmt(fp.saldoActual ?? 0) }}</span>
-                </div>
-              }
+          }
+        </div>
+        <div class="spx-reports__grid">
+          @for (fp of formasPago; track fp.id) {
+            <div class="spx-report-card spx-pago-card">
+              <div class="spx-report-card__icon spx-pago-card__icon">
+                <i class="fa-solid fa-money-bill-wave"></i>
+              </div>
+              <div class="spx-report-card__info">
+                <p class="spx-report-card__name">{{ fp.nombre }}</p>
+                <p class="spx-pago-card__saldo">$ {{ fmt(fp.saldoActual ?? 0) }}</p>
+              </div>
             </div>
           }
         </div>
-
-        <!-- Compras del día -->
-        <div class="spx-panel" style="margin-top:1.25rem;">
-          <div class="spx-panel__header">
-            <h3 class="spx-panel__title">
-              <i class="fa-solid fa-cart-flatbed"></i> Compras de Hoy
-            </h3>
-            <a routerLink="/synthax-pos/compra" class="spx-link">Ver todas</a>
-          </div>
-
-          @if (comprasHoy.length === 0) {
-            <div class="spx-empty-row">
-              <i class="fa-solid fa-cart-flatbed"></i>
-              <span>Sin compras registradas hoy</span>
-            </div>
-          } @else {
-            <div class="spx-fp-list">
-              @for (c of comprasHoy.slice(0, 5); track c.id) {
-                <div class="spx-fp-item">
-                  <div class="spx-fp-item__left">
-                    <div class="spx-fp-item__icon spx-fp-item__icon--amber">
-                      <i class="fa-solid fa-boxes-stacked"></i>
-                    </div>
-                    <span class="spx-fp-item__nombre">{{ c.insumo?.descripcion ?? c.codigo ?? '—' }}</span>
-                  </div>
-                  <span class="spx-fp-item__saldo">$ {{ fmt(c.valorTotal ?? 0) }}</span>
-                </div>
-              }
-              @if (comprasHoy.length > 5) {
-                <p class="spx-fp-more">+{{ comprasHoy.length - 5 }} más</p>
-              }
-            </div>
-          }
-        </div>
-
-        <!-- Accesos rápidos -->
-        <div class="spx-panel" style="margin-top:1.25rem;">
-          <div class="spx-panel__header">
-            <h3 class="spx-panel__title">
-              <i class="fa-solid fa-bolt"></i> Accesos Rápidos
-            </h3>
-          </div>
-          <div class="spx-shortcuts">
-            <a routerLink="/synthax-pos/pedido/registrar" class="spx-shortcut">
-              <div class="spx-shortcut__icon"><i class="fa-solid fa-receipt"></i></div>
-              <div class="spx-shortcut__info">
-                <p class="spx-shortcut__name">Pedidos</p>
-                <p class="spx-shortcut__desc">Gestionar pedidos activos</p>
-              </div>
-              <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
-            </a>
-            <a routerLink="/synthax-pos/producto" class="spx-shortcut">
-              <div class="spx-shortcut__icon"><i class="fa-solid fa-box-open"></i></div>
-              <div class="spx-shortcut__info">
-                <p class="spx-shortcut__name">Productos</p>
-                <p class="spx-shortcut__desc">Gestionar catálogo</p>
-              </div>
-              <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
-            </a>
-            <a routerLink="/synthax-pos/insumo" class="spx-shortcut">
-              <div class="spx-shortcut__icon"><i class="fa-solid fa-warehouse"></i></div>
-              <div class="spx-shortcut__info">
-                <p class="spx-shortcut__name">Inventario</p>
-                <p class="spx-shortcut__desc">Insumos y stock</p>
-              </div>
-              <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
-            </a>
-            <a routerLink="/synthax-pos/cliente" class="spx-shortcut">
-              <div class="spx-shortcut__icon"><i class="fa-solid fa-user-tie"></i></div>
-              <div class="spx-shortcut__info">
-                <p class="spx-shortcut__name">Clientes</p>
-                <p class="spx-shortcut__desc">Gestionar clientes</p>
-              </div>
-              <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
-            </a>
-            <a routerLink="/synthax-pos/mesa" class="spx-shortcut">
-              <div class="spx-shortcut__icon"><i class="fa-solid fa-chair"></i></div>
-              <div class="spx-shortcut__info">
-                <p class="spx-shortcut__name">Mesas</p>
-                <p class="spx-shortcut__desc">Configurar mesas</p>
-              </div>
-              <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
-            </a>
-            <a routerLink="/synthax-pos/forma-pago" class="spx-shortcut">
-              <div class="spx-shortcut__icon"><i class="fa-solid fa-wallet"></i></div>
-              <div class="spx-shortcut__info">
-                <p class="spx-shortcut__name">Formas de Pago</p>
-                <p class="spx-shortcut__desc">Gestionar métodos</p>
-              </div>
-              <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
-            </a>
-            <a routerLink="/synthax-pos/tipo-pedido" class="spx-shortcut">
-              <div class="spx-shortcut__icon"><i class="fa-solid fa-tags"></i></div>
-              <div class="spx-shortcut__info">
-                <p class="spx-shortcut__name">Tipos de Pedido</p>
-                <p class="spx-shortcut__desc">Canales de venta</p>
-              </div>
-              <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
-            </a>
-            <a routerLink="/synthax-pos/impuesto" class="spx-shortcut">
-              <div class="spx-shortcut__icon"><i class="fa-solid fa-percent"></i></div>
-              <div class="spx-shortcut__info">
-                <p class="spx-shortcut__name">Impuestos</p>
-                <p class="spx-shortcut__desc">Configurar tarifas</p>
-              </div>
-              <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
-            </a>
-            <a routerLink="/synthax-pos/identidad-visual" class="spx-shortcut">
-              <div class="spx-shortcut__icon"><i class="fa-solid fa-palette"></i></div>
-              <div class="spx-shortcut__info">
-                <p class="spx-shortcut__name">Identidad Visual</p>
-                <p class="spx-shortcut__desc">Logo y colores</p>
-              </div>
-              <i class="fa-solid fa-chevron-right spx-shortcut__arrow"></i>
-            </a>
-          </div>
-        </div>
-
       </div>
-
-    </div>
+    }
 
   }
 

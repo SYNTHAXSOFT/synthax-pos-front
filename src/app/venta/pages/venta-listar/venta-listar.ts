@@ -41,6 +41,9 @@ export class VentaListarPageComponent implements OnInit {
   public estadoFiltro: string  = '';
   public readonly estadosVenta = ESTADOS_VENTA;
 
+  /** IDs de ventas que tienen al menos un pedido en estado PEDIDO o DEVUELTO (para filtro de COCINERO). */
+  public ventaIdsCocinero: Set<number> = new Set();
+
   /** Rango de fechas para PROPIETARIO y ADMINISTRADOR */
   public fechaDesde: string = '';
   public fechaHasta: string = '';
@@ -69,6 +72,13 @@ export class VentaListarPageComponent implements OnInit {
         const hasta = new Date(this.fechaHasta + 'T23:59:59');
         lista = lista.filter(v => v.fechaCreacion ? new Date(v.fechaCreacion) <= hasta : false);
       }
+    }
+
+    // COCINERO: solo ventas que tienen al menos un pedido en estado PEDIDO o DEVUELTO
+    if (this.esCocinero && this.ventaIdsCocinero.size > 0) {
+      lista = lista.filter(v => v.id != null && this.ventaIdsCocinero.has(v.id));
+    } else if (this.esCocinero && this.ventaIdsCocinero.size === 0 && !this.cargando) {
+      lista = [];
     }
 
     // Filtro por estado
@@ -193,10 +203,31 @@ export class VentaListarPageComponent implements OnInit {
 
   cargarVentas(): void {
     this.cargando = true;
-    this.ventaService.obtenerTodos().subscribe({
-      next:  (data) => { this.ventas = data; this.cargando = false; },
-      error: (err)  => { console.error('Error al cargar ventas:', err); this.cargando = false; },
-    });
+    if (this.esCocinero) {
+      // Para el cocinero cargamos también los pedidos para filtrar ventas relevantes
+      forkJoin({
+        ventas:  this.ventaService.obtenerTodos(),
+        pedidos: this.pedidoService.obtenerTodos(),
+      }).subscribe({
+        next: ({ ventas, pedidos }) => {
+          this.ventas = ventas;
+          // Ventas que tienen al menos un pedido enviado a cocina o devuelto
+          this.ventaIdsCocinero = new Set(
+            pedidos
+              .filter(p => p.estado === 'PEDIDO' || p.estado === 'DEVUELTO')
+              .map(p => p.venta?.id)
+              .filter((id): id is number => id != null)
+          );
+          this.cargando = false;
+        },
+        error: (err) => { console.error('Error al cargar ventas:', err); this.cargando = false; },
+      });
+    } else {
+      this.ventaService.obtenerTodos().subscribe({
+        next:  (data) => { this.ventas = data; this.cargando = false; },
+        error: (err)  => { console.error('Error al cargar ventas:', err); this.cargando = false; },
+      });
+    }
   }
 
   /** Recarga desde API y mantiene los filtros activos */
@@ -475,6 +506,13 @@ export class VentaListarPageComponent implements OnInit {
       return `${dd}/${mm}/${yy} ${hh}:${min}`;
     };
 
+    /* ── Datos del restaurante ── */
+    const rest = this.authService.getCurrentRestaurante();
+    const restNombre    = rest?.nombre    ?? 'SYNTHAX POS';
+    const restTelefono  = rest?.telefono  ? `<p style="font-size:10px;margin:1px 0;">Tel: ${rest.telefono}</p>` : '';
+    const restDireccion = rest?.direccion ? `<p style="font-size:10px;margin:1px 0;">${rest.direccion}</p>` : '';
+    const restNit       = rest?.nit       ? `<p style="font-size:10px;margin:1px 0;">NIT: ${rest.nit}</p>` : '';
+
     /* ── Bloques de HTML ── */
     const itemsHtml = this.pedidosParaImprimir.map(p => {
       const precio   = p.producto?.precio ?? 0;
@@ -548,8 +586,11 @@ export class VentaListarPageComponent implements OnInit {
 
   <div style="text-align:center;margin-bottom:8px;">
     <div style="font-size:24px;margin-bottom:4px;">&#127869;</div>
-    <h2 style="font-size:16px;font-weight:700;margin:0 0 2px 0;text-transform:uppercase;letter-spacing:2px;">SYNTHAX POS</h2>
-    <p style="font-size:12px;font-weight:600;margin:2px 0;text-transform:uppercase;">${venta.tipoPedido?.nombre ?? ''}</p>
+    <h2 style="font-size:16px;font-weight:700;margin:0 0 2px 0;text-transform:uppercase;letter-spacing:2px;">${restNombre}</h2>
+    ${restNit}
+    ${restTelefono}
+    ${restDireccion}
+    <p style="font-size:12px;font-weight:600;margin:4px 0 0 0;text-transform:uppercase;">${venta.tipoPedido?.nombre ?? ''}</p>
     ${mesaHtml}
   </div>
 
@@ -601,7 +642,7 @@ export class VentaListarPageComponent implements OnInit {
 
   <div style="text-align:center;margin-top:10px;font-size:11px;">
     <p style="margin:2px 0;">¡Gracias por su compra!</p>
-    <p style="margin:2px 0;">SYNTHAX POS</p>
+    <p style="margin:2px 0;">${restNombre}</p>
   </div>
 
 </body></html>`;

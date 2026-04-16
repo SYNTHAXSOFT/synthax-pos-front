@@ -467,6 +467,40 @@
   .spx-dashboard__title { font-size: 1.5rem; }
 }
 
+@media (max-width: 600px) {
+  /* El bloque de título e info ocupa todo el ancho */
+  .spx-dashboard__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.875rem;
+  }
+
+  /* Los botones de acción se apilan en columna */
+  .spx-dashboard__header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  /* Estado "Caja abierta" ocupa el ancho completo y se centra */
+  .spx-caja-status {
+    width: 100%;
+    justify-content: center;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    border-radius: var(--spx-radius);
+  }
+
+  /* Botones de caja y CTA a ancho completo */
+  .spx-btn-caja,
+  .spx-btn-cta {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+  }
+}
+
 /* ── Badge azul (para ventas) ─────────────── */
 .spx-badge--blue { background: rgba(59,130,246,0.12); color: #3b82f6; }
 
@@ -914,4 +948,37 @@
 @media (max-width: 640px) {
   .spx-reports__grid { grid-template-columns: 1fr; }
   .spx-report-card__desc { white-space: normal; }
+}
+
+/* ── Sección Métodos de Pago (estilo reportes) ─── */
+.spx-metodos-section {
+  margin-bottom: 2rem;
+}
+
+.spx-metodos-section__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Tarjeta de método de pago */
+.spx-pago-card {
+  color: #3b82f6;
+  border-color: rgba(59,130,246,0.2);
+  cursor: default;
+}
+.spx-pago-card::before { background: #3b82f6; }
+.spx-pago-card__icon {
+  background: rgba(59,130,246,0.12) !important;
+  color: #3b82f6 !important;
+}
+
+.spx-pago-card__saldo {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #22c55e;
+  margin: 0.2rem 0 0;
 }

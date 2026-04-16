@@ -25,6 +25,8 @@ export interface RestauranteLogin {
   colorFondo?:      string;
   telefono?:        string;
   correo?:          string;
+  nit?:             string;
+  direccion?:       string;
   descripcion?:     string;
 }
 

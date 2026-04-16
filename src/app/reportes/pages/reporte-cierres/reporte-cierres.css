@@ -73,20 +73,80 @@
 }
 
 .spx-cierre-detail__section {
-  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--spx-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 1.25rem 0 0.75rem;
+  letter-spacing: 0.06em;
+  margin: 1.5rem 0 0.6rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--spx-border);
 }
 .spx-cierre-detail__section:first-of-type { margin-top: 0.5rem; }
+.spx-cierre-detail__section i { color: var(--spx-primary); font-size: 0.7rem; }
+
+.spx-cierre-detail__count {
+  margin-left: auto;
+  background: var(--spx-border);
+  color: var(--spx-text-sub);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  letter-spacing: 0;
+}
+
+/* Scroll horizontal para tablas anchas */
+.spx-cierre-detail__scroll {
+  overflow-x: auto;
+  border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius-sm);
+  margin-bottom: 0.25rem;
+}
 
 .spx-cierre-detail__table {
-  border: 1px solid var(--spx-border);
   border-radius: var(--spx-radius-sm);
   overflow: hidden;
   margin-bottom: 0.5rem;
+}
+
+/* Tabla interna del detalle: fondo más oscuro para contrastar con el panel */
+.spx-cierre-detail__table--inner {
+  background: var(--spx-bg);
+}
+
+.spx-cierre-detail__table--inner th {
+  background: rgba(255,255,255,0.04);
+  border-bottom: 2px solid var(--spx-border);
+  border-right: 1px solid var(--spx-border);
+}
+.spx-cierre-detail__table--inner th:last-child { border-right: none; }
+
+.spx-cierre-detail__table--inner td {
+  border-right: 1px solid rgba(40,53,67,0.6);
+  vertical-align: middle;
+}
+.spx-cierre-detail__table--inner td:last-child { border-right: none; }
+
+/* Columna de productos: permite salto de línea */
+.spx-cierre-detail__productos {
+  white-space: normal !important;
+  word-break: break-word;
+  font-size: 0.78rem;
+  color: var(--spx-text-sub);
+  min-width: 160px;
+}
+
+/* Texto vacío inline cuando no hay registros */
+.spx-cierre-detail__empty-inline {
+  font-size: 0.8rem;
+  color: var(--spx-text-muted);
+  padding: 0.5rem 0.25rem 0.75rem;
+  margin: 0;
+  font-style: italic;
 }
 
 /* ── Totales del cierre ────────────────────── */
