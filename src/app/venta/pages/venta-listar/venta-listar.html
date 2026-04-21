@@ -159,6 +159,7 @@
               <th>Factura</th>
               <th>Fecha</th>
               <th>Total</th>
+              <th class="spx-venta-th-center">Soporte</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -201,6 +202,15 @@
                 <td class="spx-venta-td spx-venta-td--total">
                   @if (venta.valorTotal != null && venta.valorTotal > 0) {
                     <span class="spx-venta-total-cell">$ {{ venta.valorTotal | number:'1.0-0' }}</span>
+                  } @else {
+                    <span class="spx-venta-td--muted">—</span>
+                  }
+                </td>
+                <td class="spx-venta-td spx-venta-th-center">
+                  @if (venta.imagenSoporte) {
+                    <button class="spx-venta-img-btn" (click)="verImagen(venta)" title="Ver imagen de soporte">
+                      <i class="fa-solid fa-image"></i>
+                    </button>
                   } @else {
                     <span class="spx-venta-td--muted">—</span>
                   }
@@ -485,6 +495,46 @@
             }
           </div>
 
+          <!-- ── Imagen de soporte (opcional) ──────────── -->
+          <div class="spx-modal__section">
+            <p class="spx-modal__section-title">
+              <i class="fa-solid fa-image"></i>
+              Imagen de soporte
+              <span class="spx-modal__section-hint">opcional</span>
+            </p>
+
+            <!-- Input file oculto -->
+            <input
+              #fileInputVenta
+              type="file"
+              accept="image/*"
+              style="display:none"
+              (change)="onSoporteSeleccionado($event)" />
+
+            @if (!soportePreview) {
+              <!-- Botón para seleccionar -->
+              <button type="button" class="spx-modal__soporte-btn" (click)="abrirSelectorSoporte()">
+                <i class="fa-solid fa-upload"></i>
+                Adjuntar imagen
+              </button>
+            } @else {
+              <!-- Vista previa -->
+              <div class="spx-modal__soporte-preview">
+                <img [src]="soportePreview" alt="Soporte" class="spx-modal__soporte-img" />
+                <div class="spx-modal__soporte-info">
+                  <span class="spx-modal__soporte-nombre">
+                    <i class="fa-solid fa-file-image"></i>
+                    {{ soporteNombre }}
+                  </span>
+                  <button type="button" class="spx-modal__soporte-remove" (click)="quitarSoporte()" title="Quitar imagen">
+                    <i class="fa-solid fa-trash"></i>
+                    Quitar
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+
           <!-- ── Resumen ────────────────────────────────── -->
           <div class="spx-modal__summary">
             <div class="spx-modal__summary-row">
@@ -542,6 +592,39 @@
           }
         </button>
       </div>
+    </div>
+  </div>
+}
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+
+<!-- ══ Lightbox: Imagen de soporte ════════════════════════════════════════ -->
+@if (ventaImagenActiva) {
+  <div class="spx-lightbox" (click)="cerrarImagen()">
+    <div class="spx-lightbox__box" (click)="$event.stopPropagation()">
+
+      <div class="spx-lightbox__header">
+        <div class="spx-lightbox__header-info">
+          <i class="fa-solid fa-image"></i>
+          <span>Soporte · Venta <strong>{{ ventaImagenActiva.codigo ?? '#' + ventaImagenActiva.id }}</strong></span>
+          @if (ventaImagenActiva.fechaCreacion) {
+            <span class="spx-lightbox__fecha">{{ ventaImagenActiva.fechaCreacion | date:'dd/MM/yy HH:mm' }}</span>
+          }
+        </div>
+        <div class="spx-lightbox__actions">
+          <button class="spx-lightbox__btn-download" (click)="descargarImagen(ventaImagenActiva)" title="Descargar imagen">
+            <i class="fa-solid fa-download"></i>
+            Descargar
+          </button>
+          <button class="spx-lightbox__btn-close" (click)="cerrarImagen()" title="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="spx-lightbox__img-wrap">
+        <img [src]="ventaImagenActiva.imagenSoporte" alt="Imagen de soporte" class="spx-lightbox__img" />
+      </div>
+
     </div>
   </div>
 }

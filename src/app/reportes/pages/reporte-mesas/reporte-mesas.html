@@ -1,0 +1,169 @@
+<div class="spx-rpt">
+
+  <!-- Header -->
+  <div class="spx-rpt__header">
+    <a routerLink="/synthax-pos/inicio" class="spx-rpt__back">
+      <i class="fa-solid fa-arrow-left"></i> Volver
+    </a>
+    <div>
+      <h2 class="spx-rpt__title"><i class="fa-solid fa-chair"></i> Estado de Mesas</h2>
+      <p class="spx-rpt__subtitle">
+        Ocupación en tiempo real — mesas con venta abierta vs. disponibles
+        @if (ultimaActualizacion) {
+          · Actualizado {{ fmtHora(ultimaActualizacion.toISOString()) }}
+        }
+      </p>
+    </div>
+    <button class="spx-rpt__refresh" (click)="cargar()" title="Actualizar" [disabled]="cargando">
+      <i class="fa-solid fa-rotate-right" [class.spx-spin]="cargando"></i>
+      Actualizar
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="spx-rpt__filters">
+    <div class="spx-filter-grid">
+      <div class="spx-filter-item">
+        <label>Estado</label>
+        <select [(ngModel)]="filtroEstado">
+          <option value="todas">Todas</option>
+          <option value="ocupada">Ocupadas</option>
+          <option value="disponible">Disponibles</option>
+        </select>
+      </div>
+      <div class="spx-filter-item" style="flex:2">
+        <label>Buscar mesa</label>
+        <input type="text" [(ngModel)]="filtroBusqueda" placeholder="Nombre o código...">
+      </div>
+    </div>
+    <button class="spx-rpt__clear" (click)="limpiarFiltros()">
+      <i class="fa-solid fa-times"></i> Limpiar
+    </button>
+  </div>
+
+  <!-- Loading -->
+  @if (cargando) {
+    <div class="spx-rpt__loading">
+      <div class="spx-rpt__spinner"></div>
+      <p>Cargando estado de mesas...</p>
+    </div>
+  }
+
+  @if (!cargando) {
+
+    <!-- Métricas -->
+    <div class="spx-rpt__metrics">
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-chair" style="color:#94a3b8"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ mesas.length }}</p>
+          <p class="spx-rpt-metric__lbl">Total Activas</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric spx-rpt-metric--red">
+        <i class="fa-solid fa-circle-dot" style="color:#ef4444"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ totalOcupadas }}</p>
+          <p class="spx-rpt-metric__lbl">Ocupadas</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric spx-rpt-metric--green">
+        <i class="fa-solid fa-circle-check" style="color:#22c55e"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ totalDisponibles }}</p>
+          <p class="spx-rpt-metric__lbl">Disponibles</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric">
+        <i class="fa-solid fa-percent" style="color:#a855f7"></i>
+        <div>
+          <p class="spx-rpt-metric__val">
+            {{ mesas.length > 0 ? ((totalOcupadas / mesas.length) * 100 | number:'1.0-0') : 0 }}%
+          </p>
+          <p class="spx-rpt-metric__lbl">Ocupación</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid de mesas -->
+    @if (mesasFiltradas.length === 0) {
+      <div class="spx-rpt__empty">
+        <i class="fa-solid fa-chair"></i>
+        <p>No se encontraron mesas con los filtros aplicados</p>
+      </div>
+    } @else {
+      <div class="spx-mesa-grid">
+        @for (item of mesasFiltradas; track item.mesa.id) {
+          <div class="spx-mesa-card" [class.spx-mesa-card--ocupada]="item.ocupada"
+               [class.spx-mesa-card--disponible]="!item.ocupada">
+
+            <!-- Indicador de estado (top strip) -->
+            <div class="spx-mesa-card__strip"></div>
+
+            <!-- Visual de mesa -->
+            <div class="spx-mesa-card__visual">
+              <div class="spx-mesa-card__icon-wrap">
+                <i class="fa-solid fa-utensils"></i>
+                <span class="spx-mesa-card__num">{{ getMesaNum(item.mesa) }}</span>
+              </div>
+            </div>
+
+            <!-- Info -->
+            <div class="spx-mesa-card__body">
+              <h3 class="spx-mesa-card__name">{{ item.mesa.nombre }}</h3>
+              <code class="spx-mesa-card__code">{{ item.mesa.codigo }}</code>
+            </div>
+
+            <!-- Badge de estado -->
+            <div class="spx-mesa-card__status">
+              @if (item.ocupada) {
+                <span class="spx-mesa-badge spx-mesa-badge--ocupada">
+                  <i class="fa-solid fa-circle"></i> Ocupada
+                </span>
+              } @else {
+                <span class="spx-mesa-badge spx-mesa-badge--disponible">
+                  <i class="fa-solid fa-circle-check"></i> Disponible
+                </span>
+              }
+            </div>
+
+            <!-- Detalle de la venta abierta -->
+            @if (item.ocupada && item.ventaAbierta) {
+              <div class="spx-mesa-card__venta">
+                <div class="spx-mesa-card__venta-row">
+                  <span class="spx-mesa-card__venta-lbl">Venta</span>
+                  <span class="spx-mesa-card__venta-val">
+                    <a [routerLink]="['/synthax-pos/venta']" class="spx-mesa-card__venta-link">
+                      #{{ item.ventaAbierta.id }}
+                    </a>
+                  </span>
+                </div>
+                @if (item.ventaAbierta.valorTotal && item.ventaAbierta.valorTotal > 0) {
+                  <div class="spx-mesa-card__venta-row">
+                    <span class="spx-mesa-card__venta-lbl">Total</span>
+                    <span class="spx-mesa-card__venta-money">$ {{ fmt(item.ventaAbierta.valorTotal) }}</span>
+                  </div>
+                }
+                @if (item.ventaAbierta.usuarioCreador) {
+                  <div class="spx-mesa-card__venta-row">
+                    <span class="spx-mesa-card__venta-lbl">Mesero</span>
+                    <span class="spx-mesa-card__venta-val">
+                      {{ item.ventaAbierta.usuarioCreador.nombre }} {{ item.ventaAbierta.usuarioCreador.apellido }}
+                    </span>
+                  </div>
+                }
+                <div class="spx-mesa-card__venta-row">
+                  <span class="spx-mesa-card__venta-lbl">Desde</span>
+                  <span class="spx-mesa-card__venta-val">{{ fmtHora(item.ventaAbierta.fechaCreacion) }}</span>
+                </div>
+              </div>
+            }
+
+          </div>
+        }
+      </div>
+    }
+
+  }
+
+</div>

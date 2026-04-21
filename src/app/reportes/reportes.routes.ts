@@ -31,5 +31,11 @@ export const reportesRoutes: Routes = [
     loadComponent: () =>
       import('./pages/reporte-inventario/reporte-inventario').then(m => m.ReporteInventarioComponent),
   },
+  {
+    path: 'mesas',
+    title: 'Estado de Mesas',
+    loadComponent: () =>
+      import('./pages/reporte-mesas/reporte-mesas').then(m => m.ReporteMesasComponent),
+  },
   { path: '**', redirectTo: 'ventas' },
 ];

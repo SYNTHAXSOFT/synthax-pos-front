@@ -61,7 +61,7 @@
                 <label class="spx-form-label">Mesa <span style="color:#64748b;font-weight:400">(opcional)</span></label>
                 <select class="spx-form-select" formControlName="mesaId">
                   <option [value]="null">Sin mesa asignada</option>
-                  @for (mesa of mesas; track mesa.id) {
+                  @for (mesa of mesasDisponibles; track mesa.id) {
                     <option [value]="mesa.id">{{ mesa.nombre }}</option>
                   }
                 </select>

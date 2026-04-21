@@ -47,11 +47,12 @@ export class ReporteLogsComponent implements OnInit {
     let r = [...this.logs];
 
     if (this.filtroFechaInicio) {
-      const d = new Date(this.filtroFechaInicio);
+      // Forzar interpretación como hora LOCAL (sin sufijo la cadena YYYY-MM-DD se parsea como UTC)
+      const d = new Date(this.filtroFechaInicio + 'T00:00:00');
       r = r.filter(l => l.fechaCambio && new Date(l.fechaCambio) >= d);
     }
     if (this.filtroFechaFin) {
-      const d = new Date(this.filtroFechaFin);
+      const d = new Date(this.filtroFechaFin + 'T00:00:00');
       d.setHours(23, 59, 59, 999);
       r = r.filter(l => l.fechaCambio && new Date(l.fechaCambio) <= d);
     }
@@ -61,8 +62,13 @@ export class ReporteLogsComponent implements OnInit {
       r = r.filter(l => l.estadoAnterior === this.filtroEstadoAnterior);
     if (this.filtroRol)
       r = r.filter(l => l.rolUsuario === this.filtroRol);
-    if (this.filtroPedidoId)
-      r = r.filter(l => String(l.pedido?.id) === this.filtroPedidoId.trim());
+    if (this.filtroPedidoId !== '' && this.filtroPedidoId != null) {
+      // ngModel con type="number" entrega un number en runtime; comparar numéricamente
+      const idBuscado = Number(this.filtroPedidoId);
+      if (!isNaN(idBuscado)) {
+        r = r.filter(l => l.pedido?.id === idBuscado);
+      }
+    }
     if (this.filtroMotivo) {
       const q = this.filtroMotivo.toLowerCase();
       r = r.filter(l => l.motivo?.toLowerCase().includes(q));

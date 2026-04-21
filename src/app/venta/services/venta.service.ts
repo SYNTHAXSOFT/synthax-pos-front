@@ -43,6 +43,7 @@ export class VentaService {
     formaPagoId?: number,
     clienteId?: number,
     solicitaFacturaElectronica?: boolean,
+    imagenSoporte?: string,
   ): Observable<Venta> {
     let params = new HttpParams().set('valorTotal', valorTotal.toString());
     if (usuarioFacturadorId != null) {
@@ -63,7 +64,8 @@ export class VentaService {
     if (solicitaFacturaElectronica != null) {
       params = params.set('solicitaFacturaElectronica', solicitaFacturaElectronica.toString());
     }
-    return this.http.patch<Venta>(`${this.base}/${id}/cerrar`, {}, { params });
+    const body = imagenSoporte ? { imagenSoporte } : {};
+    return this.http.patch<Venta>(`${this.base}/${id}/cerrar`, body, { params });
   }
 
   anularVenta(id: number): Observable<Venta> {

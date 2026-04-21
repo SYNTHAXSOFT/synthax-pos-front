@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -118,6 +118,11 @@ export class VentaListarPageComponent implements OnInit {
   public mostrarFormNuevoCliente: boolean = false;
   public guardandoCliente: boolean        = false;
   public nuevoCliente = { nombre: '', apellido: '', cedula: '', email: '', telefono: '' };
+
+  // ── Imagen de soporte al cierre ───────────────────────────────────────────
+  public soportePreview: string = '';
+  public soporteNombre: string  = '';
+  @ViewChild('fileInputVenta') fileInputVenta!: ElementRef<HTMLInputElement>;
 
   get clientesFiltrados(): Cliente[] {
     const term = this.clienteBusqueda.trim().toLowerCase();
@@ -310,6 +315,8 @@ export class VentaListarPageComponent implements OnInit {
     this.solicitaFacturaElectronica = false;
     this.mostrarFormNuevoCliente = false;
     this.nuevoCliente            = { nombre: '', apellido: '', cedula: '', email: '', telefono: '' };
+    this.soportePreview          = '';
+    this.soporteNombre           = '';
     this.modalCerrar             = true;
 
     forkJoin({
@@ -427,6 +434,38 @@ export class VentaListarPageComponent implements OnInit {
     this.solicitaFacturaElectronica = false;
     this.mostrarFormNuevoCliente    = false;
     this.nuevoCliente               = { nombre: '', apellido: '', cedula: '', email: '', telefono: '' };
+    this.soportePreview             = '';
+    this.soporteNombre              = '';
+  }
+
+  // ── Métodos de imagen de soporte ─────────────────────────────────────────
+
+  abrirSelectorSoporte(): void {
+    this.fileInputVenta?.nativeElement.click();
+  }
+
+  onSoporteSeleccionado(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file  = input.files?.[0];
+    if (!file) return;
+
+    const maxMB = 10;
+    if (file.size > maxMB * 1024 * 1024) {
+      alert(`La imagen no puede superar ${maxMB} MB.`);
+      input.value = '';
+      return;
+    }
+
+    this.soporteNombre = file.name;
+    const reader = new FileReader();
+    reader.onload = () => { this.soportePreview = reader.result as string; };
+    reader.readAsDataURL(file);
+    input.value = '';
+  }
+
+  quitarSoporte(): void {
+    this.soportePreview = '';
+    this.soporteNombre  = '';
   }
 
   toggleImpuesto(id: number): void {
@@ -466,6 +505,7 @@ export class VentaListarPageComponent implements OnInit {
       this.formaPagoSeleccionadaId ?? undefined,
       this.clienteSeleccionado?.id,
       this.solicitaFacturaElectronica || undefined,
+      this.soportePreview || undefined,
     ).subscribe({
       next: (ventaCerrada) => {
         this.toastService.success('Venta cerrada · Stock de insumos actualizado');
@@ -699,5 +739,24 @@ export class VentaListarPageComponent implements OnInit {
       case 'ANULADA': return 'spx-venta-badge spx-venta-badge--void';
       default:        return 'spx-venta-badge';
     }
+  }
+
+  // ── Lightbox de imagen de soporte ────────────────────────────────────────
+  ventaImagenActiva: Venta | null = null;
+
+  verImagen(v: Venta): void {
+    this.ventaImagenActiva = v;
+  }
+
+  cerrarImagen(): void {
+    this.ventaImagenActiva = null;
+  }
+
+  descargarImagen(v: Venta): void {
+    if (!v.imagenSoporte) return;
+    const a = document.createElement('a');
+    a.href     = v.imagenSoporte;
+    a.download = `soporte-venta-${v.id}.jpg`;
+    a.click();
   }
 }

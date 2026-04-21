@@ -132,6 +132,7 @@
               <th>Forma Pago</th>
               <th>Estado</th>
               <th class="text-right">Valor</th>
+              <th class="spx-rpt__th-center">Soporte</th>
             </tr>
           </thead>
           <tbody>
@@ -159,6 +160,15 @@
                 <td class="text-right spx-rpt__money">
                   @if (v.valorTotal) { $ {{ fmt(v.valorTotal) }} }
                 </td>
+                <td class="spx-rpt__td-center">
+                  @if (v.imagenSoporte) {
+                    <button class="spx-rpt__img-btn" (click)="verImagen(v)" title="Ver imagen de soporte">
+                      <i class="fa-solid fa-image"></i>
+                    </button>
+                  } @else {
+                    <span class="spx-rpt__no-img">—</span>
+                  }
+                </td>
               </tr>
             }
           </tbody>
@@ -168,3 +178,34 @@
   }
 
 </div>
+
+<!-- ══ Lightbox: Imagen de soporte ════════════════════════════════════════ -->
+@if (ventaImagenActiva) {
+  <div class="spx-lightbox" (click)="cerrarImagen()">
+    <div class="spx-lightbox__box" (click)="$event.stopPropagation()">
+
+      <div class="spx-lightbox__header">
+        <div class="spx-lightbox__header-info">
+          <i class="fa-solid fa-image"></i>
+          <span>Soporte · Venta <strong>{{ ventaImagenActiva.codigo ?? '#' + ventaImagenActiva.id }}</strong></span>
+          <span class="spx-lightbox__fecha">{{ fmtFecha(ventaImagenActiva.fechaCreacion) }}</span>
+        </div>
+        <div class="spx-lightbox__actions">
+          <button class="spx-lightbox__btn-download" (click)="descargarImagen(ventaImagenActiva)" title="Descargar imagen">
+            <i class="fa-solid fa-download"></i>
+            Descargar
+          </button>
+          <button class="spx-lightbox__btn-close" (click)="cerrarImagen()" title="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="spx-lightbox__img-wrap">
+        <img [src]="ventaImagenActiva.imagenSoporte" alt="Imagen de soporte" class="spx-lightbox__img" />
+      </div>
+
+    </div>
+  </div>
+}
+<!-- ════════════════════════════════════════════════════════════════════════ -->

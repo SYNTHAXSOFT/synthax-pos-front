@@ -2,6 +2,7 @@ import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { VentaService } from '../../services/venta.service';
 import { VentaRequest } from '../../interfaces/venta.interface';
 import { MesaService } from '../../../mesa/services/mesa.service';
@@ -30,8 +31,10 @@ export class VentaRegistrarPageComponent implements OnInit {
 
   @ViewChild(VentaListarPageComponent) listarComponent?: VentaListarPageComponent;
 
-  public mesas:       Mesa[]      = [];
-  public tiposPedido: TipoPedido[]= [];
+  public mesas:            Mesa[]      = [];
+  public tiposPedido:      TipoPedido[]= [];
+  /** IDs de mesas que ya tienen una venta ABIERTA — se excluyen del selector */
+  private mesasOcupadasIds: Set<number> = new Set();
 
   public modalNuevaVenta = false;
 
@@ -59,9 +62,28 @@ export class VentaRegistrarPageComponent implements OnInit {
     return nombre.includes('DOMICILIO') || nombre.includes('LLEVAR');
   }
 
+  /** Mesas activas que NO tienen venta abierta en este momento */
+  get mesasDisponibles(): Mesa[] {
+    return this.mesas.filter(m => !this.mesasOcupadasIds.has(m.id!));
+  }
+
   cargarCatalogos(): void {
-    this.mesaService.obtenerActivos().subscribe({ next: (d) => this.mesas = d });
-    this.tipoPedidoService.obtenerActivos().subscribe({ next: (d) => this.tiposPedido = d });
+    forkJoin({
+      mesas:        this.mesaService.obtenerActivos(),
+      ventasAbiertas: this.ventaService.obtenerAbiertas(),
+      tiposPedido:  this.tipoPedidoService.obtenerActivos(),
+    }).subscribe({
+      next: ({ mesas, ventasAbiertas, tiposPedido }) => {
+        // IDs de mesas con venta abierta asignada
+        this.mesasOcupadasIds = new Set(
+          ventasAbiertas
+            .map(v => v.mesa?.id)
+            .filter((id): id is number => id != null)
+        );
+        this.mesas       = mesas;
+        this.tiposPedido = tiposPedido;
+      },
+    });
   }
 
   onSave(): void {

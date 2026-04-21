@@ -40,11 +40,11 @@ export class ReporteVentasComponent implements OnInit {
       r = r.filter(v => v.estado === this.filtroEstado);
 
     if (this.filtroFechaInicio) {
-      const d = new Date(this.filtroFechaInicio);
+      const d = new Date(this.filtroFechaInicio + 'T00:00:00');
       r = r.filter(v => v.fechaCreacion && new Date(v.fechaCreacion) >= d);
     }
     if (this.filtroFechaFin) {
-      const d = new Date(this.filtroFechaFin);
+      const d = new Date(this.filtroFechaFin + 'T00:00:00');
       d.setHours(23, 59, 59, 999);
       r = r.filter(v => v.fechaCreacion && new Date(v.fechaCreacion) <= d);
     }
@@ -114,5 +114,24 @@ export class ReporteVentasComponent implements OnInit {
   fmtFecha(s?: string): string {
     if (!s) return '—';
     return new Date(s).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+  }
+
+  // ── Lightbox de imagen de soporte ────────────────────────────────────────
+  ventaImagenActiva: Venta | null = null;
+
+  verImagen(v: Venta): void {
+    this.ventaImagenActiva = v;
+  }
+
+  cerrarImagen(): void {
+    this.ventaImagenActiva = null;
+  }
+
+  descargarImagen(v: Venta): void {
+    if (!v.imagenSoporte) return;
+    const a = document.createElement('a');
+    a.href     = v.imagenSoporte;
+    a.download = `soporte-venta-${v.id}.jpg`;
+    a.click();
   }
 }
