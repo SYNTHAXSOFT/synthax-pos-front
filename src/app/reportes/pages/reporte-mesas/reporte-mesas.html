@@ -8,9 +8,9 @@
     <div>
       <h2 class="spx-rpt__title"><i class="fa-solid fa-chair"></i> Estado de Mesas</h2>
       <p class="spx-rpt__subtitle">
-        Ocupación en tiempo real — mesas con venta abierta vs. disponibles
+        Ocupación en tiempo real — ocupadas · reservadas · disponibles
         @if (ultimaActualizacion) {
-          · Actualizado {{ fmtHora(ultimaActualizacion.toISOString()) }}
+          · Actualizado {{ fmtHora(ultimaActualizacion) }}
         }
       </p>
     </div>
@@ -28,6 +28,7 @@
         <select [(ngModel)]="filtroEstado">
           <option value="todas">Todas</option>
           <option value="ocupada">Ocupadas</option>
+          <option value="reservada">Reservadas</option>
           <option value="disponible">Disponibles</option>
         </select>
       </div>
@@ -57,7 +58,7 @@
         <i class="fa-solid fa-chair" style="color:#94a3b8"></i>
         <div>
           <p class="spx-rpt-metric__val">{{ mesas.length }}</p>
-          <p class="spx-rpt-metric__lbl">Total Activas</p>
+          <p class="spx-rpt-metric__lbl">Total</p>
         </div>
       </div>
       <div class="spx-rpt-metric spx-rpt-metric--red">
@@ -65,6 +66,13 @@
         <div>
           <p class="spx-rpt-metric__val">{{ totalOcupadas }}</p>
           <p class="spx-rpt-metric__lbl">Ocupadas</p>
+        </div>
+      </div>
+      <div class="spx-rpt-metric spx-rpt-metric--amber">
+        <i class="fa-solid fa-clock" style="color:#f59e0b"></i>
+        <div>
+          <p class="spx-rpt-metric__val">{{ totalReservadas }}</p>
+          <p class="spx-rpt-metric__lbl">Reservadas</p>
         </div>
       </div>
       <div class="spx-rpt-metric spx-rpt-metric--green">
@@ -94,21 +102,28 @@
     } @else {
       <div class="spx-mesa-grid">
         @for (item of mesasFiltradas; track item.mesa.id) {
-          <div class="spx-mesa-card" [class.spx-mesa-card--ocupada]="item.ocupada"
-               [class.spx-mesa-card--disponible]="!item.ocupada">
 
-            <!-- Indicador de estado (top strip) -->
+          <div class="spx-mesa-card"
+               [class.spx-mesa-card--ocupada]="item.ocupada"
+               [class.spx-mesa-card--reservada]="item.reservada"
+               [class.spx-mesa-card--disponible]="!item.ocupada && !item.reservada">
+
+            <!-- Strip de color superior -->
             <div class="spx-mesa-card__strip"></div>
 
-            <!-- Visual de mesa -->
+            <!-- Visual -->
             <div class="spx-mesa-card__visual">
               <div class="spx-mesa-card__icon-wrap">
-                <i class="fa-solid fa-utensils"></i>
+                @if (item.reservada) {
+                  <i class="fa-solid fa-clock"></i>
+                } @else {
+                  <i class="fa-solid fa-utensils"></i>
+                }
                 <span class="spx-mesa-card__num">{{ getMesaNum(item.mesa) }}</span>
               </div>
             </div>
 
-            <!-- Info -->
+            <!-- Nombre y código -->
             <div class="spx-mesa-card__body">
               <h3 class="spx-mesa-card__name">{{ item.mesa.nombre }}</h3>
               <code class="spx-mesa-card__code">{{ item.mesa.codigo }}</code>
@@ -120,6 +135,10 @@
                 <span class="spx-mesa-badge spx-mesa-badge--ocupada">
                   <i class="fa-solid fa-circle"></i> Ocupada
                 </span>
+              } @else if (item.reservada) {
+                <span class="spx-mesa-badge spx-mesa-badge--reservada">
+                  <i class="fa-solid fa-clock"></i> Reservada
+                </span>
               } @else {
                 <span class="spx-mesa-badge spx-mesa-badge--disponible">
                   <i class="fa-solid fa-circle-check"></i> Disponible
@@ -127,7 +146,7 @@
               }
             </div>
 
-            <!-- Detalle de la venta abierta -->
+            <!-- ── OCUPADA: detalle de la venta ── -->
             @if (item.ocupada && item.ventaAbierta) {
               <div class="spx-mesa-card__venta">
                 <div class="spx-mesa-card__venta-row">
@@ -159,6 +178,60 @@
               </div>
             }
 
+            <!-- ── RESERVADA: detalle + acciones ── -->
+            @if (item.reservada && item.reserva) {
+              <div class="spx-mesa-card__reserva">
+                <div class="spx-mesa-card__reserva-row">
+                  <i class="fa-solid fa-user spx-mesa-card__reserva-ico"></i>
+                  <span class="spx-mesa-card__reserva-val">{{ item.reserva.nombreCliente }}</span>
+                </div>
+                @if (item.reserva.telefono) {
+                  <div class="spx-mesa-card__reserva-row">
+                    <i class="fa-solid fa-phone spx-mesa-card__reserva-ico"></i>
+                    <span class="spx-mesa-card__reserva-val">{{ item.reserva.telefono }}</span>
+                  </div>
+                }
+                <div class="spx-mesa-card__reserva-row">
+                  <i class="fa-solid fa-calendar-clock spx-mesa-card__reserva-ico"></i>
+                  <span class="spx-mesa-card__reserva-val">{{ fmtFechaHora(item.reserva.fechaReserva) }}</span>
+                </div>
+                @if (item.reserva.numPersonas) {
+                  <div class="spx-mesa-card__reserva-row">
+                    <i class="fa-solid fa-users spx-mesa-card__reserva-ico"></i>
+                    <span class="spx-mesa-card__reserva-val">{{ item.reserva.numPersonas }} personas</span>
+                  </div>
+                }
+                @if (item.reserva.observacion) {
+                  <div class="spx-mesa-card__reserva-row spx-mesa-card__reserva-row--obs">
+                    <i class="fa-solid fa-note-sticky spx-mesa-card__reserva-ico"></i>
+                    <span class="spx-mesa-card__reserva-val">{{ item.reserva.observacion }}</span>
+                  </div>
+                }
+                @if (puedeReservar) {
+                  <div class="spx-mesa-card__reserva-actions">
+                    <button class="spx-mesa-card__btn spx-mesa-card__btn--liberar"
+                            (click)="liberarReserva(item.reserva.id!)">
+                      <i class="fa-solid fa-xmark"></i> Liberar
+                    </button>
+                    <button class="spx-mesa-card__btn spx-mesa-card__btn--venta"
+                            (click)="abrirVentaDesdeReserva(item)">
+                      <i class="fa-solid fa-cash-register"></i> Abrir Venta
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- ── DISPONIBLE: botón reservar ── -->
+            @if (!item.ocupada && !item.reservada && puedeReservar) {
+              <div class="spx-mesa-card__footer">
+                <button class="spx-mesa-card__btn spx-mesa-card__btn--reservar"
+                        (click)="abrirModalReserva(item.mesa)">
+                  <i class="fa-solid fa-calendar-plus"></i> Reservar
+                </button>
+              </div>
+            }
+
           </div>
         }
       </div>
@@ -167,3 +240,192 @@
   }
 
 </div>
+
+<!-- ══ Modal: Nueva Reserva ════════════════════════════════════════════════ -->
+@if (modalReserva && mesaEnReserva) {
+  <div class="spx-reserva-overlay" (click)="cerrarModalReserva()">
+    <div class="spx-reserva-modal" (click)="$event.stopPropagation()">
+
+      <!-- Barra de acento ámbar -->
+      <div class="spx-reserva-modal__accent"></div>
+
+      <!-- Header -->
+      <div class="spx-reserva-modal__header">
+        <div class="spx-reserva-modal__icon">
+          <i class="fa-solid fa-calendar-plus"></i>
+        </div>
+        <div>
+          <p class="spx-reserva-modal__title">Nueva Reserva</p>
+          <p class="spx-reserva-modal__subtitle">
+            <i class="fa-solid fa-chair"></i> {{ mesaEnReserva.nombre }}
+          </p>
+        </div>
+        <button class="spx-reserva-modal__close" (click)="cerrarModalReserva()" title="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="spx-reserva-modal__body">
+
+        <!-- ── Búsqueda de cliente ─────────────────────────────── -->
+        <div class="spx-reserva-field">
+          <label class="spx-reserva-label">
+            <i class="fa-solid fa-user" style="margin-right:0.3rem"></i>
+            Cliente <span class="spx-reserva-required">*</span>
+          </label>
+
+          @if (clienteSeleccionadoReserva) {
+            <!-- ① Cliente seleccionado → tarjeta -->
+            <div class="spx-reserva-cli-card">
+              <div class="spx-reserva-cli-card__avatar">
+                {{ (clienteSeleccionadoReserva.nombre[0] + clienteSeleccionadoReserva.apellido[0]).toUpperCase() }}
+              </div>
+              <div class="spx-reserva-cli-card__info">
+                <span class="spx-reserva-cli-card__name">
+                  {{ clienteSeleccionadoReserva.nombre }} {{ clienteSeleccionadoReserva.apellido }}
+                </span>
+                <span class="spx-reserva-cli-card__cedula">CC {{ clienteSeleccionadoReserva.cedula }}</span>
+              </div>
+              <button class="spx-reserva-cli-card__remove" type="button"
+                      (click)="limpiarClienteReserva()" title="Quitar cliente">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+          } @else if (mostrarFormNuevoClienteReserva) {
+            <!-- ② Mini-form crear cliente nuevo -->
+            <div class="spx-reserva-new-cli">
+              <p class="spx-reserva-new-cli__title">
+                <i class="fa-solid fa-user-plus"></i> Nuevo cliente
+              </p>
+              <div class="spx-reserva-new-cli__grid">
+                <input class="spx-reserva-new-cli__input" type="text" placeholder="Nombre *"
+                       [(ngModel)]="nuevoClienteReserva.nombre" />
+                <input class="spx-reserva-new-cli__input" type="text" placeholder="Apellido *"
+                       [(ngModel)]="nuevoClienteReserva.apellido" />
+                <input class="spx-reserva-new-cli__input" type="text" placeholder="Cédula *"
+                       [(ngModel)]="nuevoClienteReserva.cedula" />
+                <input class="spx-reserva-new-cli__input" type="email" placeholder="Email *"
+                       [(ngModel)]="nuevoClienteReserva.email" />
+                <input class="spx-reserva-new-cli__input spx-reserva-new-cli__input--full"
+                       type="tel" placeholder="Teléfono (opcional)"
+                       [(ngModel)]="nuevoClienteReserva.telefono" />
+              </div>
+              <div class="spx-reserva-new-cli__actions">
+                <button class="spx-reserva-new-cli__btn-cancel" type="button"
+                        (click)="cerrarFormNuevoClienteReserva()">
+                  Cancelar
+                </button>
+                <button class="spx-reserva-new-cli__btn-save" type="button"
+                        [disabled]="guardandoClienteReserva"
+                        (click)="guardarNuevoClienteReserva()">
+                  @if (guardandoClienteReserva) {
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                  } @else {
+                    <i class="fa-solid fa-user-plus"></i>
+                  }
+                  Guardar y seleccionar
+                </button>
+              </div>
+            </div>
+
+          } @else {
+            <!-- ③ Buscador -->
+            <div class="spx-reserva-cli-search">
+              <i class="fa-solid fa-magnifying-glass spx-reserva-cli-search__icon"></i>
+              <input
+                class="spx-reserva-cli-search__input"
+                type="text"
+                placeholder="Buscar por cédula o nombre..."
+                [(ngModel)]="clienteBusquedaReserva"
+                (ngModelChange)="onClienteReservaBusquedaChange()"
+                (focus)="mostrarDropdownReserva = clienteBusquedaReserva.trim().length > 0"
+                autocomplete="off"
+              />
+            </div>
+
+            @if (mostrarDropdownReserva) {
+              <div class="spx-reserva-cli-dropdown">
+                @for (c of clientesFiltradosReserva; track c.id) {
+                  <button class="spx-reserva-cli-option" type="button"
+                          (click)="seleccionarClienteReserva(c)">
+                    <span class="spx-reserva-cli-option__avatar">
+                      {{ (c.nombre[0] + c.apellido[0]).toUpperCase() }}
+                    </span>
+                    <span class="spx-reserva-cli-option__info">
+                      <span class="spx-reserva-cli-option__name">{{ c.nombre }} {{ c.apellido }}</span>
+                      <span class="spx-reserva-cli-option__cedula">CC {{ c.cedula }}</span>
+                    </span>
+                  </button>
+                }
+                @if (clientesFiltradosReserva.length === 0) {
+                  <div class="spx-reserva-cli-noresult">
+                    <i class="fa-solid fa-user-slash"></i> No se encontró ningún cliente
+                  </div>
+                }
+                <button class="spx-reserva-cli-create" type="button"
+                        (click)="abrirFormNuevoClienteReserva()">
+                  <i class="fa-solid fa-user-plus"></i> Crear nuevo cliente
+                </button>
+              </div>
+            }
+          }
+        </div>
+
+        <!-- Teléfono -->
+        <div class="spx-reserva-field">
+          <label class="spx-reserva-label">Teléfono</label>
+          <input class="spx-reserva-input" type="tel"
+                 placeholder="Ej: 300 123 4567"
+                 [(ngModel)]="formReserva.telefono" />
+        </div>
+
+        <!-- Fecha y hora + Personas (en grid) -->
+        <div class="spx-reserva-grid">
+          <div class="spx-reserva-field">
+            <label class="spx-reserva-label">
+              Fecha y hora <span class="spx-reserva-required">*</span>
+            </label>
+            <input class="spx-reserva-input" type="datetime-local"
+                   [(ngModel)]="formReserva.fechaReserva" />
+          </div>
+          <div class="spx-reserva-field">
+            <label class="spx-reserva-label">Nº personas</label>
+            <input class="spx-reserva-input" type="number" min="1" max="50"
+                   [(ngModel)]="formReserva.numPersonas" />
+          </div>
+        </div>
+
+        <!-- Nota -->
+        <div class="spx-reserva-field">
+          <label class="spx-reserva-label">Nota (opcional)</label>
+          <textarea class="spx-reserva-input spx-reserva-textarea" rows="2"
+                    placeholder="Alergias, peticiones especiales, cumpleaños..."
+                    [(ngModel)]="formReserva.observacion">
+          </textarea>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="spx-reserva-modal__footer">
+        <button class="spx-reserva-btn spx-reserva-btn--cancel"
+                (click)="cerrarModalReserva()">
+          <i class="fa-solid fa-xmark"></i> Cancelar
+        </button>
+        <button class="spx-reserva-btn spx-reserva-btn--confirm"
+                [disabled]="guardandoReserva"
+                (click)="confirmarReserva()">
+          @if (guardandoReserva) {
+            <i class="fa-solid fa-spinner fa-spin"></i> Guardando...
+          } @else {
+            <i class="fa-solid fa-calendar-check"></i> Confirmar Reserva
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+<!-- ════════════════════════════════════════════════════════════════════════ -->

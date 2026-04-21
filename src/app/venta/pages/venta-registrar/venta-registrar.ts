@@ -1,13 +1,15 @@
 import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { VentaService } from '../../services/venta.service';
 import { VentaRequest } from '../../interfaces/venta.interface';
 import { MesaService } from '../../../mesa/services/mesa.service';
 import { TipoPedidoService } from '../../../tipo-pedido/services/tipo-pedido.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { ReservaMesaService } from '../../../reserva-mesa/services/reserva-mesa.service';
 import { Mesa } from '../../../mesa/interfaces/mesa.interface';
 import { TipoPedido } from '../../../tipo-pedido/interfaces/tipo-pedido.interface';
 import { VentaListarPageComponent } from '../venta-listar/venta-listar';
@@ -26,17 +28,27 @@ export class VentaRegistrarPageComponent implements OnInit {
   private readonly mesaService       = inject(MesaService);
   private readonly tipoPedidoService = inject(TipoPedidoService);
   private readonly authService       = inject(AuthService);
+  private readonly reservaService    = inject(ReservaMesaService);
   private readonly toastService      = inject(ToastService);
   private readonly router            = inject(Router);
+  private readonly route             = inject(ActivatedRoute);
 
   @ViewChild(VentaListarPageComponent) listarComponent?: VentaListarPageComponent;
 
   public mesas:            Mesa[]      = [];
   public tiposPedido:      TipoPedido[]= [];
-  /** IDs de mesas que ya tienen una venta ABIERTA — se excluyen del selector */
-  private mesasOcupadasIds: Set<number> = new Set();
+
+  /** IDs de mesas con venta ABIERTA — excluidas del selector */
+  private mesasOcupadasIds:  Set<number> = new Set();
+  /** IDs de mesas con reserva ACTIVA — excluidas del selector (salvo la reserva actual) */
+  private mesasReservadasIds: Set<number> = new Set();
 
   public modalNuevaVenta = false;
+
+  /** Mesa pre-seleccionada al llegar desde el mapa de reservas */
+  private pendingMesaId:   number | null = null;
+  /** ID de la reserva que se cumple al crear esta venta */
+  public  reservaDesdeId: number | null = null;
 
   public myForm: FormGroup = this.fb.group({
     tipoPedidoId: [null, [Validators.required]],
@@ -45,6 +57,11 @@ export class VentaRegistrarPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // Leer queryParams antes de cargar catálogos
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
+      if (params['mesaId'])    this.pendingMesaId   = +params['mesaId'];
+      if (params['reservaId']) this.reservaDesdeId  = +params['reservaId'];
+    });
     this.cargarCatalogos();
   }
 
@@ -52,7 +69,6 @@ export class VentaRegistrarPageComponent implements OnInit {
     return this.authService.getUserRole() === 'COCINERO';
   }
 
-  /** Oculta el campo mesa cuando el tipo de pedido es Domicilio o Llevar */
   get ocultarMesa(): boolean {
     const id = this.myForm.get('tipoPedidoId')?.value;
     if (!id) return false;
@@ -62,26 +78,49 @@ export class VentaRegistrarPageComponent implements OnInit {
     return nombre.includes('DOMICILIO') || nombre.includes('LLEVAR');
   }
 
-  /** Mesas activas que NO tienen venta abierta en este momento */
+  /**
+   * Mesas activas sin venta abierta ni reserva activa.
+   * Excepción: si venimos de una reserva, la mesa reservada SÍ aparece
+   * (es la que queremos seleccionar).
+   */
   get mesasDisponibles(): Mesa[] {
-    return this.mesas.filter(m => !this.mesasOcupadasIds.has(m.id!));
+    return this.mesas.filter(m => {
+      if (this.mesasOcupadasIds.has(m.id!)) return false;
+      if (this.mesasReservadasIds.has(m.id!)) {
+        // Permitir solo si es la mesa de la reserva que estamos cumpliendo
+        return m.id === this.pendingMesaId;
+      }
+      return true;
+    });
   }
 
   cargarCatalogos(): void {
     forkJoin({
-      mesas:        this.mesaService.obtenerActivos(),
-      ventasAbiertas: this.ventaService.obtenerAbiertas(),
-      tiposPedido:  this.tipoPedidoService.obtenerActivos(),
+      mesas:         this.mesaService.obtenerActivos(),
+      ventasAbiertas:this.ventaService.obtenerAbiertas(),
+      tiposPedido:   this.tipoPedidoService.obtenerActivos(),
+      reservas:      this.reservaService.obtenerActivas(),
     }).subscribe({
-      next: ({ mesas, ventasAbiertas, tiposPedido }) => {
-        // IDs de mesas con venta abierta asignada
+      next: ({ mesas, ventasAbiertas, tiposPedido, reservas }) => {
         this.mesasOcupadasIds = new Set(
           ventasAbiertas
             .map(v => v.mesa?.id)
             .filter((id): id is number => id != null)
         );
+        this.mesasReservadasIds = new Set(
+          reservas
+            .map(r => r.mesa?.id)
+            .filter((id): id is number => id != null)
+        );
         this.mesas       = mesas;
         this.tiposPedido = tiposPedido;
+
+        // Auto-abrir modal si venimos del mapa de reservas
+        if (this.pendingMesaId && !this.esCocinero) {
+          this.myForm.reset();
+          this.myForm.patchValue({ mesaId: this.pendingMesaId });
+          this.modalNuevaVenta = true;
+        }
       },
     });
   }
@@ -101,16 +140,20 @@ export class VentaRegistrarPageComponent implements OnInit {
     }
 
     const payload: VentaRequest = {
-      tipoPedido:    { id: v.tipoPedidoId },
+      tipoPedido:     { id: v.tipoPedidoId },
       usuarioCreador: { id: currentUserId },
-      observacion:   v.observacion?.trim() || undefined,
-      estado:        'ABIERTA',
-      activo:        true,
+      observacion:    v.observacion?.trim() || undefined,
+      estado:         'ABIERTA',
+      activo:         true,
       ...(v.mesaId ? { mesa: { id: v.mesaId } } : {}),
     };
 
     this.ventaService.crear(payload).subscribe({
       next: (ventaCreada) => {
+        // Si venimos de una reserva, marcarla como cumplida
+        if (this.reservaDesdeId) {
+          this.reservaService.cumplir(this.reservaDesdeId).subscribe();
+        }
         this.cerrarModalNuevaVenta();
         this.router.navigate(['/synthax-pos/pedido/registrar'], { queryParams: { ventaId: ventaCreada.id } });
       },
@@ -123,11 +166,15 @@ export class VentaRegistrarPageComponent implements OnInit {
 
   abrirModalNuevaVenta(): void {
     this.myForm.reset();
+    this.pendingMesaId  = null;
+    this.reservaDesdeId = null;
     this.modalNuevaVenta = true;
   }
 
   cerrarModalNuevaVenta(): void {
     this.modalNuevaVenta = false;
+    this.pendingMesaId   = null;
+    this.reservaDesdeId  = null;
     this.myForm.reset();
   }
 

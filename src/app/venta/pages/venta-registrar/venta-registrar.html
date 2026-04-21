@@ -29,7 +29,15 @@
         <div class="spx-reg-modal__icon"><i class="fa-solid fa-cash-register"></i></div>
         <div>
           <p class="spx-reg-modal__title">Nueva Venta</p>
+          @if (reservaDesdeId) {
+          <p class="spx-reg-modal__subtitle">
+            <span class="spx-reg-reserva-badge">
+              <i class="fa-solid fa-calendar-check"></i> Cumpliendo reserva #{{ reservaDesdeId }}
+            </span>
+          </p>
+        } @else {
           <p class="spx-reg-modal__subtitle">La venta se abrirá en estado ABIERTA</p>
+        }
         </div>
         <button class="spx-reg-modal__close" (click)="cerrarModalNuevaVenta()" title="Cerrar">
           <i class="fa-solid fa-xmark"></i>

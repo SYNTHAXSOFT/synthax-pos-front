@@ -165,3 +165,17 @@
   transition: background 0.15s;
 }
 .spx-reg-btn-submit:hover { background: #0b6dd4; }
+
+/* ── Badge reserva en el header del modal ── */
+.spx-reg-reserva-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #f59e0b;
+  background: rgba(245,158,11,0.12);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+}
