@@ -48,7 +48,8 @@ export class UsuarioService {
   actualizar(id: number, usuario: Usuario): Observable<Usuario> {
     return this.http.put<Usuario>(
       `${environment.URL}/${API_ENDPOINTS.USUARIOS}/${id}`,
-      usuario
+      usuario,
+      { headers: this.headers }
     );
   }
 

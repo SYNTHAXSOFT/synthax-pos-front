@@ -131,7 +131,7 @@ export class AuthService {
    * Actualiza los datos del usuario en la sesión local (localStorage).
    * Útil para reflejar cambios de nombre, foto, etc. sin necesidad de re-login.
    */
-  actualizarUsuarioEnSesion(parcial: Partial<{ fotoPerfil: string | null; nombre: string; apellido: string }>): void {
+  actualizarUsuarioEnSesion(parcial: Partial<{ fotoPerfil: string | null; nombre: string; apellido: string; email: string; telefono: string }>): void {
     const user = this.getCurrentUser();
     if (!user) return;
     const updated = { ...user, ...parcial };

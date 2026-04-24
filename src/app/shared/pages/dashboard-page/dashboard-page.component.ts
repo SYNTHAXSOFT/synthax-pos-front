@@ -199,6 +199,8 @@ export default class DashboardPageComponent implements OnInit, OnDestroy {
         this.auth.actualizarUsuarioEnSesion({
           nombre:     this.perfilNombre.trim(),
           apellido:   this.perfilApellido.trim(),
+          email:      this.perfilEmail.trim(),
+          telefono:   this.perfilTelefono.trim(),
           fotoPerfil: this.perfilFotoBase64 ?? undefined,
         });
         this.toast.success('Perfil actualizado correctamente');
