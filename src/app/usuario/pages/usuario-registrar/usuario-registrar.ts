@@ -13,7 +13,7 @@ import { ListarPage } from '../usuario-listar/usuario-listar';
 import { ToastService } from '../../../shared/services/toast.service';
 
 const ROLES_POR_ROL: Record<string, string[]> = {
-  ROOT:          ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO'],
+  ROOT:          ['ROOT', 'PROPIETARIO'],
   PROPIETARIO:   ['ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO'],
   ADMINISTRADOR: ['CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO'],
 };

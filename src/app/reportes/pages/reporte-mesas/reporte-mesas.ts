@@ -247,6 +247,7 @@ export class ReporteMesasComponent implements OnInit {
       cedula:   nc.cedula.trim(),
       email:    nc.email.trim(),
       telefono: nc.telefono.trim() || undefined,
+      activo:   true,
     };
     this.clienteService.crear(payload).subscribe({
       next: (creado) => {

@@ -6,9 +6,10 @@ export interface Usuario {
   cedula: string;
   email: string;
   password: string;
-  rol: string; // ROOT | ADMINISTRADOR | CAJERO | MESERO | DOMICILIARIO
+  rol: string; // ROOT | PROPIETARIO | ADMINISTRADOR | CAJERO | MESERO | COCINERO | DOMICILIARIO
   telefono?: string;
   activo?: boolean;
   departamento?: { id: string; nombre?: string; };
   municipio?:    { id: string; nombre?: string; };
+  restaurante?:  { id: number; nombre?: string; };
 }

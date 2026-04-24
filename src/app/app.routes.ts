@@ -11,7 +11,7 @@ import { CajaGuard } from './caja/guards/caja.guard';
  *  Ruta              | Roles permitidos
  *  ------------------|------------------------------------------------------
  *  Usuarios          | ROOT, PROPIETARIO, ADMINISTRADOR
- *  Restaurantes      | ROOT, ADMINISTRADOR   (PROPIETARIO NO puede listar/crear)
+ *  Restaurantes      | ROOT   (solo ROOT puede listar/crear restaurantes)
  *  Identidad Visual  | ROOT, PROPIETARIO, ADMINISTRADOR
  *  Mesas             | ROOT, PROPIETARIO, ADMINISTRADOR
  *  Productos         | ROOT, PROPIETARIO, ADMINISTRADOR
@@ -44,8 +44,8 @@ export const routes: Routes = [
           import('./shared/pages/inicio-page/inicio-page.component').then(
             (m) => m.InicioPageComponent
           ),
-        // COCINERO no necesita el panel de control — su flujo empieza en Ventas
-        data: { hideForRoles: ['ROOT', 'COCINERO'] },
+        // COCINERO y DOMICILIARIO no necesitan el panel de control — su flujo empieza en Ventas
+        data: { hideForRoles: ['ROOT', 'COCINERO', 'DOMICILIARIO'] },
       },
 
       // ── Administración (accesos rápidos a configuración) ─────────────────────
@@ -67,8 +67,9 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./usuario/usuario.routes').then((m) => m.usuarioRoutes),
         canActivate: [RoleGuard, CajaGuard],
-        // PROPIETARIO puede gestionar el personal de su restaurante — oculto del menú (acceso desde Administración)
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideFromMenu: true },
+        // ROOT ve "Usuarios" en su menú lateral para gestión global.
+        // PROPIETARIO y ADMINISTRADOR acceden desde la pantalla de Administración (hideForRoles).
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideForRoles: ['PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO'] },
       },
 
       // ── Geografía (solo ROOT) ────────────────────────────────────────────────
@@ -91,14 +92,14 @@ export const routes: Routes = [
 
       // ── Multi-tenancy ───────────────────────────────────────────────────────
       {
-        // PROPIETARIO no puede listar ni crear restaurantes.
-        // Solo ROOT y ADMINISTRADOR tienen acceso al CRUD completo.
+        // Solo ROOT tiene acceso al CRUD completo de restaurantes.
+        // ADMINISTRADOR gestiona el restaurante que tiene asignado, no el listado global.
         path: 'restaurante',
         title: 'Restaurantes',
         loadChildren: () =>
           import('./restaurante/restaurante.routes').then((m) => m.restauranteRoutes),
         canActivate: [RoleGuard, CajaGuard],
-        data: { roles: ['ROOT', 'ADMINISTRADOR'] },
+        data: { roles: ['ROOT'] },
       },
       {
         // Acceso directo a la identidad visual (logo + colores).
@@ -179,7 +180,8 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./reportes/reportes.routes').then((m) => m.reportesRoutes),
         canActivate: [RoleGuard],
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideFromMenu: true },
+        // CAJERO y MESERO solo pueden acceder al reporte de mesas (sub-ruta protegida)
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO'], hideFromMenu: true },
       },
 
       // ── Clientes ─────────────────────────────────────────────────────────────
@@ -208,8 +210,8 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./pedido/pedido.routes').then((m) => m.pedidoRoutes),
         canActivate: [RoleGuard, CajaGuard],
-        // COCINERO puede ver los pedidos del día — oculto del menú (acceso solo desde ventas)
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO'], hideForRoles: ['ROOT'], hideFromMenu: true },
+        // COCINERO y DOMICILIARIO pueden ver los pedidos del día — oculto del menú (acceso solo desde ventas)
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO'], hideForRoles: ['ROOT'], hideFromMenu: true },
       },
 
       { path: '**', redirectTo: 'inicio' },

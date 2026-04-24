@@ -50,30 +50,60 @@
           <div class="spx-form-grid spx-form-grid--2" style="margin-bottom:1.25rem">
 
             <!-- Tipo de pedido -->
-            <div class="spx-form-group">
-              <label class="spx-form-label">Tipo de Pedido <span class="spx-form-required">*</span></label>
-              <select class="spx-form-select" formControlName="tipoPedidoId">
-                <option [value]="null" disabled selected>Seleccione un tipo</option>
-                @for (tipo of tiposPedido; track tipo.id) {
-                  <option [value]="tipo.id">{{ tipo.nombre }}</option>
+            @if (pendingMesaId) {
+              <!-- Modo lectura: fijado en LOCAL por la reserva -->
+              <div class="spx-form-group">
+                <label class="spx-form-label">Tipo de Pedido</label>
+                <div class="spx-reg-mesa-locked">
+                  <i class="fa-solid fa-lock"></i>
+                  <span>{{ tipoPedidoLocal?.nombre ?? 'Local' }}</span>
+                  <span class="spx-reg-mesa-locked__hint">
+                    <i class="fa-solid fa-calendar-check"></i> Asignado por la reserva
+                  </span>
+                </div>
+              </div>
+            } @else {
+              <!-- Selector libre -->
+              <div class="spx-form-group">
+                <label class="spx-form-label">Tipo de Pedido <span class="spx-form-required">*</span></label>
+                <select class="spx-form-select" formControlName="tipoPedidoId">
+                  <option [value]="null" disabled selected>Seleccione un tipo</option>
+                  @for (tipo of tiposPedido; track tipo.id) {
+                    <option [value]="tipo.id">{{ tipo.nombre }}</option>
+                  }
+                </select>
+                @if (isValidField('tipoPedidoId')) {
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Este campo es requerido</span>
                 }
-              </select>
-              @if (isValidField('tipoPedidoId')) {
-                <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Este campo es requerido</span>
-              }
-            </div>
+              </div>
+            }
 
             <!-- Mesa (oculta para Domicilio y Llevar) -->
             @if (!ocultarMesa) {
-              <div class="spx-form-group">
-                <label class="spx-form-label">Mesa <span style="color:#64748b;font-weight:400">(opcional)</span></label>
-                <select class="spx-form-select" formControlName="mesaId">
-                  <option [value]="null">Sin mesa asignada</option>
-                  @for (mesa of mesasDisponibles; track mesa.id) {
-                    <option [value]="mesa.id">{{ mesa.nombre }}</option>
-                  }
-                </select>
-              </div>
+              @if (pendingMesaId) {
+                <!-- Modo lectura: mesa fijada por la reserva — no se puede cambiar -->
+                <div class="spx-form-group">
+                  <label class="spx-form-label">Mesa</label>
+                  <div class="spx-reg-mesa-locked">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>{{ mesaPendiente?.nombre ?? ('Mesa #' + pendingMesaId) }}</span>
+                    <span class="spx-reg-mesa-locked__hint">
+                      <i class="fa-solid fa-calendar-check"></i> Asignada por la reserva
+                    </span>
+                  </div>
+                </div>
+              } @else {
+                <!-- Selector libre -->
+                <div class="spx-form-group">
+                  <label class="spx-form-label">Mesa <span style="color:#64748b;font-weight:400">(opcional)</span></label>
+                  <select class="spx-form-select" formControlName="mesaId">
+                    <option [value]="null">Sin mesa asignada</option>
+                    @for (mesa of mesasDisponibles; track mesa.id) {
+                      <option [value]="mesa.id">{{ mesa.nombre }}</option>
+                    }
+                  </select>
+                </div>
+              }
             }
 
 

@@ -37,7 +37,8 @@ export class PedidoListarPageComponent implements OnInit, OnChanges {
 
   // ── Rol del usuario logueado ────────────────────────────────────────────────
   private get rol(): string { return this.authService.getUserRole() ?? ''; }
-  get esCocinero(): boolean { return this.rol === 'COCINERO'; }
+  get esCocinero():     boolean { return this.rol === 'COCINERO'; }
+  get esDomiciliario(): boolean { return this.rol === 'DOMICILIARIO'; }
 
   ngOnInit(): void  { this.cargarPedidos(); }
 
@@ -63,15 +64,21 @@ export class PedidoListarPageComponent implements OnInit, OnChanges {
     return p.estado ?? 'CREADO';
   }
 
-  // ── COCINERO solo ve pedidos con trabajo pendiente en cocina ─────────────────
-  // PEDIDO = enviado, esperando preparación
-  // PREPARANDO = en preparación
-  // DEVUELTO = devuelto, requiere re-preparación
-  // Todo lo demás (CREADO, PREPARADO, ENTREGADO, CANCELADO, DESTRUIDO) queda oculto
+  // ── Filtro de pedidos visible según rol ──────────────────────────────────────
+  // COCINERO: solo ve los que tienen trabajo pendiente en cocina
+  //   PEDIDO = esperando preparación | PREPARANDO = en preparación | DEVUELTO = re-preparación
+  // DOMICILIARIO: solo ve los que están en reparto (pendientes de confirmar entrega)
+  //   ENTREGADO_DOMICILIARIO = asignado a domiciliario, esperando confirmación de entrega
+  // Resto de roles: ven todos los ítems
   get pedidosVisibles(): Pedido[] {
     if (this.esCocinero) {
       return this.pedidos.filter(p =>
         ['PEDIDO', 'PREPARANDO', 'DEVUELTO'].includes(this.estadoEfectivo(p))
+      );
+    }
+    if (this.esDomiciliario) {
+      return this.pedidos.filter(p =>
+        this.estadoEfectivo(p) === 'ENTREGADO_DOMICILIARIO'
       );
     }
     return this.pedidos;
@@ -136,11 +143,19 @@ export class PedidoListarPageComponent implements OnInit, OnChanges {
     return (est === 'PREPARANDO' || est === 'DEVUELTO') && this.rol === 'COCINERO';
   }
 
-  /** PREPARADO → ENTREGADO_CLIENTE */
+  /** PREPARADO → ENTREGADO_CLIENTE  |  ENTREGADO_DOMICILIARIO → ENTREGADO_CLIENTE (solo DOMICILIARIO) */
   puedeEntregarCliente(p: Pedido): boolean {
     if (this.ventaPagada) return false;
-    return this.estadoEfectivo(p) === 'PREPARADO'
-      && ['PROPIETARIO','ADMINISTRADOR','CAJERO','MESERO','DOMICILIARIO'].includes(this.rol);
+    const est = this.estadoEfectivo(p);
+    // Flujo normal: listo en cocina → entregado al cliente (mesa / mostrador)
+    if (est === 'PREPARADO') {
+      return ['PROPIETARIO','ADMINISTRADOR','CAJERO','MESERO','DOMICILIARIO'].includes(this.rol);
+    }
+    // Flujo domicilio: en reparto → domiciliario confirma entrega al cliente final
+    if (est === 'ENTREGADO_DOMICILIARIO') {
+      return this.esDomiciliario;
+    }
+    return false;
   }
 
   /** PREPARADO → ENTREGADO_DOMICILIARIO */

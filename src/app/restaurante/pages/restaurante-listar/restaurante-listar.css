@@ -60,6 +60,24 @@
   border-color: var(--primary);
   background: rgba(13,127,242,0.08);
 }
+.spx-rest-btn-nuevo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s, transform 0.1s;
+  white-space: nowrap;
+}
+.spx-rest-btn-nuevo:hover  { background: #0b6dd4; }
+.spx-rest-btn-nuevo:active { transform: scale(0.97); }
 
 /* ── Stats ── */
 .spx-rest-stats {

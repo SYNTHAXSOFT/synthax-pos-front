@@ -46,7 +46,7 @@ export class VentaRegistrarPageComponent implements OnInit {
   public modalNuevaVenta = false;
 
   /** Mesa pre-seleccionada al llegar desde el mapa de reservas */
-  private pendingMesaId:   number | null = null;
+  public  pendingMesaId:   number | null = null;
   /** ID de la reserva que se cumple al crear esta venta */
   public  reservaDesdeId: number | null = null;
 
@@ -67,6 +67,24 @@ export class VentaRegistrarPageComponent implements OnInit {
 
   get esCocinero(): boolean {
     return this.authService.getUserRole() === 'COCINERO';
+  }
+
+  /** Mesa correspondiente al pendingMesaId (para mostrar su nombre en modo lectura). */
+  get mesaPendiente(): Mesa | null {
+    if (!this.pendingMesaId) return null;
+    return this.mesas.find(m => m.id === this.pendingMesaId) ?? null;
+  }
+
+  /**
+   * Tipo de pedido LOCAL del restaurante.
+   * Se crea por defecto al registrar un restaurante nuevo (código = "LOCAL").
+   * Se pre-selecciona automáticamente al abrir una venta desde una reserva de mesa.
+   */
+  get tipoPedidoLocal(): TipoPedido | null {
+    return this.tiposPedido.find(t =>
+      (t.codigo ?? '').toUpperCase() === 'LOCAL' ||
+      (t.nombre ?? '').toUpperCase() === 'LOCAL'
+    ) ?? null;
   }
 
   get ocultarMesa(): boolean {
@@ -117,8 +135,16 @@ export class VentaRegistrarPageComponent implements OnInit {
 
         // Auto-abrir modal si venimos del mapa de reservas
         if (this.pendingMesaId && !this.esCocinero) {
+          // Buscar el tipo de pedido LOCAL (creado por defecto al registrar el restaurante)
+          const tipoLocal = tiposPedido.find(t =>
+            (t.codigo ?? '').toUpperCase() === 'LOCAL' ||
+            (t.nombre ?? '').toUpperCase() === 'LOCAL'
+          );
           this.myForm.reset();
-          this.myForm.patchValue({ mesaId: this.pendingMesaId });
+          this.myForm.patchValue({
+            mesaId:       this.pendingMesaId,
+            tipoPedidoId: tipoLocal?.id ?? null,
+          });
           this.modalNuevaVenta = true;
         }
       },

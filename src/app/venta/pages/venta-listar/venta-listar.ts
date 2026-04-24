@@ -41,8 +41,11 @@ export class VentaListarPageComponent implements OnInit {
   public estadoFiltro: string  = '';
   public readonly estadosVenta = ESTADOS_VENTA;
 
-  /** IDs de ventas que tienen al menos un pedido en estado PEDIDO o DEVUELTO (para filtro de COCINERO). */
+  /** IDs de ventas que tienen al menos un pedido en estado PEDIDO, PREPARANDO o DEVUELTO (para filtro de COCINERO). */
   public ventaIdsCocinero: Set<number> = new Set();
+
+  /** IDs de ventas que tienen al menos un pedido en estado ENTREGADO_DOMICILIARIO (para filtro de DOMICILIARIO). */
+  public ventaIdsDomiciliario: Set<number> = new Set();
 
   /** Rango de fechas para PROPIETARIO y ADMINISTRADOR */
   public fechaDesde: string = '';
@@ -74,10 +77,17 @@ export class VentaListarPageComponent implements OnInit {
       }
     }
 
-    // COCINERO: solo ventas que tienen al menos un pedido en estado PEDIDO o DEVUELTO
+    // COCINERO: solo ventas que tienen al menos un pedido en estado PEDIDO, PREPARANDO o DEVUELTO
     if (this.esCocinero && this.ventaIdsCocinero.size > 0) {
       lista = lista.filter(v => v.id != null && this.ventaIdsCocinero.has(v.id));
     } else if (this.esCocinero && this.ventaIdsCocinero.size === 0 && !this.cargando) {
+      lista = [];
+    }
+
+    // DOMICILIARIO: solo ventas que tienen al menos un pedido en estado ENTREGADO_DOMICILIARIO
+    if (this.esDomiciliario && this.ventaIdsDomiciliario.size > 0) {
+      lista = lista.filter(v => v.id != null && this.ventaIdsDomiciliario.has(v.id));
+    } else if (this.esDomiciliario && this.ventaIdsDomiciliario.size === 0 && !this.cargando) {
       lista = [];
     }
 
@@ -181,6 +191,16 @@ export class VentaListarPageComponent implements OnInit {
     return this.authService.getUserRole() === 'COCINERO';
   }
 
+  /** El mesero puede ver ventas y agregar pedidos, pero no cerrar ni anular */
+  get esMesero(): boolean {
+    return this.authService.getUserRole() === 'MESERO';
+  }
+
+  /** El domiciliario solo ve ventas con pedidos en reparto */
+  get esDomiciliario(): boolean {
+    return this.authService.getUserRole() === 'DOMICILIARIO';
+  }
+
   ngOnInit(): void {
     // Para PROPIETARIO / ADMINISTRADOR inicia el filtro en "hoy"
     if (!this.soloHoy) {
@@ -208,21 +228,35 @@ export class VentaListarPageComponent implements OnInit {
 
   cargarVentas(): void {
     this.cargando = true;
-    if (this.esCocinero) {
-      // Para el cocinero cargamos también los pedidos para filtrar ventas relevantes
+    if (this.esCocinero || this.esDomiciliario) {
+      // Para cocinero y domiciliario cargamos también los pedidos para filtrar ventas relevantes
       forkJoin({
         ventas:  this.ventaService.obtenerTodos(),
         pedidos: this.pedidoService.obtenerTodos(),
       }).subscribe({
         next: ({ ventas, pedidos }) => {
           this.ventas = ventas;
-          // Ventas que tienen al menos un pedido enviado a cocina o devuelto
-          this.ventaIdsCocinero = new Set(
-            pedidos
-              .filter(p => p.estado === 'PEDIDO' || p.estado === 'DEVUELTO')
-              .map(p => p.venta?.id)
-              .filter((id): id is number => id != null)
-          );
+
+          if (this.esCocinero) {
+            // Ventas con al menos un pedido enviado a cocina, en preparación o devuelto
+            this.ventaIdsCocinero = new Set(
+              pedidos
+                .filter(p => p.estado === 'PEDIDO' || p.estado === 'PREPARANDO' || p.estado === 'DEVUELTO')
+                .map(p => p.venta?.id)
+                .filter((id): id is number => id != null)
+            );
+          }
+
+          if (this.esDomiciliario) {
+            // Ventas con al menos un pedido en reparto (ENTREGADO_DOMICILIARIO)
+            this.ventaIdsDomiciliario = new Set(
+              pedidos
+                .filter(p => p.estado === 'ENTREGADO_DOMICILIARIO')
+                .map(p => p.venta?.id)
+                .filter((id): id is number => id != null)
+            );
+          }
+
           this.cargando = false;
         },
         error: (err) => { console.error('Error al cargar ventas:', err); this.cargando = false; },

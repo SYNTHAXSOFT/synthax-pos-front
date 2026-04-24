@@ -94,6 +94,7 @@
               <th>Usuario</th>
               <th class="spx-th--cedula">Cédula</th>
               <th>Rol</th>
+              <th>Restaurante</th>
               <th>Estado</th>
               <th class="spx-th--right">Acciones</th>
             </tr>
@@ -124,6 +125,18 @@
                   <span [class]="'spx-u-badge ' + rolColorClass(u.rol)">
                     {{ rolLabel(u.rol) }}
                   </span>
+                </td>
+
+                <!-- Restaurante -->
+                <td>
+                  @if (u.restaurante?.nombre) {
+                    <span class="spx-u-rest">
+                      <i class="fa-solid fa-store"></i>
+                      {{ u.restaurante!.nombre }}
+                    </span>
+                  } @else {
+                    <span class="spx-u-rest--none">—</span>
+                  }
                 </td>
 
                 <!-- Status -->
@@ -164,7 +177,7 @@
 
             @empty {
               <tr>
-                <td colspan="5" class="spx-table__empty">
+                <td colspan="6" class="spx-table__empty">
                   <i class="fa-solid fa-users-slash"></i>
                   <p>No se encontraron usuarios</p>
                 </td>

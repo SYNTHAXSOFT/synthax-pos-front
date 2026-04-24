@@ -131,8 +131,9 @@ export class AuthService {
   getDefaultRouteByRole(): string {
     const user = this.getCurrentUser();
     if (!user) return '/';
-    if (user.rol === 'ROOT')      return '/synthax-pos/restaurante/listar';
-    if (user.rol === 'COCINERO')  return '/synthax-pos/venta/listar';
+    if (user.rol === 'ROOT')         return '/synthax-pos/restaurante/listar';
+    if (user.rol === 'COCINERO')     return '/synthax-pos/venta/listar';
+    if (user.rol === 'DOMICILIARIO') return '/synthax-pos/venta/listar';
     return '/synthax-pos/inicio';
   }
 }

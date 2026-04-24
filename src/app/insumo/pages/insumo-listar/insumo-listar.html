@@ -78,82 +78,106 @@
     </div>
   }
 
-  <!-- Card Grid -->
+  <!-- Table -->
   @if (!cargando) {
-    @if (insumosFiltrados.length === 0) {
-      <div class="spx-inv-empty">
-        <i class="fa-solid fa-box-open spx-inv-empty__icon"></i>
-        <p class="spx-inv-empty__msg">No se encontraron insumos</p>
-        <p class="spx-inv-empty__sub">Intenta ajustar los filtros o registra un nuevo insumo</p>
-      </div>
-    } @else {
-      <div class="spx-inv-grid">
-        @for (item of insumosFiltrados; track item.id) {
-          <div class="spx-inv-card" [class.spx-inv-card--inactive]="!item.activo">
+    <div class="spx-inv-table-card">
+      <div class="spx-inv-table-wrap">
+        <table class="spx-inv-table">
+          <thead>
+            <tr>
+              <th>Insumo</th>
+              <th>Medida</th>
+              <th>Stock</th>
+              <th>Estado</th>
+              <th class="spx-inv-th--right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
 
-            <!-- Card Image / Icon Area -->
-            <div class="spx-inv-card__img-wrap" [class.spx-inv-card__img-wrap--out]="(item.stock ?? 0) === 0">
-              <div class="spx-inv-card__icon-bg">
-                <i [class]="getMedidaIcon(item.medida) + ' spx-inv-card__icon'"></i>
-              </div>
-              <!-- Out of stock overlay -->
-              @if ((item.stock ?? 0) === 0) {
-                <div class="spx-inv-card__out-overlay">
-                  <span class="spx-inv-card__out-label">Sin Stock</span>
-                </div>
-              }
-              <!-- Low stock badge -->
-              @if ((item.stock ?? 0) > 0 && (item.stock ?? 0) <= 5) {
-                <span class="spx-inv-card__badge spx-inv-card__badge--low">Bajo Stock</span>
-              }
-              <!-- Inactive badge -->
-              @if (!item.activo) {
-                <span class="spx-inv-card__badge spx-inv-card__badge--inactive">Inactivo</span>
-              }
-            </div>
+            @for (item of insumosFiltrados; track item.id) {
+              <tr class="spx-inv-table__row" [class.spx-inv-table__row--inactive]="!item.activo">
 
-            <!-- Card Body -->
-            <div class="spx-inv-card__body">
-              <div class="spx-inv-card__meta">
-                <span class="spx-inv-card__medida">
-                  <i class="fa-solid fa-ruler spx-inv-card__medida-icon"></i>
-                  {{ item.medida ?? '—' }}
-                </span>
-                <code class="spx-inv-card__codigo">{{ item.codigo ?? '—' }}</code>
-              </div>
+                <!-- Insumo cell -->
+                <td>
+                  <div class="spx-inv-cell">
+                    <div class="spx-inv-cell__icon-wrap">
+                      <i [class]="getMedidaIcon(item.medida) + ' spx-inv-cell__icon'"></i>
+                    </div>
+                    <div>
+                      <p class="spx-inv-cell__name">{{ item.descripcion ?? 'Sin descripción' }}</p>
+                      @if (item.codigo) {
+                        <code class="spx-inv-cell__codigo">{{ item.codigo }}</code>
+                      }
+                    </div>
+                  </div>
+                </td>
 
-              <h3 class="spx-inv-card__name">{{ item.descripcion ?? 'Sin descripción' }}</h3>
+                <!-- Medida -->
+                <td>
+                  <span class="spx-inv-medida">{{ item.medida ?? '—' }}</span>
+                </td>
 
-              <div class="spx-inv-card__stock-row">
-                <div class="spx-inv-card__stock-info">
-                  <span class="spx-inv-card__stock-label">Stock</span>
-                  <span class="spx-inv-card__stock-val" [class]="getStockClass(item.stock)">
+                <!-- Stock -->
+                <td>
+                  <span class="spx-inv-stock-badge" [class]="getStockClass(item.stock)">
                     {{ item.stock ?? 0 }} {{ item.medida ?? '' }}
                   </span>
-                </div>
-                <span class="spx-inv-card__status" [class.spx-inv-card__status--active]="item.activo">
-                  {{ item.activo ? 'Activo' : 'Inactivo' }}
-                </span>
-              </div>
+                  @if ((item.stock ?? 0) > 0 && (item.stock ?? 0) <= 5) {
+                    <span class="spx-inv-warn-tag"><i class="fa-solid fa-triangle-exclamation"></i> Bajo</span>
+                  }
+                  @if ((item.stock ?? 0) === 0) {
+                    <span class="spx-inv-out-tag">Sin stock</span>
+                  }
+                </td>
 
-              <!-- Actions -->
-              <div class="spx-inv-card__actions">
-                <button class="spx-inv-card__btn-edit" (click)="editar(item.id)" title="Editar">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                  Editar
-                </button>
-                @if (item.activo) {
-                  <button class="spx-inv-card__btn-deact" (click)="desactivar(item.id)" title="Desactivar">
-                    <i class="fa-solid fa-ban"></i>
-                  </button>
-                }
-              </div>
-            </div>
+                <!-- Estado -->
+                <td>
+                  <div [class]="item.activo ? 'spx-inv-status spx-inv-status--active' : 'spx-inv-status spx-inv-status--inactive'">
+                    <span class="spx-inv-status__dot"></span>
+                    {{ item.activo ? 'Activo' : 'Inactivo' }}
+                  </div>
+                </td>
 
-          </div>
-        }
+                <!-- Actions -->
+                <td class="spx-inv-th--right">
+                  <div class="spx-inv-action-btns">
+                    <button class="spx-inv-action-btn spx-inv-action-btn--edit" (click)="editar(item.id)" title="Editar">
+                      <i class="fa-solid fa-pen"></i>
+                    </button>
+                    @if (item.activo) {
+                      <button class="spx-inv-action-btn spx-inv-action-btn--deact" (click)="desactivar(item.id)" title="Desactivar">
+                        <i class="fa-solid fa-ban"></i>
+                      </button>
+                    }
+                  </div>
+                </td>
+
+              </tr>
+            }
+
+            @empty {
+              <tr>
+                <td colspan="5" class="spx-inv-table__empty">
+                  <i class="fa-solid fa-box-open"></i>
+                  <p>No se encontraron insumos</p>
+                  <p class="spx-inv-table__empty-sub">Intenta ajustar los filtros o registra un nuevo insumo</p>
+                </td>
+              </tr>
+            }
+
+          </tbody>
+        </table>
       </div>
-    }
+
+      <!-- Footer count -->
+      <div class="spx-inv-table__footer">
+        <p class="spx-inv-table__count">
+          Mostrando <strong>{{ insumosFiltrados.length }}</strong>
+          de <strong>{{ insumos.length }}</strong> insumos
+        </p>
+      </div>
+
+    </div>
   }
 
 </div>

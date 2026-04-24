@@ -166,6 +166,35 @@
 }
 .spx-reg-btn-submit:hover { background: #0b6dd4; }
 
+/* ── Mesa bloqueada (viene de una reserva) ── */
+.spx-reg-mesa-locked {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 0.5rem;
+  color: #f59e0b;
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-height: 2.5rem;
+}
+.spx-reg-mesa-locked > i:first-child {
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+.spx-reg-mesa-locked__hint {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  color: rgba(245, 158, 11, 0.6);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
 /* ── Badge reserva en el header del modal ── */
 .spx-reg-reserva-badge {
   display: inline-flex;

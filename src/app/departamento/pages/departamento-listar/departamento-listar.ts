@@ -1,5 +1,4 @@
-import { Router } from '@angular/router';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DepartamentoService } from '../../services/departamento.service';
@@ -16,14 +15,17 @@ import { ConfirmService } from '../../../shared/services/confirm.service';
 })
 export class ListarPageComponent implements OnInit {
 
-  private departamentoService = inject(DepartamentoService);
-  private readonly toastService = inject(ToastService);
+  private departamentoService  = inject(DepartamentoService);
+  private readonly toastService   = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
+
+  @Input()  modoModal:           boolean = false;
+  @Output() nuevoDepartamento  = new EventEmitter<void>();
+  @Output() editarDepartamento = new EventEmitter<string>();
+
   public departamentos: Departamento[] = [];
   public cargando: boolean = false;
   public searchTerm: string = '';
-
-  constructor(private router: Router) {}
 
   get departamentosFiltrados(): Departamento[] {
     if (!this.searchTerm.trim()) return this.departamentos;
@@ -86,6 +88,6 @@ export class ListarPageComponent implements OnInit {
   }
 
   editar(id: string): void {
-    this.router.navigate(['/departamento/actualizar', id]);
+    this.editarDepartamento.emit(id);
   }
 }

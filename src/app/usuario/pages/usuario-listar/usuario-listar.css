@@ -505,6 +505,27 @@
 
 .spx-page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+/* ── Restaurante cell ─────────────────────── */
+.spx-u-rest {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--spx-sub);
+  white-space: normal;
+  word-break: break-word;
+  max-width: 180px;
+}
+.spx-u-rest i {
+  font-size: 0.7rem;
+  color: var(--spx-muted);
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+.spx-u-rest--none {
+  color: var(--spx-muted);
+}
+
 /* ── Responsive ───────────────────────────── */
 @media (max-width: 768px) {
   .spx-users { padding: 1.25rem; }

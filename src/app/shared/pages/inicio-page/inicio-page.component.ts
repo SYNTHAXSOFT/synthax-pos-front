@@ -77,6 +77,16 @@ export class InicioPageComponent implements OnInit {
     return this.authService.hasRole(['ROOT', 'PROPIETARIO', 'ADMINISTRADOR']);
   }
 
+  /** CAJERO y MESERO solo tienen acceso al reporte de Mesas. */
+  get esSoloReporteMesas(): boolean {
+    return this.authService.hasRole(['CAJERO', 'MESERO']);
+  }
+
+  /** MESERO: no ve métricas de negocio ni métodos de pago en el dashboard. */
+  get esMesero(): boolean {
+    return this.authService.hasRole(['MESERO']);
+  }
+
   // ── Helpers de fecha ──────────────────────────────────────────────────────
 
   /**

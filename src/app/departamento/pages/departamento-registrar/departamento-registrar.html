@@ -1,69 +1,81 @@
-<div class="spx-form-page">
+<div class="spx-module-page">
 
-  <!-- Form card -->
-  <div class="spx-form-card">
+  <!-- Listado principal -->
+  <app-listar-page
+    [modoModal]="true"
+    (nuevoDepartamento)="abrirModal()"
+    (editarDepartamento)="abrirModalEditar($event)">
+  </app-listar-page>
 
-    <div class="spx-form-card__header">
-      <div class="spx-form-card__header-icon">
-        <i class="fa-solid fa-map"></i>
-      </div>
-      <div>
-        <h2 class="spx-form-card__title">Registrar Departamento</h2>
-        <p class="spx-form-card__subtitle">Agrega un nuevo departamento al sistema</p>
+  <!-- ══ Modal ══ -->
+  @if (modalAbierto) {
+    <div class="spx-modal-backdrop" (click)="cerrarModal()">
+      <div class="spx-modal-container" (click)="$event.stopPropagation()">
+
+        <div class="spx-modal-header">
+          <div class="spx-modal-header__info">
+            <div class="spx-modal-header__icon">
+              <i class="fa-solid fa-map"></i>
+            </div>
+            <div>
+              <p class="spx-modal-header__title">{{ editando ? 'Editar Departamento' : 'Nuevo Departamento' }}</p>
+              <p class="spx-modal-header__sub">Los campos con <span class="spx-form-required">*</span> son obligatorios</p>
+            </div>
+          </div>
+          <button class="spx-modal-close" (click)="cerrarModal()" title="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="spx-modal-body">
+          <form [formGroup]="myForm" (ngSubmit)="onSave()">
+            <div class="spx-form-grid spx-form-grid--3" style="margin-bottom:1.25rem">
+
+              <div class="spx-form-field">
+                <label class="spx-form-label">Código <span class="spx-form-required">*</span></label>
+                <input type="number" formControlName="id" class="spx-form-input"
+                       placeholder="Ej: 5"
+                       [readonly]="editando"
+                       [class.spx-form-input--error]="isValidField('id')">
+                @if (isValidField('id')) {
+                  <span class="spx-form-error">{{ getFieldError('id') }}</span>
+                }
+              </div>
+
+              <div class="spx-form-field spx-form-col-span-2">
+                <label class="spx-form-label">Nombre <span class="spx-form-required">*</span></label>
+                <input type="text" formControlName="nombre" class="spx-form-input"
+                       placeholder="Nombre del departamento"
+                       [class.spx-form-input--error]="isValidField('nombre')">
+                @if (isValidField('nombre')) {
+                  <span class="spx-form-error">{{ getFieldError('nombre') }}</span>
+                }
+              </div>
+
+            </div>
+
+            <div class="spx-form-check" style="margin-bottom:1.25rem">
+              <input type="checkbox" class="spx-form-check__input" id="activoDepto" formControlName="activo">
+              <label class="spx-form-check__label" for="activoDepto">
+                <i class="fa-solid fa-circle-check"></i>
+                Departamento activo
+              </label>
+            </div>
+
+            <div class="spx-modal-actions">
+              <button type="button" class="spx-modal-btn-cancel" (click)="cerrarModal()">
+                <i class="fa-solid fa-xmark"></i> Cancelar
+              </button>
+              <button type="submit" class="spx-form-btn-submit">
+                <i class="fa-solid fa-floppy-disk"></i>
+                {{ editando ? 'Actualizar' : 'Guardar' }}
+              </button>
+            </div>
+          </form>
+        </div>
+
       </div>
     </div>
-
-    <form [formGroup]="myForm" (ngSubmit)="onSave()" class="spx-form-body">
-      <div class="spx-form-grid spx-form-grid--3">
-
-        <div class="spx-form-field">
-          <label class="spx-form-label">
-            Código <span class="spx-form-required">*</span>
-          </label>
-          <input type="number" formControlName="id" class="spx-form-input"
-                 placeholder="Ej: 5"
-                 [class.spx-form-input--error]="isValidField('id')">
-          @if (isValidField('id')) {
-            <span class="spx-form-error">{{ getFieldError('id') }}</span>
-          }
-        </div>
-
-        <div class="spx-form-field spx-form-col-span-2">
-          <label class="spx-form-label">
-            Nombre <span class="spx-form-required">*</span>
-          </label>
-          <input type="text" formControlName="nombre" class="spx-form-input"
-                 placeholder="Nombre del departamento"
-                 [class.spx-form-input--error]="isValidField('nombre')">
-          @if (isValidField('nombre')) {
-            <span class="spx-form-error">{{ getFieldError('nombre') }}</span>
-          }
-        </div>
-
-      </div>
-
-      <div class="spx-form-check">
-        <input type="checkbox" class="spx-form-check__input" id="activoDepto"
-               formControlName="activo">
-        <label class="spx-form-check__label" for="activoDepto">
-          <i class="fa-solid fa-circle-check"></i>
-          Departamento activo
-        </label>
-      </div>
-
-      <div class="spx-form-actions">
-        <button type="submit" class="spx-form-btn-submit">
-          <i class="fa-solid fa-floppy-disk"></i>
-          Guardar Departamento
-        </button>
-      </div>
-
-    </form>
-  </div>
-
-  <!-- Lista embebida -->
-  <div class="spx-form-embedded">
-    <app-listar-page></app-listar-page>
-  </div>
+  }
 
 </div>

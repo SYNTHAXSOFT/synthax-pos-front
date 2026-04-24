@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RestauranteService } from '../../services/restaurante.service';
@@ -15,9 +15,13 @@ import { ConfirmService } from '../../../shared/services/confirm.service';
 })
 export class RestauranteListarPageComponent implements OnInit {
   private readonly restauranteService = inject(RestauranteService);
-  private readonly router = inject(Router);
-  private readonly toastService = inject(ToastService);
-  private readonly confirmService = inject(ConfirmService);
+  private readonly router             = inject(Router);
+  private readonly toastService       = inject(ToastService);
+  private readonly confirmService     = inject(ConfirmService);
+
+  @Input()  modoModal:         boolean = false;
+  @Output() nuevoRestaurante  = new EventEmitter<void>();
+  @Output() editarRestaurante = new EventEmitter<number>();
 
   public restaurantes: Restaurante[] = [];
   public cargando: boolean = false;
@@ -45,7 +49,7 @@ export class RestauranteListarPageComponent implements OnInit {
 
   editar(id?: number): void {
     if (!id) return;
-    this.router.navigate(['/synthax-pos/restaurante/registrar'], { queryParams: { id } });
+    this.editarRestaurante.emit(id);
   }
 
   configurarBranding(id?: number): void {

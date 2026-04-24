@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MunicipioService } from '../../service/municipio.service';
@@ -15,9 +15,14 @@ import { ConfirmService } from '../../../shared/services/confirm.service';
 })
 export class ListarMunicipioPageComponent implements OnInit {
 
-  private municipioService = inject(MunicipioService);
-  private readonly toastService = inject(ToastService);
+  private municipioService        = inject(MunicipioService);
+  private readonly toastService   = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
+
+  @Input()  modoModal:      boolean = false;
+  @Output() nuevoMunicipio  = new EventEmitter<void>();
+  @Output() editarMunicipio = new EventEmitter<number>();
+
   public municipios: Municipio[] = [];
   public cargando: boolean = false;
   public searchTerm: string = '';
@@ -41,7 +46,8 @@ export class ListarMunicipioPageComponent implements OnInit {
 
   cargarMunicipios(): void {
     this.cargando = true;
-    this.municipioService.obtenerTodos().subscribe({
+    // El panel admin usa /todos para ver activos e inactivos y poder gestionarlos
+    this.municipioService.obtenerTodosAdmin().subscribe({
       next: (data) => {
         this.municipios = data;
         this.cargando = false;
@@ -74,10 +80,11 @@ export class ListarMunicipioPageComponent implements OnInit {
         this.toastService.success('Municipio desactivado');
         this.cargarMunicipios();
       },
-      error: (error) => {
-        console.error('Error:', error);
-        this.toastService.error('Error al desactivar');
-      }
+      error: () => this.toastService.error('Error al desactivar'),
     });
+  }
+
+  editar(id: number): void {
+    this.editarMunicipio.emit(id);
   }
 }

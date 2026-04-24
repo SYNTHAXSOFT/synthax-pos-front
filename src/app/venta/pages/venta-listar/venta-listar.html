@@ -221,7 +221,7 @@
                       <i class="fa-solid fa-list-ul"></i>
                       Pedidos
                     </button>
-                    @if (venta.estado === 'ABIERTA' && !esCocinero && (venta.numeroPedidos ?? 0) > 0) {
+                    @if (venta.estado === 'ABIERTA' && !esCocinero && !esMesero && !esDomiciliario && (venta.numeroPedidos ?? 0) > 0) {
                       <button class="spx-venta-btn spx-venta-btn--success" (click)="abrirModalCerrar(venta)" title="Cerrar venta">
                         <i class="fa-solid fa-cash-register"></i>
                         Cerrar
@@ -230,7 +230,7 @@
                         <i class="fa-solid fa-ban"></i>
                       </button>
                     }
-                    @if (venta.estado === 'PAGADA' && !esCocinero) {
+                    @if (venta.estado === 'PAGADA' && !esCocinero && !esMesero && !esDomiciliario) {
                       <button class="spx-venta-btn spx-venta-btn--print" (click)="imprimirTirillaExistente(venta)" title="Reimprimir tirilla">
                         <i class="fa-solid fa-print"></i>
                       </button>

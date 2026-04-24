@@ -76,6 +76,9 @@
         @if (esCocinero && pedidos.length > 0) {
           <p class="spx-ped-empty__msg">¡Todo listo! Sin pendientes en cocina</p>
           <p class="spx-ped-empty__sub">Todos los productos han sido preparados o están en camino</p>
+        } @else if (esDomiciliario && pedidos.length > 0) {
+          <p class="spx-ped-empty__msg">Sin pedidos en reparto</p>
+          <p class="spx-ped-empty__sub">No hay ítems asignados a domicilio pendientes de entrega</p>
         } @else {
           <p class="spx-ped-empty__msg">No hay ítems en este pedido</p>
           <p class="spx-ped-empty__sub">Agrega productos desde el formulario de pedido</p>

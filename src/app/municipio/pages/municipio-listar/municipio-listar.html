@@ -9,10 +9,16 @@
       </h2>
       <p class="spx-geo-header__sub">{{ municipios.length }} municipios registrados</p>
     </div>
-    <button class="spx-geo-btn-refresh" (click)="cargarMunicipios()">
-      <i class="fa-solid fa-rotate-right"></i>
-      Actualizar
-    </button>
+    <div style="display:flex;gap:0.5rem;align-items:center">
+      <button class="spx-geo-btn-refresh" (click)="cargarMunicipios()">
+        <i class="fa-solid fa-rotate-right"></i>
+        Actualizar
+      </button>
+      <button class="spx-geo-btn-primary" (click)="nuevoMunicipio.emit()">
+        <i class="fa-solid fa-plus"></i>
+        Nuevo
+      </button>
+    </div>
   </div>
 
   <!-- Stats -->
@@ -101,6 +107,11 @@
                   </span>
                 </td>
                 <td class="spx-geo-td spx-geo-td--actions">
+                  <button class="spx-geo-btn spx-geo-btn--edit"
+                          (click)="editar(+muni.id)"
+                          title="Editar">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
                   @if (muni.activo) {
                     <button class="spx-geo-btn spx-geo-btn--deact"
                             (click)="desactivar(+muni.id)"

@@ -73,7 +73,8 @@
 
   @if (!cargando) {
 
-    <!-- ── Métricas principales ──────────────────────────────── -->
+    <!-- ── Métricas principales (no visibles para MESERO) ─────── -->
+    @if (!esMesero) {
     <div class="spx-metrics">
 
       <!-- Ingresos del día -->
@@ -121,6 +122,7 @@
       </div>
 
     </div>
+    }<!-- /!esMesero métricas -->
 
     <!-- ── Reportes del Sistema ─────────────────────────────── -->
     <div class="spx-reports">
@@ -132,70 +134,74 @@
       </div>
       <div class="spx-reports__grid">
 
-        <a routerLink="/synthax-pos/reporte/ventas" class="spx-report-card spx-report-card--green">
-          <div class="spx-report-card__icon">
-            <i class="fa-solid fa-receipt"></i>
-          </div>
-          <div class="spx-report-card__info">
-            <p class="spx-report-card__name">Ventas</p>
-            <p class="spx-report-card__desc">
-              Filtros por estado, cliente, mesa, usuario, tipo de pedido y fechas
-            </p>
-          </div>
-          <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
-        </a>
+        @if (!esSoloReporteMesas) {
 
-        <a routerLink="/synthax-pos/reporte/compras" class="spx-report-card spx-report-card--amber">
-          <div class="spx-report-card__icon">
-            <i class="fa-solid fa-cart-flatbed"></i>
-          </div>
-          <div class="spx-report-card__info">
-            <p class="spx-report-card__name">Compras</p>
-            <p class="spx-report-card__desc">
-              Filtros por insumo, rango de precios, fechas y estado
-            </p>
-          </div>
-          <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
-        </a>
+          <a routerLink="/synthax-pos/reporte/ventas" class="spx-report-card spx-report-card--green">
+            <div class="spx-report-card__icon">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+            <div class="spx-report-card__info">
+              <p class="spx-report-card__name">Ventas</p>
+              <p class="spx-report-card__desc">
+                Filtros por estado, cliente, mesa, usuario, tipo de pedido y fechas
+              </p>
+            </div>
+            <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
+          </a>
 
-        <a routerLink="/synthax-pos/reporte/cierres" class="spx-report-card spx-report-card--blue">
-          <div class="spx-report-card__icon">
-            <i class="fa-solid fa-cash-register"></i>
-          </div>
-          <div class="spx-report-card__info">
-            <p class="spx-report-card__name">Cierres de Caja</p>
-            <p class="spx-report-card__desc">
-              Histórico de sesiones con detalle de ventas, compras e insumos
-            </p>
-          </div>
-          <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
-        </a>
+          <a routerLink="/synthax-pos/reporte/compras" class="spx-report-card spx-report-card--amber">
+            <div class="spx-report-card__icon">
+              <i class="fa-solid fa-cart-flatbed"></i>
+            </div>
+            <div class="spx-report-card__info">
+              <p class="spx-report-card__name">Compras</p>
+              <p class="spx-report-card__desc">
+                Filtros por insumo, rango de precios, fechas y estado
+              </p>
+            </div>
+            <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
+          </a>
 
-        <a routerLink="/synthax-pos/reporte/logs" class="spx-report-card spx-report-card--purple">
-          <div class="spx-report-card__icon">
-            <i class="fa-solid fa-timeline"></i>
-          </div>
-          <div class="spx-report-card__info">
-            <p class="spx-report-card__name">Logs del Sistema</p>
-            <p class="spx-report-card__desc">
-              Auditoría de cambios de estado en pedidos por usuario, rol y fecha
-            </p>
-          </div>
-          <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
-        </a>
+          <a routerLink="/synthax-pos/reporte/cierres" class="spx-report-card spx-report-card--blue">
+            <div class="spx-report-card__icon">
+              <i class="fa-solid fa-cash-register"></i>
+            </div>
+            <div class="spx-report-card__info">
+              <p class="spx-report-card__name">Cierres de Caja</p>
+              <p class="spx-report-card__desc">
+                Histórico de sesiones con detalle de ventas, compras e insumos
+              </p>
+            </div>
+            <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
+          </a>
 
-        <a routerLink="/synthax-pos/reporte/inventario" class="spx-report-card spx-report-card--rose">
-          <div class="spx-report-card__icon">
-            <i class="fa-solid fa-warehouse"></i>
-          </div>
-          <div class="spx-report-card__info">
-            <p class="spx-report-card__name">Inventario</p>
-            <p class="spx-report-card__desc">
-              Stock actual de insumos con alertas de nivel bajo y sin existencias
-            </p>
-          </div>
-          <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
-        </a>
+          <a routerLink="/synthax-pos/reporte/logs" class="spx-report-card spx-report-card--purple">
+            <div class="spx-report-card__icon">
+              <i class="fa-solid fa-timeline"></i>
+            </div>
+            <div class="spx-report-card__info">
+              <p class="spx-report-card__name">Logs del Sistema</p>
+              <p class="spx-report-card__desc">
+                Auditoría de cambios de estado en pedidos por usuario, rol y fecha
+              </p>
+            </div>
+            <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
+          </a>
+
+          <a routerLink="/synthax-pos/reporte/inventario" class="spx-report-card spx-report-card--rose">
+            <div class="spx-report-card__icon">
+              <i class="fa-solid fa-warehouse"></i>
+            </div>
+            <div class="spx-report-card__info">
+              <p class="spx-report-card__name">Inventario</p>
+              <p class="spx-report-card__desc">
+                Stock actual de insumos con alertas de nivel bajo y sin existencias
+              </p>
+            </div>
+            <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
+          </a>
+
+        }
 
         <a routerLink="/synthax-pos/reporte/mesas" class="spx-report-card spx-report-card--purple">
           <div class="spx-report-card__icon">
@@ -213,8 +219,8 @@
       </div>
     </div>
 
-    <!-- ── Métodos de Pago ─────────────────────────────────────── -->
-    @if (formasPago.length > 0) {
+    <!-- ── Métodos de Pago (no visibles para MESERO) ─────────────── -->
+    @if (!esMesero && formasPago.length > 0) {
       <div class="spx-metodos-section">
         <div class="spx-metodos-section__header">
           <div>

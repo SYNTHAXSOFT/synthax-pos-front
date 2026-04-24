@@ -16,8 +16,14 @@ export class MunicipioService {
     return this.http.post<Municipio>(`${environment.URL}/${API_ENDPOINTS.MPIOS}`, municipio);
   }
 
+  /** Solo activos — usado en listados y selectores de la app. */
   obtenerTodos(): Observable<Municipio[]> {
     return this.http.get<Municipio[]>(`${environment.URL}/${API_ENDPOINTS.MPIOS}`);
+  }
+
+  /** Todos (activos e inactivos) — solo para el panel de administración ROOT. */
+  obtenerTodosAdmin(): Observable<Municipio[]> {
+    return this.http.get<Municipio[]>(`${environment.URL}/${API_ENDPOINTS.MPIOS}/todos`);
   }
 
   obtenerPorId(id: string): Observable<Municipio> {
