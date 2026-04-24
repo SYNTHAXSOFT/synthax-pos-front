@@ -74,12 +74,23 @@ export class SideMenuHeaderComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Lee siempre del localStorage para reflejar cambios sin re-login. */
+  private get sessionUser(): any {
+    return this.authService.getCurrentUser();
+  }
+
   get fullName(): string {
-    if (!this.currentUser) return 'Usuario';
-    return `${this.currentUser.nombre} ${this.currentUser.apellido ?? ''}`.trim();
+    const u = this.sessionUser;
+    if (!u) return 'Usuario';
+    return `${u.nombre} ${u.apellido ?? ''}`.trim();
   }
 
   get userRole(): string {
-    return this.currentUser?.rol ?? '';
+    return this.sessionUser?.rol ?? '';
+  }
+
+  /** Foto de perfil del usuario logueado, o null para usar el avatar generado. */
+  get userFotoPerfil(): string | null {
+    return this.sessionUser?.fotoPerfil ?? null;
   }
 }

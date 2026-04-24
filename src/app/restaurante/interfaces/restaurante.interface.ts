@@ -20,6 +20,8 @@ export interface Restaurante {
   propietarios?:    UsuarioPropietario[];
   activo?:          boolean;
   fechaCreacion?:   string;
+  departamento?:    { id: string; nombre?: string };
+  municipio?:       { id: string; nombre?: string };
 
   // ── Branding / Identidad Visual ──────────────────────────────────────────
   colorPrimario?:   string;   // HEX, p.ej. "#1a73e8"

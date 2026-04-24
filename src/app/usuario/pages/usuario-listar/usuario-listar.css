@@ -332,6 +332,11 @@
   flex-shrink: 0;
 }
 
+.spx-avatar--img {
+  object-fit: cover;
+  border: 2px solid #283543;
+}
+
 .spx-user-cell__name {
   font-size: 0.875rem;
   font-weight: 600;

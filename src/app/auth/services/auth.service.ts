@@ -127,6 +127,17 @@ export class AuthService {
     return rest ? rest.id : null;
   }
 
+  /**
+   * Actualiza los datos del usuario en la sesión local (localStorage).
+   * Útil para reflejar cambios de nombre, foto, etc. sin necesidad de re-login.
+   */
+  actualizarUsuarioEnSesion(parcial: Partial<{ fotoPerfil: string | null; nombre: string; apellido: string }>): void {
+    const user = this.getCurrentUser();
+    if (!user) return;
+    const updated = { ...user, ...parcial };
+    localStorage.setItem(this.USER_KEY, JSON.stringify(updated));
+  }
+
   /** Ruta de inicio según el rol del usuario logueado. */
   getDefaultRouteByRole(): string {
     const user = this.getCurrentUser();

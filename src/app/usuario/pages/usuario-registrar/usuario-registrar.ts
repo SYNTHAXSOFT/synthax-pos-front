@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Formutils } from '../../../utils/form-utils';
@@ -36,6 +36,7 @@ export class RegistrarPage implements OnInit, OnDestroy {
   formUtils = Formutils;
 
   @ViewChild(ListarPage) listarComp?: ListarPage;
+  @ViewChild('fotoInput') fotoInput!: ElementRef<HTMLInputElement>;
 
   public editando: boolean = false;
   private usuarioId?: number;
@@ -46,6 +47,12 @@ export class RegistrarPage implements OnInit, OnDestroy {
   municipios: Municipio[]          = [];
   municipiosFiltrados: Municipio[] = [];
   deptoSeleccionado: Departamento | null = null;
+
+  // ── Foto de perfil ────────────────────────────────────────────────────────
+  // null  = no hay foto / sin cambio (al editar: conserva la existente)
+  // ''    = quitar foto explícitamente (solo aplica al editar)
+  // 'data:...' = imagen nueva en Base64
+  fotoPerfilBase64: string | null = null;
 
   myform = this.fb.group({
     nombre:         ['', Validators.required],
@@ -70,15 +77,59 @@ export class RegistrarPage implements OnInit, OnDestroy {
     document.body.style.overflow = '';
   }
 
+  // ── Foto helpers ──────────────────────────────────────────────────────────
+
+  triggerFotoInput(): void {
+    this.fotoInput?.nativeElement.click();
+  }
+
+  onFotoSeleccionada(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file  = input.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      this.toastService.error('La imagen no debe superar 2 MB');
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => { this.fotoPerfilBase64 = reader.result as string; };
+    reader.readAsDataURL(file);
+    input.value = ''; // reset para que pueda reseleccionarse el mismo archivo
+  }
+
+  quitarFoto(): void {
+    this.fotoPerfilBase64 = '';  // cadena vacía = quitar foto al guardar
+  }
+
+  // ── Modal helpers ─────────────────────────────────────────────────────────
+
   abrirModal(): void {
-    this.editando = false;
-    this.usuarioId = undefined;
+    this.editando    = false;
+    this.usuarioId   = undefined;
+    this.fotoPerfilBase64 = null;
     this.deptoSeleccionado = null;
     this.municipiosFiltrados = [];
-    // Restaurar validador de contraseña obligatorio
     this.myform.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
     this.myform.get('password')?.updateValueAndValidity();
     this.myform.reset({ activo: true });
+
+    // ── Auto-rellenar departamento/municipio desde el restaurante activo ──
+    // Prioridad: restaurante activo → usuario logueado
+    const rest = this.authService.getCurrentRestaurante() as any;
+    const user = this.authService.getCurrentUser();
+
+    const deptId = rest?.departamento?.id ?? user?.departamento?.id ?? '';
+    const munId  = rest?.municipio?.id    ?? user?.municipio?.id    ?? '';
+
+    if (deptId) {
+      this.deptoSeleccionado   = this.departamentos.find(d => d.id === deptId) ?? null;
+      this.municipiosFiltrados = this.municipios.filter(m => m.departamento?.id === deptId);
+      this.myform.patchValue({ departamentoId: deptId, municipioId: munId || '' });
+    }
+
     this.modalAbierto = true;
     document.body.style.overflow = 'hidden';
   }
@@ -86,9 +137,11 @@ export class RegistrarPage implements OnInit, OnDestroy {
   abrirModalEditar(id: number): void {
     this.usuarioService.obtenerPorId(id).subscribe({
       next: (u) => {
-        this.editando = true;
-        this.usuarioId = id;
-        // En edición la contraseña también es obligatoria (@NotBlank en el backend)
+        this.editando    = true;
+        this.usuarioId   = id;
+        // Cargar foto existente (null si no tiene)
+        this.fotoPerfilBase64 = u.fotoPerfil ?? null;
+
         this.myform.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
         this.myform.get('password')?.updateValueAndValidity();
 
@@ -105,7 +158,7 @@ export class RegistrarPage implements OnInit, OnDestroy {
         });
 
         if (u.departamento?.id) {
-          this.deptoSeleccionado = this.departamentos.find(d => d.id === u.departamento?.id) ?? null;
+          this.deptoSeleccionado   = this.departamentos.find(d => d.id === u.departamento?.id) ?? null;
           this.municipiosFiltrados = this.municipios.filter(m => m.departamento?.id === u.departamento?.id);
         }
 
@@ -117,11 +170,12 @@ export class RegistrarPage implements OnInit, OnDestroy {
   }
 
   cerrarModal(): void {
-    this.modalAbierto = false;
+    this.modalAbierto     = false;
+    this.fotoPerfilBase64 = null;
     document.body.style.overflow = '';
-    this.editando = false;
+    this.editando  = false;
     this.usuarioId = undefined;
-    this.deptoSeleccionado = null;
+    this.deptoSeleccionado   = null;
     this.municipiosFiltrados = [];
     this.myform.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
     this.myform.get('password')?.updateValueAndValidity();
@@ -131,7 +185,7 @@ export class RegistrarPage implements OnInit, OnDestroy {
   onDepartamentoChange(): void {
     const id = this.myform.get('departamentoId')?.value;
     this.myform.patchValue({ municipioId: '' });
-    this.deptoSeleccionado = this.departamentos.find(d => d.id === id) ?? null;
+    this.deptoSeleccionado   = this.departamentos.find(d => d.id === id) ?? null;
     this.municipiosFiltrados = id
       ? this.municipios.filter(m => m.departamento?.id === id)
       : [];
@@ -150,12 +204,23 @@ export class RegistrarPage implements OnInit, OnDestroy {
         email:    v.email    ?? '',
         rol:      v.rol      ?? '',
         activo:   v.activo   ?? true,
-        ...(v.password        ? { password:    v.password } : {}),
-        ...(v.departamentoId  ? { departamento: { id: v.departamentoId } } : {}),
-        ...(v.municipioId     ? { municipio:    { id: v.municipioId    } } : {}),
+        ...(v.password       ? { password:    v.password } : {}),
+        ...(v.departamentoId ? { departamento: { id: v.departamentoId } } : {}),
+        ...(v.municipioId    ? { municipio:    { id: v.municipioId    } } : {}),
+        // null = sin cambio; '' = quitar foto; 'data:...' = nueva foto
+        ...(this.fotoPerfilBase64 !== null ? { fotoPerfil: this.fotoPerfilBase64 } : {}),
       } as Usuario;
       this.usuarioService.actualizar(this.usuarioId, usuarioActualizado).subscribe({
-        next: () => {
+        next: (usuarioActual) => {
+          // Si el usuario editado es el que está logueado, actualizar la sesión
+          // para que la foto del sidebar se refresque sin necesidad de re-login.
+          if (this.usuarioId === this.authService.getUserId()) {
+            this.authService.actualizarUsuarioEnSesion({
+              fotoPerfil: (usuarioActualizado as any).fotoPerfil ?? undefined,
+              nombre:     usuarioActualizado.nombre,
+              apellido:   usuarioActualizado.apellido,
+            });
+          }
           this.toastService.success('Usuario actualizado exitosamente');
           this.cerrarModal();
           this.listarComp?.listarAction();
@@ -173,6 +238,8 @@ export class RegistrarPage implements OnInit, OnDestroy {
         activo:   v.activo   ?? true,
         ...(v.departamentoId ? { departamento: { id: v.departamentoId } } : {}),
         ...(v.municipioId    ? { municipio:    { id: v.municipioId    } } : {}),
+        // Solo incluir si hay foto seleccionada (cadena vacía no aplica en creación)
+        ...(this.fotoPerfilBase64 ? { fotoPerfil: this.fotoPerfilBase64 } : {}),
       };
       this.usuarioService.crearUsuario(nuevoUsuario).subscribe({
         next: () => {

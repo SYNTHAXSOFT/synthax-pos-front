@@ -32,6 +32,34 @@
         <div class="spx-modal-body">
           <form autocomplete="off" [formGroup]="myform" (ngSubmit)="onSave()">
 
+            <!-- ── Foto de perfil ──────────────────────────────────────────── -->
+            <div class="spx-foto-picker" style="margin-bottom:1.5rem">
+              <div class="spx-foto-preview" (click)="triggerFotoInput()" title="Cambiar foto de perfil">
+                @if (fotoPerfilBase64) {
+                  <img [src]="fotoPerfilBase64" alt="Foto de perfil" class="spx-foto-preview__img">
+                } @else {
+                  <i class="fa-solid fa-user spx-foto-preview__icon"></i>
+                }
+                <div class="spx-foto-preview__hover">
+                  <i class="fa-solid fa-camera"></i>
+                </div>
+              </div>
+              <div class="spx-foto-info">
+                <p class="spx-foto-info__title">Foto de perfil <span class="spx-form-hint-text" style="text-transform:none;font-size:0.75rem">(opcional)</span></p>
+                <p class="spx-foto-info__sub">JPG, PNG o GIF · máx. 2 MB</p>
+                @if (fotoPerfilBase64) {
+                  <button type="button" class="spx-foto-remove" (click)="quitarFoto(); $event.stopPropagation()">
+                    <i class="fa-solid fa-trash"></i> Quitar foto
+                  </button>
+                } @else {
+                  <button type="button" class="spx-foto-upload-btn" (click)="triggerFotoInput()">
+                    <i class="fa-solid fa-upload"></i> Subir imagen
+                  </button>
+                }
+              </div>
+              <input #fotoInput type="file" accept="image/*" (change)="onFotoSeleccionada($event)" style="display:none">
+            </div>
+
             <!-- Rol -->
             <div class="spx-form-grid spx-form-grid--2" style="margin-bottom:1.25rem">
               <div class="spx-form-group">

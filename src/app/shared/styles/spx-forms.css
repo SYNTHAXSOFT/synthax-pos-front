@@ -1235,3 +1235,106 @@
   margin-bottom: 0.75rem;
 }
 .spx-prop-empty i { color: #374151; }
+
+/* ── Foto de perfil picker ────────────────────────────────────────── */
+.spx-foto-picker {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: rgba(13,127,242,0.04);
+  border: 1px solid #283543;
+  border-radius: 0.75rem;
+}
+
+.spx-foto-preview {
+  position: relative;
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  background: #283543;
+  border: 2px solid #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+}
+.spx-foto-preview:hover { border-color: #0d7ff2; }
+
+.spx-foto-preview__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.spx-foto-preview__icon {
+  font-size: 1.75rem;
+  color: #475569;
+}
+
+.spx-foto-preview__hover {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.18s;
+  font-size: 1rem;
+  color: #fff;
+}
+.spx-foto-preview:hover .spx-foto-preview__hover { opacity: 1; }
+
+.spx-foto-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.spx-foto-info__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.spx-foto-info__sub {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.spx-foto-upload-btn,
+.spx-foto-remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-family: 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  margin-top: 0.25rem;
+  border: 1px solid;
+}
+
+.spx-foto-upload-btn {
+  background: transparent;
+  color: #0d7ff2;
+  border-color: #0d7ff2;
+}
+.spx-foto-upload-btn:hover { background: rgba(13,127,242,0.1); }
+
+.spx-foto-remove {
+  background: transparent;
+  color: #ef4444;
+  border-color: rgba(239,68,68,0.4);
+}
+.spx-foto-remove:hover { background: rgba(239,68,68,0.1); }

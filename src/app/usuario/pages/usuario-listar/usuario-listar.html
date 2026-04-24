@@ -107,9 +107,13 @@
                 <!-- User cell -->
                 <td>
                   <div class="spx-user-cell">
-                    <div [class]="'spx-avatar ' + rolColorClass(u.rol)">
-                      {{ iniciales(u) }}
-                    </div>
+                    @if (u.fotoPerfil) {
+                      <img [src]="u.fotoPerfil" [alt]="u.nombre" class="spx-avatar spx-avatar--img">
+                    } @else {
+                      <div [class]="'spx-avatar ' + rolColorClass(u.rol)">
+                        {{ iniciales(u) }}
+                      </div>
+                    }
                     <div>
                       <p class="spx-user-cell__name">{{ u.nombre }} {{ u.apellido }}</p>
                       <p class="spx-user-cell__email">{{ u.email }}</p>

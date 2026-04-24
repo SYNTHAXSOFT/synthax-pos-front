@@ -71,73 +71,195 @@
       <!-- ── Right side ── -->
       <div class="spx-dash-topbar__right">
 
-        <!-- Notifications -->
-        <button class="spx-dash-topbar__btn" title="Notificaciones">
-          <i class="fa-solid fa-bell"></i>
-          <span class="spx-dash-topbar__notif-dot"></span>
-        </button>
-
-        <!-- Settings -->
+        <!-- Perfil / Settings -->
         <div class="spx-settings-wrap" (click)="$event.stopPropagation()">
           <button
             class="spx-dash-topbar__btn"
             [class.spx-dash-topbar__btn--active]="showSettingsPanel"
-            title="Ajustes"
+            title="Mi perfil"
             (click)="toggleSettings($event)"
           >
-            <i class="fa-solid fa-gear"></i>
+            <i class="fa-solid fa-user-circle"></i>
           </button>
 
-          <!-- Settings Panel -->
+          <!-- Profile Panel -->
           @if (showSettingsPanel) {
-            <div class="spx-settings-panel">
+            <div class="spx-settings-panel" (click)="$event.stopPropagation()">
+
+              <!-- Panel Header -->
               <div class="spx-settings-panel__header">
-                <i class="fa-solid fa-sliders"></i>
-                Preferencias
+                <i class="fa-solid fa-user-circle"></i>
+                Mi Perfil
               </div>
 
-              <!-- Theme toggle -->
-              <div class="spx-settings-section">
-                <p class="spx-settings-section__title">Apariencia</p>
-                <div class="spx-theme-options">
-                  <button
-                    class="spx-theme-opt"
-                    [class.spx-theme-opt--active]="themeService.isDark"
-                    (click)="themeService.setTheme('dark')"
-                  >
-                    <div class="spx-theme-opt__preview spx-theme-opt__preview--dark">
-                      <div class="spx-theme-opt__preview-nav"></div>
-                      <div class="spx-theme-opt__preview-row"></div>
-                      <div class="spx-theme-opt__preview-row spx-theme-opt__preview-row--sm"></div>
-                    </div>
-                    <span class="spx-theme-opt__label">
-                      <i class="fa-solid fa-moon"></i>
-                      Oscuro
-                    </span>
-                    @if (themeService.isDark) {
-                      <i class="fa-solid fa-check spx-theme-opt__check"></i>
-                    }
-                  </button>
+              <div class="spx-profile-body">
 
-                  <button
-                    class="spx-theme-opt"
-                    [class.spx-theme-opt--active]="!themeService.isDark"
-                    (click)="themeService.setTheme('light')"
-                  >
-                    <div class="spx-theme-opt__preview spx-theme-opt__preview--light">
-                      <div class="spx-theme-opt__preview-nav"></div>
-                      <div class="spx-theme-opt__preview-row"></div>
-                      <div class="spx-theme-opt__preview-row spx-theme-opt__preview-row--sm"></div>
-                    </div>
-                    <span class="spx-theme-opt__label">
-                      <i class="fa-solid fa-sun"></i>
-                      Claro
-                    </span>
-                    @if (!themeService.isDark) {
-                      <i class="fa-solid fa-check spx-theme-opt__check"></i>
+                <!-- ── Foto de perfil ──────────────────────── -->
+                <div class="spx-profile-foto-row">
+                  <div class="spx-profile-foto" (click)="triggerPerfilFotoInput()" title="Cambiar foto">
+                    @if (perfilFotoVisible) {
+                      <img [src]="perfilFotoVisible" alt="Foto" class="spx-profile-foto__img">
+                    } @else {
+                      <i class="fa-solid fa-user spx-profile-foto__icon"></i>
                     }
-                  </button>
+                    <div class="spx-profile-foto__hover">
+                      <i class="fa-solid fa-camera"></i>
+                    </div>
+                  </div>
+                  <div class="spx-profile-foto-info">
+                    <p class="spx-profile-foto-info__label">Foto de perfil</p>
+                    <p class="spx-profile-foto-info__sub">JPG, PNG · máx. 2 MB</p>
+                    @if (perfilFotoVisible) {
+                      <button type="button" class="spx-profile-foto-remove" (click)="quitarPerfilFoto()">
+                        <i class="fa-solid fa-trash"></i> Quitar
+                      </button>
+                    }
+                  </div>
+                  <input #perfilFotoInput type="file" accept="image/*"
+                    (change)="onPerfilFotoSeleccionada($event)" style="display:none">
                 </div>
+
+                <!-- ── Información personal ───────────────── -->
+                <div class="spx-profile-section">
+                  <p class="spx-profile-section__title">
+                    <i class="fa-solid fa-id-card"></i> Información personal
+                  </p>
+
+                  <div class="spx-profile-field">
+                    <label class="spx-profile-label">Nombre</label>
+                    <input type="text" class="spx-profile-input"
+                      placeholder="Tu nombre"
+                      [(ngModel)]="perfilNombre">
+                  </div>
+                  <div class="spx-profile-field">
+                    <label class="spx-profile-label">Apellido</label>
+                    <input type="text" class="spx-profile-input"
+                      placeholder="Tu apellido"
+                      [(ngModel)]="perfilApellido">
+                  </div>
+                  <div class="spx-profile-field">
+                    <label class="spx-profile-label">Teléfono</label>
+                    <input type="tel" class="spx-profile-input"
+                      placeholder="Tu teléfono"
+                      [(ngModel)]="perfilTelefono">
+                  </div>
+                  <div class="spx-profile-field">
+                    <label class="spx-profile-label">Correo electrónico</label>
+                    <input type="email" class="spx-profile-input"
+                      placeholder="correo@ejemplo.com"
+                      [(ngModel)]="perfilEmail">
+                  </div>
+                </div>
+
+                <!-- ── Contraseña ─────────────────────────── -->
+                <div class="spx-profile-section">
+                  <p class="spx-profile-section__title">
+                    <i class="fa-solid fa-lock"></i> Contraseña
+                  </p>
+
+                  <div class="spx-profile-field">
+                    <label class="spx-profile-label">Contraseña actual <span style="color:#ef4444">*</span></label>
+                    <div class="spx-profile-input-wrap">
+                      <input [type]="verPasswordActual ? 'text' : 'password'"
+                        class="spx-profile-input spx-profile-input--pw"
+                        placeholder="Contraseña actual"
+                        [(ngModel)]="perfilPasswordActual">
+                      <button type="button" class="spx-profile-eye"
+                        (click)="verPasswordActual = !verPasswordActual">
+                        <i [class]="verPasswordActual ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="spx-profile-field">
+                    <label class="spx-profile-label">Nueva contraseña <span class="spx-profile-opt">(opcional)</span></label>
+                    <div class="spx-profile-input-wrap">
+                      <input [type]="verPasswordNueva ? 'text' : 'password'"
+                        class="spx-profile-input spx-profile-input--pw"
+                        placeholder="Mínimo 6 caracteres"
+                        [(ngModel)]="perfilPasswordNueva">
+                      <button type="button" class="spx-profile-eye"
+                        (click)="verPasswordNueva = !verPasswordNueva">
+                        <i [class]="verPasswordNueva ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                      </button>
+                    </div>
+                  </div>
+                  @if (perfilPasswordNueva) {
+                    <div class="spx-profile-field">
+                      <label class="spx-profile-label">Confirmar nueva contraseña</label>
+                      <div class="spx-profile-input-wrap">
+                        <input [type]="verPasswordConfirm ? 'text' : 'password'"
+                          class="spx-profile-input spx-profile-input--pw"
+                          [class.spx-profile-input--error]="perfilPasswordConfirm && perfilPasswordNueva !== perfilPasswordConfirm"
+                          placeholder="Repite la nueva contraseña"
+                          [(ngModel)]="perfilPasswordConfirm">
+                        <button type="button" class="spx-profile-eye"
+                          (click)="verPasswordConfirm = !verPasswordConfirm">
+                          <i [class]="verPasswordConfirm ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                        </button>
+                      </div>
+                      @if (perfilPasswordConfirm && perfilPasswordNueva !== perfilPasswordConfirm) {
+                        <span class="spx-profile-pw-mismatch">
+                          <i class="fa-solid fa-circle-exclamation"></i> Las contraseñas no coinciden
+                        </span>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <!-- ── Apariencia ─────────────────────────── -->
+                <div class="spx-profile-section">
+                  <p class="spx-profile-section__title">
+                    <i class="fa-solid fa-palette"></i> Apariencia
+                  </p>
+                  <div class="spx-theme-options">
+                    <button
+                      class="spx-theme-opt"
+                      [class.spx-theme-opt--active]="themeService.isDark"
+                      (click)="themeService.setTheme('dark')">
+                      <div class="spx-theme-opt__preview spx-theme-opt__preview--dark">
+                        <div class="spx-theme-opt__preview-nav"></div>
+                        <div class="spx-theme-opt__preview-row"></div>
+                        <div class="spx-theme-opt__preview-row spx-theme-opt__preview-row--sm"></div>
+                      </div>
+                      <span class="spx-theme-opt__label">
+                        <i class="fa-solid fa-moon"></i> Oscuro
+                      </span>
+                      @if (themeService.isDark) {
+                        <i class="fa-solid fa-check spx-theme-opt__check"></i>
+                      }
+                    </button>
+                    <button
+                      class="spx-theme-opt"
+                      [class.spx-theme-opt--active]="!themeService.isDark"
+                      (click)="themeService.setTheme('light')">
+                      <div class="spx-theme-opt__preview spx-theme-opt__preview--light">
+                        <div class="spx-theme-opt__preview-nav"></div>
+                        <div class="spx-theme-opt__preview-row"></div>
+                        <div class="spx-theme-opt__preview-row spx-theme-opt__preview-row--sm"></div>
+                      </div>
+                      <span class="spx-theme-opt__label">
+                        <i class="fa-solid fa-sun"></i> Claro
+                      </span>
+                      @if (!themeService.isDark) {
+                        <i class="fa-solid fa-check spx-theme-opt__check"></i>
+                      }
+                    </button>
+                  </div>
+                </div>
+
+              </div><!-- /spx-profile-body -->
+
+              <!-- ── Footer: guardar ────────────────────── -->
+              <div class="spx-profile-footer">
+                <button class="spx-profile-save-btn"
+                  [disabled]="guardandoPerfil"
+                  (click)="guardarPerfil()">
+                  @if (guardandoPerfil) {
+                    <div class="spx-profile-spinner"></div> Guardando...
+                  } @else {
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar cambios
+                  }
+                </button>
               </div>
 
             </div>
@@ -145,10 +267,16 @@
         </div>
 
         <div class="spx-dash-topbar__divider"></div>
-        <div class="spx-dash-topbar__branch">
-          <p class="spx-dash-topbar__branch-name">Sucursal Principal</p>
-          <p class="spx-dash-topbar__branch-sub">Terminal #01</p>
+
+        <!-- Sistema: nombre -->
+        <div class="spx-dash-topbar__brand">
+          <i class="fa-solid fa-cash-register spx-dash-topbar__brand-icon"></i>
+          <div>
+            <p class="spx-dash-topbar__brand-name">SYNTHAX POS</p>
+            <p class="spx-dash-topbar__brand-sub">Sistema POS</p>
+          </div>
         </div>
+
       </div>
     </header>
 

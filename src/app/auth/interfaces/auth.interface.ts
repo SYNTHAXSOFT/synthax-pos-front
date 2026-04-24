@@ -28,16 +28,22 @@ export interface RestauranteLogin {
   nit?:             string;
   direccion?:       string;
   descripcion?:     string;
+  /** Ubicación del restaurante — usado para pre-rellenar la ubicación al crear empleados. */
+  departamento?:    { id: string; nombre?: string };
+  municipio?:       { id: string; nombre?: string };
 }
 
 export interface LoginResponse {
   usuario: {
-    id:       number;
-    nombre:   string;
-    apellido: string;
-    cedula:   string;
-    email:    string;
-    rol:      string;
+    id:           number;
+    nombre:       string;
+    apellido:     string;
+    cedula:       string;
+    email:        string;
+    rol:          string;
+    fotoPerfil?:  string | null;
+    departamento?: { id: string; nombre?: string };
+    municipio?:    { id: string; nombre?: string };
   };
   /** Restaurante activo del usuario. Null para ROOT. */
   restaurante: RestauranteLogin | null;
