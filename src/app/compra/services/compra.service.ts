@@ -1,6 +1,6 @@
 import { environment } from '../../../environments/environment';
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Compra, CompraRequest } from '../interfaces/compra.interface';
 import { API_ENDPOINTS } from '../../utils/constantes-utils';
@@ -16,6 +16,15 @@ export class CompraService {
 
   obtenerTodas(): Observable<Compra[]> {
     return this.http.get<Compra[]>(this.base);
+  }
+
+  /** Solo trae compras desde `fechaDesde` usando el header Restaurante-Id. */
+  obtenerDesde(restauranteId: number, fechaDesde: string): Observable<Compra[]> {
+    const params = new HttpParams().set('fechaDesde', fechaDesde);
+    return this.http.get<Compra[]>(this.base, {
+      headers: { 'Restaurante-Id': restauranteId.toString() },
+      params,
+    });
   }
 
   obtenerPorRestaurante(restauranteId: number): Observable<Compra[]> {

@@ -18,6 +18,12 @@ export class VentaService {
     return this.http.get<Venta[]>(this.base);
   }
 
+  /** Solo trae ventas creadas desde `fechaDesde` (ISO-8601). Usado en el dashboard. */
+  obtenerDesde(fechaDesde: string): Observable<Venta[]> {
+    const params = new HttpParams().set('fechaDesde', fechaDesde);
+    return this.http.get<Venta[]>(this.base, { params });
+  }
+
   obtenerPorEstado(estado: string): Observable<Venta[]> {
     return this.http.get<Venta[]>(`${this.base}/estado/${estado}`);
   }

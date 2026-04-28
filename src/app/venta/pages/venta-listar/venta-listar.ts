@@ -2,7 +2,7 @@ import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core'
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 import { VentaService } from '../../services/venta.service';
 import { Venta } from '../../interfaces/venta.interface';
 import { ESTADOS_VENTA } from '../../../utils/constantes-utils';
@@ -38,7 +38,7 @@ export class VentaListarPageComponent implements OnInit {
 
   public ventas: Venta[]       = [];
   public cargando: boolean     = false;
-  public estadoFiltro: string  = '';
+  public estadoFiltro: string  = 'ABIERTA'; // Por defecto: solo ventas abiertas
   public readonly estadosVenta = ESTADOS_VENTA;
 
   /** Subtotal estimado (suma de pedidos activos) por ventaId — para ventas ABIERTA */
@@ -217,12 +217,10 @@ export class VentaListarPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Para PROPIETARIO / ADMINISTRADOR inicia el filtro en "hoy"
-    if (!this.soloHoy) {
-      const hoy = this.fechaHoy();
-      this.fechaDesde = hoy;
-      this.fechaHasta = hoy;
-    }
+    // Siempre iniciamos con el día de hoy como rango de fechas
+    const hoy = this.fechaHoy();
+    this.fechaDesde = hoy;
+    this.fechaHasta = hoy;
     this.cargarVentas();
   }
 
@@ -241,20 +239,41 @@ export class VentaListarPageComponent implements OnInit {
     this.fechaHasta = '';
   }
 
+  /** YYYY-MM-DDTHH:mm:ss sin zona — formato que acepta LocalDateTime.parse() en Java. */
+  private startOfTodayStr(): string {
+    const d = new Date();
+    const p = (n: number) => n.toString().padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T00:00:00`;
+  }
+
   cargarVentas(): void {
     this.cargando = true;
-    // Siempre cargamos pedidos en paralelo para calcular subtotales de ventas ABIERTA
-    forkJoin({
-      ventas:  this.ventaService.obtenerTodos(),
-      pedidos: this.pedidoService.obtenerTodos(),
-    }).subscribe({
+    const restauranteId = this.authService.getRestauranteId();
+
+    // Ventas: desde la fecha seleccionada en el filtro (defecto: inicio de hoy).
+    // Esto evita cargar todo el historial — el backend aplica la restricción de fecha.
+    const fechaDesde = this.fechaDesde
+      ? `${this.fechaDesde}T00:00:00`
+      : this.startOfTodayStr();
+
+    const ventasObs = this.ventaService.obtenerDesde(fechaDesde)
+      .pipe(catchError(() => of([])));
+
+    // Pedidos: siempre solo los de hoy (se usan para subtotales de ventas ABIERTAS
+    // y para los filtros de COCINERO / DOMICILIARIO — todos casos del día actual).
+    const pedidosObs = (restauranteId
+      ? this.pedidoService.obtenerDesde(restauranteId, this.startOfTodayStr())
+      : this.pedidoService.obtenerTodos()
+    ).pipe(catchError(() => of([])));
+
+    forkJoin({ ventas: ventasObs, pedidos: pedidosObs }).subscribe({
       next: ({ ventas, pedidos }) => {
-        this.ventas = ventas;
+        this.ventas = ventas as any;
 
         // ── Mapa de subtotales estimados para ventas ABIERTA ─────────────
         const EXCLUIDOS = new Set(['CANCELADO', 'DESTRUIDO']);
         const mapa = new Map<number, number>();
-        for (const p of pedidos) {
+        for (const p of pedidos as any[]) {
           const vid = p.venta?.id;
           if (!vid || EXCLUIDOS.has(p.estado ?? '')) continue;
           const linea = (p.producto?.precio ?? 0) * (p.cantidad ?? 1);
@@ -265,7 +284,7 @@ export class VentaListarPageComponent implements OnInit {
         // ── Filtros específicos por rol ───────────────────────────────────
         if (this.esCocinero) {
           this.ventaIdsCocinero = new Set(
-            pedidos
+            (pedidos as any[])
               .filter(p => p.estado === 'PEDIDO' || p.estado === 'PREPARANDO' || p.estado === 'DEVUELTO')
               .map(p => p.venta?.id)
               .filter((id): id is number => id != null)
@@ -274,7 +293,7 @@ export class VentaListarPageComponent implements OnInit {
 
         if (this.esDomiciliario) {
           this.ventaIdsDomiciliario = new Set(
-            pedidos
+            (pedidos as any[])
               .filter(p => p.estado === 'ENTREGADO_DOMICILIARIO')
               .map(p => p.venta?.id)
               .filter((id): id is number => id != null)

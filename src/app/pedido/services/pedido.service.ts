@@ -1,6 +1,6 @@
 import { environment } from '../../../environments/environment';
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CambioEstadoRequest, Pedido, PedidoRequest } from '../interfaces/pedido.interface';
 import { LogCambioPedido } from '../interfaces/log-cambio-pedido.interface';
@@ -17,6 +17,15 @@ export class PedidoService {
 
   obtenerTodos(): Observable<Pedido[]> {
     return this.http.get<Pedido[]>(this.base);
+  }
+
+  /** Solo trae pedidos desde `fechaDesde` para un restaurante. Usado en el dashboard. */
+  obtenerDesde(restauranteId: number, fechaDesde: string): Observable<Pedido[]> {
+    const params = new HttpParams().set('fechaDesde', fechaDesde);
+    return this.http.get<Pedido[]>(this.base, {
+      headers: { 'Restaurante-Id': restauranteId.toString() },
+      params,
+    });
   }
 
   obtenerPorVenta(ventaId: number): Observable<Pedido[]> {

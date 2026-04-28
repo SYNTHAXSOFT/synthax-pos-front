@@ -141,23 +141,52 @@ export class InicioPageComponent implements OnInit {
     ).length;
   }
 
+  // ── Helpers de fecha ─────────────────────────────────────────────────────
+
+  /** Inicio del día actual (00:00:00) como fallback cuando la caja no está abierta. */
+  private startOfToday(): Date {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  /**
+   * Convierte un Date al formato ISO-local que acepta LocalDateTime.parse() en Java:
+   * "YYYY-MM-DDTHH:mm:ss" (sin zona horaria ni milisegundos).
+   */
+  private toLocalDateTimeStr(d: Date): string {
+    const p = (n: number) => n.toString().padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}` +
+           `T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  }
+
   // ── Init ─────────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
     const restauranteId = this.authService.getRestauranteId();
 
-    // Cargar estado de caja y datos del dashboard en paralelo
+    // Usamos el inicio del día como fecha mínima para no cargar todo el historial.
+    // Si la caja tiene una apertura posterior a medianoche, el filtro del getter
+    // `esDesdeApertura` lo refina aún más en el cliente.
+    const fechaDesde = this.toLocalDateTimeStr(this.startOfToday());
+
     const dataSources: any = {
-      ventas:     this.ventaService.obtenerTodos().pipe(
-                    catchError(() => of([]))),
-      compras:    (restauranteId
-                    ? this.compraService.obtenerPorRestaurante(restauranteId)
-                    : this.compraService.obtenerTodas()).pipe(
-                    catchError(() => of([]))),
-      formasPago: this.formaPagoService.obtenerActivas().pipe(
-                    catchError(() => of([]))),
-      pedidos:    this.pedidoService.obtenerTodos().pipe(
-                    catchError(() => of([]))),
+      ventas: (restauranteId
+        ? this.ventaService.obtenerDesde(fechaDesde)
+        : this.ventaService.obtenerTodos()
+      ).pipe(catchError(() => of([]))),
+
+      compras: (restauranteId
+        ? this.compraService.obtenerDesde(restauranteId, fechaDesde)
+        : this.compraService.obtenerTodas()
+      ).pipe(catchError(() => of([]))),
+
+      formasPago: this.formaPagoService.obtenerActivas().pipe(catchError(() => of([]))),
+
+      pedidos: (restauranteId
+        ? this.pedidoService.obtenerDesde(restauranteId, fechaDesde)
+        : this.pedidoService.obtenerTodos()
+      ).pipe(catchError(() => of([]))),
     };
 
     if (this.puedeOperarCaja) {
@@ -212,13 +241,30 @@ export class InicioPageComponent implements OnInit {
 
   private recargarDatos(): void {
     const restauranteId = this.authService.getRestauranteId();
+    // Recarga con la fecha de apertura real si la caja está abierta;
+    // de lo contrario usa el inicio del día para no traer historial completo.
+    const base   = this.cajaAbierta && this.fechaApertura
+                     ? this.fechaApertura
+                     : this.startOfToday();
+    const fechaDesde = this.toLocalDateTimeStr(base);
+
     forkJoin({
-      ventas:     this.ventaService.obtenerTodos(),
-      compras:    restauranteId
-                    ? this.compraService.obtenerPorRestaurante(restauranteId)
-                    : this.compraService.obtenerTodas(),
-      formasPago: this.formaPagoService.obtenerActivas(),
-      pedidos:    this.pedidoService.obtenerTodos(),
+      ventas: (restauranteId
+        ? this.ventaService.obtenerDesde(fechaDesde)
+        : this.ventaService.obtenerTodos()
+      ).pipe(catchError(() => of([]))),
+
+      compras: (restauranteId
+        ? this.compraService.obtenerDesde(restauranteId, fechaDesde)
+        : this.compraService.obtenerTodas()
+      ).pipe(catchError(() => of([]))),
+
+      formasPago: this.formaPagoService.obtenerActivas().pipe(catchError(() => of([]))),
+
+      pedidos: (restauranteId
+        ? this.pedidoService.obtenerDesde(restauranteId, fechaDesde)
+        : this.pedidoService.obtenerTodos()
+      ).pipe(catchError(() => of([]))),
     }).subscribe({
       next: (res) => {
         this.ventas     = res.ventas;
