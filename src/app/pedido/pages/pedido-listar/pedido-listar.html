@@ -9,7 +9,14 @@
       </p>
     </div>
     <div class="spx-ped-header-actions">
-      <!-- Botón Enviar todos a cocina (FIX #4) -->
+      <!-- Botón Agregar producto (abre modal catálogo en el padre) -->
+      @if (puedeAgregar) {
+        <button class="spx-ped-btn-agregar" (click)="agregarProductoClick.emit()">
+          <i class="fa-solid fa-plus"></i>
+          Agregar producto
+        </button>
+      }
+      <!-- Botón Enviar todos a cocina -->
       @if (hayPedidosParaCocina) {
         <button class="spx-ped-btn-cocina" (click)="enviarTodosACocina()" [disabled]="enviandoTodos">
           @if (enviandoTodos) {

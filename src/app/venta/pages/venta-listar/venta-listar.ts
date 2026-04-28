@@ -41,6 +41,9 @@ export class VentaListarPageComponent implements OnInit {
   public estadoFiltro: string  = '';
   public readonly estadosVenta = ESTADOS_VENTA;
 
+  /** Subtotal estimado (suma de pedidos activos) por ventaId — para ventas ABIERTA */
+  public pedidoSubtotalMap: Map<number, number> = new Map();
+
   /** IDs de ventas que tienen al menos un pedido en estado PEDIDO, PREPARANDO o DEVUELTO (para filtro de COCINERO). */
   public ventaIdsCocinero: Set<number> = new Set();
 
@@ -134,6 +137,14 @@ export class VentaListarPageComponent implements OnInit {
   public soporteNombre: string  = '';
   @ViewChild('fileInputVenta') fileInputVenta!: ElementRef<HTMLInputElement>;
 
+  // ── Servicios adicionales ─────────────────────────────────────────────────
+  public serviciosAdicionales: { descripcion: string; valor: number }[] = [];
+  public mostrarFormServicio: boolean  = false;
+  public nuevoServicioDescripcion: string = '';
+  public nuevoServicioValor: number | null = null;
+  /** Copia que se guarda justo antes de cerrar el modal, para imprimirla */
+  public serviciosParaImprimir: { descripcion: string; valor: number }[] = [];
+
   get clientesFiltrados(): Cliente[] {
     const term = this.clienteBusqueda.trim().toLowerCase();
     if (!term) return this.clientesDisponibles.slice(0, 6);
@@ -174,8 +185,12 @@ export class VentaListarPageComponent implements OnInit {
     return Math.round(this.totalConImpuestos * (this.descuentoPct / 100));
   }
 
+  get totalServiciosAdicionales(): number {
+    return this.serviciosAdicionales.reduce((s, sv) => s + (sv.valor ?? 0), 0);
+  }
+
   get totalFinal(): number {
-    return this.totalConImpuestos - this.valorDescuento;
+    return this.totalConImpuestos - this.valorDescuento + this.totalServiciosAdicionales;
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -228,45 +243,48 @@ export class VentaListarPageComponent implements OnInit {
 
   cargarVentas(): void {
     this.cargando = true;
-    if (this.esCocinero || this.esDomiciliario) {
-      // Para cocinero y domiciliario cargamos también los pedidos para filtrar ventas relevantes
-      forkJoin({
-        ventas:  this.ventaService.obtenerTodos(),
-        pedidos: this.pedidoService.obtenerTodos(),
-      }).subscribe({
-        next: ({ ventas, pedidos }) => {
-          this.ventas = ventas;
+    // Siempre cargamos pedidos en paralelo para calcular subtotales de ventas ABIERTA
+    forkJoin({
+      ventas:  this.ventaService.obtenerTodos(),
+      pedidos: this.pedidoService.obtenerTodos(),
+    }).subscribe({
+      next: ({ ventas, pedidos }) => {
+        this.ventas = ventas;
 
-          if (this.esCocinero) {
-            // Ventas con al menos un pedido enviado a cocina, en preparación o devuelto
-            this.ventaIdsCocinero = new Set(
-              pedidos
-                .filter(p => p.estado === 'PEDIDO' || p.estado === 'PREPARANDO' || p.estado === 'DEVUELTO')
-                .map(p => p.venta?.id)
-                .filter((id): id is number => id != null)
-            );
-          }
+        // ── Mapa de subtotales estimados para ventas ABIERTA ─────────────
+        const EXCLUIDOS = new Set(['CANCELADO', 'DESTRUIDO']);
+        const mapa = new Map<number, number>();
+        for (const p of pedidos) {
+          const vid = p.venta?.id;
+          if (!vid || EXCLUIDOS.has(p.estado ?? '')) continue;
+          const linea = (p.producto?.precio ?? 0) * (p.cantidad ?? 1);
+          mapa.set(vid, (mapa.get(vid) ?? 0) + linea);
+        }
+        this.pedidoSubtotalMap = mapa;
 
-          if (this.esDomiciliario) {
-            // Ventas con al menos un pedido en reparto (ENTREGADO_DOMICILIARIO)
-            this.ventaIdsDomiciliario = new Set(
-              pedidos
-                .filter(p => p.estado === 'ENTREGADO_DOMICILIARIO')
-                .map(p => p.venta?.id)
-                .filter((id): id is number => id != null)
-            );
-          }
+        // ── Filtros específicos por rol ───────────────────────────────────
+        if (this.esCocinero) {
+          this.ventaIdsCocinero = new Set(
+            pedidos
+              .filter(p => p.estado === 'PEDIDO' || p.estado === 'PREPARANDO' || p.estado === 'DEVUELTO')
+              .map(p => p.venta?.id)
+              .filter((id): id is number => id != null)
+          );
+        }
 
-          this.cargando = false;
-        },
-        error: (err) => { console.error('Error al cargar ventas:', err); this.cargando = false; },
-      });
-    } else {
-      this.ventaService.obtenerTodos().subscribe({
-        next:  (data) => { this.ventas = data; this.cargando = false; },
-        error: (err)  => { console.error('Error al cargar ventas:', err); this.cargando = false; },
-      });
-    }
+        if (this.esDomiciliario) {
+          this.ventaIdsDomiciliario = new Set(
+            pedidos
+              .filter(p => p.estado === 'ENTREGADO_DOMICILIARIO')
+              .map(p => p.venta?.id)
+              .filter((id): id is number => id != null)
+          );
+        }
+
+        this.cargando = false;
+      },
+      error: (err) => { console.error('Error al cargar ventas:', err); this.cargando = false; },
+    });
   }
 
   /** Recarga desde API y mantiene los filtros activos */
@@ -307,6 +325,12 @@ export class VentaListarPageComponent implements OnInit {
   get totalAbiertas(): number { return this.ventasFiltradas.filter(v => v.estado === 'ABIERTA').length; }
   get totalPagadas(): number  { return this.ventasFiltradas.filter(v => v.estado === 'PAGADA').length; }
   get totalAnuladas(): number { return this.ventasFiltradas.filter(v => v.estado === 'ANULADA').length; }
+
+  /** Subtotal estimado de una venta ABIERTA (suma de pedidos activos). */
+  getSubtotalAbierta(ventaId?: number): number {
+    if (!ventaId) return 0;
+    return this.pedidoSubtotalMap.get(ventaId) ?? 0;
+  }
   get totalIngresos(): number {
     return this.ventasMostradas
       .filter(v => v.estado === 'PAGADA')
@@ -351,6 +375,10 @@ export class VentaListarPageComponent implements OnInit {
     this.nuevoCliente            = { nombre: '', apellido: '', cedula: '', email: '', telefono: '' };
     this.soportePreview          = '';
     this.soporteNombre           = '';
+    this.serviciosAdicionales    = [];
+    this.mostrarFormServicio     = false;
+    this.nuevoServicioDescripcion = '';
+    this.nuevoServicioValor      = null;
     this.modalCerrar             = true;
 
     forkJoin({
@@ -470,6 +498,10 @@ export class VentaListarPageComponent implements OnInit {
     this.nuevoCliente               = { nombre: '', apellido: '', cedula: '', email: '', telefono: '' };
     this.soportePreview             = '';
     this.soporteNombre              = '';
+    this.serviciosAdicionales       = [];
+    this.mostrarFormServicio        = false;
+    this.nuevoServicioDescripcion   = '';
+    this.nuevoServicioValor         = null;
   }
 
   // ── Métodos de imagen de soporte ─────────────────────────────────────────
@@ -500,6 +532,29 @@ export class VentaListarPageComponent implements OnInit {
   quitarSoporte(): void {
     this.soportePreview = '';
     this.soporteNombre  = '';
+  }
+
+  // ── Servicios adicionales ─────────────────────────────────────────────────
+
+  agregarServicio(): void {
+    const desc = this.nuevoServicioDescripcion.trim();
+    const val  = this.nuevoServicioValor ?? 0;
+    if (!desc) {
+      this.toastService.warning('La descripción del servicio es obligatoria.');
+      return;
+    }
+    if (val <= 0) {
+      this.toastService.warning('El valor del servicio debe ser mayor a 0.');
+      return;
+    }
+    this.serviciosAdicionales     = [...this.serviciosAdicionales, { descripcion: desc, valor: val }];
+    this.nuevoServicioDescripcion = '';
+    this.nuevoServicioValor       = null;
+    this.mostrarFormServicio      = false;
+  }
+
+  quitarServicio(index: number): void {
+    this.serviciosAdicionales = this.serviciosAdicionales.filter((_, i) => i !== index);
   }
 
   toggleImpuesto(id: number): void {
@@ -550,6 +605,7 @@ export class VentaListarPageComponent implements OnInit {
         this.subtotalParaImprimir       = this.subtotalCierre;
         this.descuentoValorParaImprimir = this.valorDescuento;
         this.totalParaImprimir          = this.totalFinal;
+        this.serviciosParaImprimir      = [...this.serviciosAdicionales];
         this.fechaImpresion             = new Date();
 
         this.cerrarModal();
@@ -600,6 +656,19 @@ export class VentaListarPageComponent implements OnInit {
         <td style="text-align:right;padding:3px 0;vertical-align:top;">$ ${fmt(precio * cantidad)}</td>
       </tr>`;
     }).join('');
+
+    const serviciosHtml = this.serviciosParaImprimir.length > 0
+      ? `<div class="div"></div>
+         <div style="margin:4px 0;">
+           <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;color:#555;">Servicios adicionales</div>
+           ${this.serviciosParaImprimir.map(sv =>
+             `<div style="display:flex;justify-content:space-between;font-size:11px;margin:2px 0;">
+               <span>${sv.descripcion}</span>
+               <span>$ ${fmt(sv.valor)}</span>
+             </div>`
+           ).join('')}
+         </div>`
+      : '';
 
     const impuestosHtml = this.impuestosParaImprimir.map(t =>
       `<div style="display:flex;justify-content:space-between;font-size:11px;margin:2px 0;">
@@ -693,6 +762,8 @@ export class VentaListarPageComponent implements OnInit {
     </thead>
     <tbody>${itemsHtml}</tbody>
   </table>
+
+  ${serviciosHtml}
 
   <div class="div"></div>
 

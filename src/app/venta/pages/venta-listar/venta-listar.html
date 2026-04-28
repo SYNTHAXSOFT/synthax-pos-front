@@ -200,8 +200,31 @@
                   {{ venta.fechaCreacion | date:'dd/MM/yy HH:mm' }}
                 </td>
                 <td class="spx-venta-td spx-venta-td--total">
-                  @if (venta.valorTotal != null && venta.valorTotal > 0) {
-                    <span class="spx-venta-total-cell">$ {{ venta.valorTotal | number:'1.0-0' }}</span>
+                  @if (venta.estado === 'PAGADA' && venta.valorTotal != null && venta.valorTotal > 0) {
+                    <!-- Venta PAGADA: total cobrado + método de pago -->
+                    <div class="spx-venta-total-wrap">
+                      <span class="spx-venta-total-cell">$ {{ venta.valorTotal | number:'1.0-0' }}</span>
+                      @if (venta.formaPago?.nombre) {
+                        <span class="spx-venta-total-fp">
+                          <i class="fa-solid fa-wallet"></i>
+                          {{ venta.formaPago!.nombre }}
+                        </span>
+                      }
+                    </div>
+                  } @else if (venta.estado === 'ABIERTA') {
+                    <!-- Venta ABIERTA: subtotal estimado de pedidos activos -->
+                    @if (getSubtotalAbierta(venta.id) > 0) {
+                      <div class="spx-venta-total-wrap">
+                        <span class="spx-venta-total-cell spx-venta-total-cell--open">
+                          $ {{ getSubtotalAbierta(venta.id) | number:'1.0-0' }}
+                        </span>
+                        <span class="spx-venta-total-est">
+                          <i class="fa-solid fa-clock"></i> en curso
+                        </span>
+                      </div>
+                    } @else {
+                      <span class="spx-venta-td--muted">—</span>
+                    }
                   } @else {
                     <span class="spx-venta-td--muted">—</span>
                   }
@@ -495,6 +518,63 @@
             }
           </div>
 
+          <!-- ── Servicios adicionales ────────────────── -->
+          <div class="spx-modal__section">
+            <p class="spx-modal__section-title">
+              <i class="fa-solid fa-plus-circle"></i>
+              Servicios adicionales
+              <span class="spx-modal__section-hint">opcional</span>
+            </p>
+
+            @if (serviciosAdicionales.length > 0) {
+              <div class="spx-modal__servicios-list">
+                @for (sv of serviciosAdicionales; track $index) {
+                  <div class="spx-modal__servicio-item">
+                    <span class="spx-modal__servicio-desc">{{ sv.descripcion }}</span>
+                    <span class="spx-modal__servicio-val">$ {{ sv.valor | number:'1.0-0' }}</span>
+                    <button type="button" class="spx-modal__servicio-remove"
+                            (click)="quitarServicio($index)" title="Quitar servicio">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (mostrarFormServicio) {
+              <div class="spx-modal__new-client" style="margin-top:0.5rem">
+                <p class="spx-modal__new-client__title">
+                  <i class="fa-solid fa-circle-plus"></i> Nuevo servicio adicional
+                </p>
+                <div class="spx-modal__new-client__grid">
+                  <input class="spx-modal__new-client__input spx-modal__new-client__input--full"
+                    type="text" placeholder="Descripción del servicio *"
+                    [(ngModel)]="nuevoServicioDescripcion" />
+                  <input class="spx-modal__new-client__input spx-modal__new-client__input--full"
+                    type="number" placeholder="Valor (COP) *" min="1" step="1"
+                    [(ngModel)]="nuevoServicioValor" />
+                </div>
+                <div class="spx-modal__new-client__actions">
+                  <button type="button" class="spx-modal__new-client__btn-cancel"
+                          (click)="mostrarFormServicio = false">
+                    Cancelar
+                  </button>
+                  <button type="button" class="spx-modal__new-client__btn-save"
+                          (click)="agregarServicio()">
+                    <i class="fa-solid fa-plus"></i>
+                    Agregar servicio
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <button type="button" class="spx-modal__client-create"
+                      (click)="mostrarFormServicio = true">
+                <i class="fa-solid fa-plus"></i>
+                Agregar otro servicio
+              </button>
+            }
+          </div>
+
           <!-- ── Imagen de soporte (opcional) ──────────── -->
           <div class="spx-modal__section">
             <p class="spx-modal__section-title">
@@ -559,6 +639,16 @@
                 </span>
                 <span class="spx-modal__summary-value spx-modal__summary-value--discount">
                   − $ {{ valorDescuento | number:'1.0-0' }}
+                </span>
+              </div>
+            }
+            @if (totalServiciosAdicionales > 0) {
+              <div class="spx-modal__summary-row spx-modal__summary-row--tax">
+                <span class="spx-modal__summary-label">
+                  <i class="fa-solid fa-plus-circle"></i> Servicios adicionales
+                </span>
+                <span class="spx-modal__summary-value spx-modal__summary-value--tax">
+                  + $ {{ totalServiciosAdicionales | number:'1.0-0' }}
                 </span>
               </div>
             }

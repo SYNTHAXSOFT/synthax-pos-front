@@ -60,6 +60,16 @@
 .spx-ped-btn-refresh:hover {
   background: var(--spx-surface2); border-color: var(--spx-primary);
 }
+.spx-ped-btn-agregar {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: var(--spx-ok); border: none;
+  color: #fff; border-radius: var(--spx-radius);
+  font-size: 0.875rem; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: opacity 0.15s; white-space: nowrap;
+}
+.spx-ped-btn-agregar:hover { opacity: 0.88; }
+
 .spx-ped-btn-cocina {
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.625rem 1.25rem;

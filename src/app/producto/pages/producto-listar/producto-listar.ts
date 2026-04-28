@@ -19,8 +19,9 @@ export class ProductoListarPageComponent implements OnInit {
   private readonly confirmService  = inject(ConfirmService);
 
   @Input() modoModal: boolean = false;
-  @Output() nuevoProducto  = new EventEmitter<void>();
-  @Output() editarProducto = new EventEmitter<number>();
+  @Output() nuevoProducto   = new EventEmitter<void>();
+  @Output() editarProducto  = new EventEmitter<number>();
+  @Output() duplicarProducto = new EventEmitter<number>();
 
   public productos: Producto[] = [];
   public cargando: boolean = false;
@@ -70,6 +71,11 @@ export class ProductoListarPageComponent implements OnInit {
   editar(id?: number): void {
     if (!id) return;
     this.editarProducto.emit(id);
+  }
+
+  duplicar(id?: number): void {
+    if (!id) return;
+    this.duplicarProducto.emit(id);
   }
 
   async desactivar(id?: number): Promise<void> {

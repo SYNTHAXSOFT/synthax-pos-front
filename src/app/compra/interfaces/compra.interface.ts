@@ -17,8 +17,10 @@ export interface Compra {
   valorTotal?: number;
   valorUnidad?: number;
   cantidad?: number;
+  descripcion?: string;
   insumo?: InsumoRef;
   restaurante?: RestauranteRef;
+  formaPago?: { id?: number; nombre?: string };
   imagenSoporte?: string;
   activo?: boolean;
   fechaCreacion?: string;
@@ -29,6 +31,7 @@ export interface CompraRequest {
   valorUnidad: number;
   cantidad: number;
   valorTotal?: number;
+  descripcion?: string;
   insumo: { id: number };
   restaurante: { id: number };
   formaPago?: { id: number };

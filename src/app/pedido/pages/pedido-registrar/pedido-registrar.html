@@ -51,116 +51,162 @@
     </div>
   }
 
-  <!-- ══ Catálogo de productos ════════════════════════════════════════════ -->
-  @if (!soloLectura && !ventaPagada && (ventaIdFijo || ventaIdActual)) {
-    <div class="spx-reg-catalog-header">
-      <div class="spx-reg-section-title">
-        <i class="fa-solid fa-bowl-food"></i> Agregar productos
-        @if (filtroCatalogo && productosFiltrados.length !== productos.length) {
-          <span class="spx-reg-catalog-count">{{ productosFiltrados.length }} de {{ productos.length }}</span>
-        }
+  <!-- ══ Listado de pedidos (vista principal) ═════════════════════════════ -->
+  @if (ventaIdActual) {
+    <app-pedido-listar
+      [ventaId]="ventaIdActual"
+      [ventaPagada]="ventaPagada"
+      [puedeAgregar]="puedeAgregar"
+      (agregarProductoClick)="abrirModalCatalogo()">
+    </app-pedido-listar>
+  }
+
+</div>
+
+<!-- ══ Modal: Catálogo de productos ═══════════════════════════════════════ -->
+@if (modalCatalogoAbierto) {
+  <div class="spx-cat-overlay" (click)="cerrarModalCatalogo()">
+    <div class="spx-cat-modal" (click)="$event.stopPropagation()">
+
+      <!-- Header del modal -->
+      <div class="spx-cat-header">
+        <div class="spx-cat-header__info">
+          <div class="spx-cat-header__icon">
+            <i class="fa-solid fa-bowl-food"></i>
+          </div>
+          <div>
+            <p class="spx-cat-header__title">Agregar productos</p>
+            @if (ventaSeleccionada) {
+              <p class="spx-cat-header__sub">
+                Venta #{{ ventaSeleccionada.id }}
+                @if (ventaSeleccionada.tipoPedido?.nombre) {
+                  · {{ ventaSeleccionada.tipoPedido!.nombre }}
+                }
+                @if (ventaSeleccionada.mesa?.nombre) {
+                  · <i class="fa-solid fa-chair"></i> {{ ventaSeleccionada.mesa!.nombre }}
+                }
+              </p>
+            }
+          </div>
+        </div>
+        <button class="spx-cat-close" (click)="cerrarModalCatalogo()" title="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
-      <div class="spx-reg-search">
-        <i class="fa-solid fa-magnifying-glass spx-reg-search__icon"></i>
+
+      <!-- Buscador sticky -->
+      <div class="spx-cat-search-bar">
+        <i class="fa-solid fa-magnifying-glass spx-cat-search-bar__icon"></i>
         <input
-          class="spx-reg-search__input"
+          class="spx-cat-search-bar__input"
           type="text"
           placeholder="Buscar por nombre, descripción o código..."
           [(ngModel)]="filtroCatalogo"
           autocomplete="off">
         @if (filtroCatalogo) {
-          <button class="spx-reg-search__clear" (click)="filtroCatalogo = ''" title="Limpiar">
+          <button class="spx-cat-search-bar__clear" (click)="filtroCatalogo = ''" title="Limpiar">
             <i class="fa-solid fa-xmark"></i>
           </button>
         }
+        @if (filtroCatalogo && productosFiltrados.length !== productos.length) {
+          <span class="spx-cat-search-bar__count">
+            {{ productosFiltrados.length }} de {{ productos.length }}
+          </span>
+        }
       </div>
-    </div>
 
-    @if (productosFiltrados.length === 0) {
-      <div class="spx-reg-empty">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <span>Sin resultados para <strong>"{{ filtroCatalogo }}"</strong></span>
-      </div>
-    }
+      <!-- Grid de productos -->
+      <div class="spx-cat-body">
 
-    <div class="spx-reg-catalog">
-      @for (prod of productosFiltrados; track prod.id) {
-        <div class="spx-reg-card">
-
-          <!-- Imagen -->
-          <div class="spx-reg-card__img">
-            @if (prod.imagen) {
-              <img [src]="prod.imagen" [alt]="prod.nombre" class="spx-reg-card__img-el">
-            } @else {
-              <div class="spx-reg-card__img-ph">
-                <i class="fa-solid fa-bowl-food"></i>
-              </div>
-            }
+        @if (productosFiltrados.length === 0) {
+          <div class="spx-reg-empty">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Sin resultados para <strong>"{{ filtroCatalogo }}"</strong></span>
           </div>
+        }
 
-          <!-- Info + acciones -->
-          <div class="spx-reg-card__body">
-            <div class="spx-reg-card__header-row">
-              <span class="spx-reg-card__name">{{ prod.nombre }}</span>
-              <span class="spx-reg-card__price">$ {{ prod.precio | number:'1.0-0' }}</span>
-            </div>
-            @if (prod.descripcion) {
-              <p class="spx-reg-card__desc">{{ prod.descripcion }}</p>
-            }
+        <div class="spx-reg-catalog">
+          @for (prod of productosFiltrados; track prod.id) {
+            <div class="spx-reg-card">
 
-            <!-- Textarea de observación (expandible) -->
-            @if (obsVisible(prod.id!)) {
-              <textarea
-                class="spx-reg-card__obs-input"
-                rows="2"
-                placeholder="Sin cebolla, término 3/4, bien caliente..."
-                [value]="getObs(prod.id!)"
-                (input)="setObs(prod.id!, $event)">
-              </textarea>
-            }
-
-            <!-- Fila de acciones -->
-            <div class="spx-reg-card__footer">
-              <button
-                class="spx-reg-btn-obs"
-                [class.spx-reg-btn-obs--active]="obsVisible(prod.id!)"
-                (click)="toggleObs(prod.id!)"
-                title="Agregar observación">
-                <i class="fa-solid fa-note-sticky"></i>
-                <span>Observación</span>
-              </button>
-
-              <div class="spx-reg-qty">
-                <button class="spx-reg-qty__btn" (click)="decrementar(prod.id!)"
-                  [disabled]="getCantidad(prod.id!) <= 1">−</button>
-                <span class="spx-reg-qty__val">{{ getCantidad(prod.id!) }}</span>
-                <button class="spx-reg-qty__btn" (click)="incrementar(prod.id!)">+</button>
-              </div>
-
-              <button
-                class="spx-reg-btn-add"
-                (click)="agregarProducto(prod)"
-                [disabled]="agregando.has(prod.id!)">
-                @if (agregando.has(prod.id!)) {
-                  <i class="fa-solid fa-spinner fa-spin"></i>
+              <!-- Imagen -->
+              <div class="spx-reg-card__img">
+                @if (prod.imagen) {
+                  <img [src]="prod.imagen" [alt]="prod.nombre" class="spx-reg-card__img-el">
                 } @else {
-                  <i class="fa-solid fa-plus"></i>
+                  <div class="spx-reg-card__img-ph">
+                    <i class="fa-solid fa-bowl-food"></i>
+                  </div>
                 }
-                Agregar
-              </button>
+              </div>
+
+              <!-- Info + acciones -->
+              <div class="spx-reg-card__body">
+                <div class="spx-reg-card__header-row">
+                  <span class="spx-reg-card__name">{{ prod.nombre }}</span>
+                  <span class="spx-reg-card__price">$ {{ prod.precio | number:'1.0-0' }}</span>
+                </div>
+                @if (prod.descripcion) {
+                  <p class="spx-reg-card__desc">{{ prod.descripcion }}</p>
+                }
+
+                <!-- Textarea de observación (expandible) -->
+                @if (obsVisible(prod.id!)) {
+                  <textarea
+                    class="spx-reg-card__obs-input"
+                    rows="2"
+                    placeholder="Sin cebolla, término 3/4, bien caliente..."
+                    [value]="getObs(prod.id!)"
+                    (input)="setObs(prod.id!, $event)">
+                  </textarea>
+                }
+
+                <!-- Fila de acciones -->
+                <div class="spx-reg-card__footer">
+                  <button
+                    class="spx-reg-btn-obs"
+                    [class.spx-reg-btn-obs--active]="obsVisible(prod.id!)"
+                    (click)="toggleObs(prod.id!)"
+                    title="Agregar observación">
+                    <i class="fa-solid fa-note-sticky"></i>
+                    <span>Obs.</span>
+                  </button>
+
+                  <div class="spx-reg-qty">
+                    <button class="spx-reg-qty__btn" (click)="decrementar(prod.id!)"
+                      [disabled]="getCantidad(prod.id!) <= 1">−</button>
+                    <span class="spx-reg-qty__val">{{ getCantidad(prod.id!) }}</span>
+                    <button class="spx-reg-qty__btn" (click)="incrementar(prod.id!)">+</button>
+                  </div>
+
+                  <button
+                    class="spx-reg-btn-add"
+                    (click)="agregarProducto(prod)"
+                    [disabled]="agregando.has(prod.id!)">
+                    @if (agregando.has(prod.id!)) {
+                      <i class="fa-solid fa-spinner fa-spin"></i>
+                    } @else {
+                      <i class="fa-solid fa-plus"></i>
+                    }
+                    Agregar
+                  </button>
+                </div>
+              </div>
+
             </div>
-          </div>
-
+          }
         </div>
-      }
-    </div>
-  }
 
-  <!-- ══ Listado de pedidos de esta venta ═════════════════════════════════ -->
-  @if (ventaIdActual) {
-    <div class="spx-reg-pedidos">
-      <app-pedido-listar [ventaId]="ventaIdActual" [ventaPagada]="ventaPagada"></app-pedido-listar>
-    </div>
-  }
+      </div>
 
-</div>
+      <!-- Footer del modal -->
+      <div class="spx-cat-footer">
+        <button class="spx-cat-footer__close-btn" (click)="cerrarModalCatalogo()">
+          <i class="fa-solid fa-check"></i>
+          Listo — ver pedidos
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

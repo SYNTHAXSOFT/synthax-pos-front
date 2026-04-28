@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -19,7 +19,7 @@ import { AuthService } from '../../../auth/services/auth.service';
   templateUrl: './pedido-registrar.html',
   styleUrls: ['./pedido-registrar.css'],
 })
-export class PedidoRegistrarPageComponent implements OnInit {
+export class PedidoRegistrarPageComponent implements OnInit, OnDestroy {
   private readonly fb             = inject(FormBuilder);
   private readonly pedidoService  = inject(PedidoService);
   private readonly ventaService   = inject(VentaService);
@@ -35,7 +35,10 @@ export class PedidoRegistrarPageComponent implements OnInit {
   public ventaSeleccionada?: Venta;
   public ventaIdFijo?: number;
 
-  /** Texto del buscador de productos */
+  /** Controla el modal del catálogo de productos */
+  public modalCatalogoAbierto: boolean = false;
+
+  /** Texto del buscador de productos dentro del modal */
   public filtroCatalogo: string = '';
 
   /** Productos filtrados según el texto de búsqueda */
@@ -76,6 +79,11 @@ export class PedidoRegistrarPageComponent implements OnInit {
     return this.myForm.getRawValue().ventaId ?? null;
   }
 
+  /** True si el rol puede agregar productos */
+  get puedeAgregar(): boolean {
+    return !this.soloLectura && !this.ventaPagada && !!(this.ventaIdFijo || this.ventaIdActual);
+  }
+
   /** Icono según tipo de pedido */
   getTipoIcon(nombre?: string): string {
     const n = (nombre ?? '').toUpperCase();
@@ -84,7 +92,7 @@ export class PedidoRegistrarPageComponent implements OnInit {
     return 'fa-solid fa-utensils';
   }
 
-  // ── Init ──────────────────────────────────────────────────────────────────
+  // ── Init / Destroy ────────────────────────────────────────────────────────
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
@@ -98,19 +106,21 @@ export class PedidoRegistrarPageComponent implements OnInit {
     this.cargarCatalogos();
   }
 
+  ngOnDestroy(): void {
+    document.body.style.overflow = '';
+  }
+
   cargarCatalogos(): void {
     this.ventaService.obtenerAbiertas().subscribe({
       next: (d) => {
         this.ventasAbiertas = d;
         if (this.ventaIdFijo) {
           this.ventaSeleccionada = d.find(v => v.id === this.ventaIdFijo);
-          // Si la venta no está en abiertas (ej. ya PAGADA), la cargamos por ID
           if (!this.ventaSeleccionada) {
             this.ventaService.obtenerPorId(this.ventaIdFijo).subscribe({
               next: (v) => { this.ventaSeleccionada = v; },
             });
           }
-          this.onVentaChange(this.ventaIdFijo);
         }
       },
     });
@@ -123,6 +133,20 @@ export class PedidoRegistrarPageComponent implements OnInit {
       this.listarComponent.ventaId = id;
       this.listarComponent.cargarPedidos();
     }
+  }
+
+  // ── Modal del catálogo ────────────────────────────────────────────────────
+
+  abrirModalCatalogo(): void {
+    this.filtroCatalogo = '';
+    this.modalCatalogoAbierto = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  cerrarModalCatalogo(): void {
+    this.modalCatalogoAbierto = false;
+    document.body.style.overflow = '';
+    this.filtroCatalogo = '';
   }
 
   // ── Helpers por producto ──────────────────────────────────────────────────
@@ -175,6 +199,7 @@ export class PedidoRegistrarPageComponent implements OnInit {
         this.obsMap.delete(id);
         this.obsExpanded.delete(id);
         this.agregando.delete(id);
+        // Refrescar el listado principal (siempre está en el DOM)
         this.listarComponent?.cargarPedidos();
       },
       error: (err) => {

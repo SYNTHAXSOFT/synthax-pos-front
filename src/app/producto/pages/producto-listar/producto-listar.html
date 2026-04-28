@@ -86,8 +86,9 @@
         @for (p of productosFiltrados; track p.id) {
           <div class="spx-prod-card" [class.spx-prod-card--inactive]="!p.activo">
 
-            <!-- Image area -->
-            <div class="spx-prod-card__img-wrap">
+            <!-- Image area — clic duplica el producto -->
+            <div class="spx-prod-card__img-wrap spx-prod-card__img-wrap--clickable"
+                 (click)="duplicar(p.id)" title="Clic para duplicar">
               @if (p.imagen) {
                 <img [src]="p.imagen" [alt]="p.nombre" class="spx-prod-card__img" />
               } @else {
@@ -95,6 +96,11 @@
                   <span class="spx-prod-card__initials">{{ getInitials(p.nombre) }}</span>
                 </div>
               }
+              <!-- Duplicar hint overlay -->
+              <div class="spx-prod-card__dup-hint">
+                <i class="fa-solid fa-copy"></i>
+                <span>Duplicar</span>
+              </div>
               <!-- Inactive overlay -->
               @if (!p.activo) {
                 <div class="spx-prod-card__overlay">
@@ -124,6 +130,9 @@
                 <button class="spx-prod-card__btn-edit" (click)="editar(p.id)">
                   <i class="fa-solid fa-pen-to-square"></i>
                   Editar
+                </button>
+                <button class="spx-prod-card__btn-dup" (click)="duplicar(p.id)" title="Duplicar producto">
+                  <i class="fa-solid fa-copy"></i>
                 </button>
                 @if (p.activo) {
                   <button class="spx-prod-card__btn-deact" (click)="desactivar(p.id)" title="Desactivar">

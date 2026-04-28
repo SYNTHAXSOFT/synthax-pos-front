@@ -369,7 +369,44 @@
 .spx-venta-td--id   { color: var(--spx-muted); font-variant-numeric: tabular-nums; }
 .spx-venta-td--date { color: var(--spx-muted); font-size: 0.8rem; }
 .spx-venta-td--total { text-align: right; }
-.spx-venta-total-cell { font-weight: 600; color: #22c55e; font-size: 0.875rem; }
+
+.spx-venta-total-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.18rem;
+}
+.spx-venta-total-cell {
+  font-weight: 700;
+  color: #22c55e;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+/* Ventas ABIERTA: total en ámbar */
+.spx-venta-total-cell--open {
+  color: #f59e0b;
+}
+/* Método de pago (debajo del total en ventas PAGADA) */
+.spx-venta-total-fp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #60a5fa;
+  white-space: nowrap;
+}
+/* Etiqueta "en curso" (debajo del estimado en ventas ABIERTA) */
+.spx-venta-total-est {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.68rem;
+  color: var(--spx-muted);
+  font-style: italic;
+  white-space: nowrap;
+}
+
 .spx-venta-td--muted { color: var(--spx-muted); }
 .spx-venta-td--center { text-align: center; }
 
@@ -1195,6 +1232,35 @@
 }
 .spx-modal__new-client__btn-save:hover:not(:disabled) { opacity: 0.88; }
 .spx-modal__new-client__btn-save:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── Servicios adicionales ── */
+.spx-modal__servicios-list {
+  display: flex; flex-direction: column; gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+.spx-modal__servicio-item {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: rgba(13,127,242,0.06);
+  border: 1px solid rgba(13,127,242,0.18);
+  border-radius: 0.45rem;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.825rem;
+}
+.spx-modal__servicio-desc {
+  flex: 1; color: #e2e8f0; font-weight: 500;
+}
+.spx-modal__servicio-val {
+  color: #22c55e; font-weight: 700; white-space: nowrap;
+}
+.spx-modal__servicio-remove {
+  display: flex; align-items: center; justify-content: center;
+  width: 1.4rem; height: 1.4rem; border-radius: 50%;
+  background: rgba(239,68,68,0.1); border: none;
+  color: #ef4444; font-size: 0.7rem;
+  cursor: pointer; transition: background 0.15s;
+  flex-shrink: 0;
+}
+.spx-modal__servicio-remove:hover { background: rgba(239,68,68,0.25); }
 
 /* ── Impuestos: chips horizontales ── */
 .spx-modal__tax-chips {

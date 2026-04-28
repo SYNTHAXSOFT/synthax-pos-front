@@ -28,7 +28,8 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
 
   @ViewChild(ProductoListarPageComponent) listarComponent?: ProductoListarPageComponent;
 
-  public editando: boolean = false;
+  public editando: boolean   = false;
+  public duplicando: boolean = false;
   private productoId?: number;
   public modalAbierto: boolean = false;
 
@@ -61,7 +62,8 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
   }
 
   abrirModal(): void {
-    this.editando = false;
+    this.editando   = false;
+    this.duplicando = false;
     this.productoId = undefined;
     this.imagenPreview = null;
     this.receta = [];
@@ -75,7 +77,8 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
   abrirModalEditar(id: number): void {
     this.productoService.obtenerPorId(id).subscribe({
       next: (p) => {
-        this.editando = true;
+        this.editando   = true;
+        this.duplicando = false;
         this.productoId = id;
         this.imagenPreview = p.imagen ?? null;
         this.receta = [];
@@ -99,10 +102,47 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Abre el modal en modo duplicación: carga todos los datos pero sin productoId (crea nuevo) */
+  abrirModalDuplicar(id: number): void {
+    forkJoin({
+      producto: this.productoService.obtenerPorId(id),
+      detalles: this.detalleProductoService.obtenerPorProducto(id),
+    }).subscribe({
+      next: ({ producto, detalles }) => {
+        this.editando   = false;
+        this.duplicando = true;
+        this.productoId = undefined;  // sin ID → al guardar se creará uno nuevo
+
+        // Pre-llenar el formulario con todos los datos del original
+        this.myForm.reset({
+          codigo:      '',          // código vacío — debe ser único, el usuario lo ingresa
+          nombre:      producto.nombre,
+          descripcion: producto.descripcion,
+          precio:      producto.precio,
+          imagen:      producto.imagen ?? '',
+          activo:      producto.activo ?? true,
+        });
+        this.imagenPreview        = producto.imagen ?? null;
+        this.insumoSeleccionadoId = null;
+        this.cantidadInsumo       = 1;
+
+        // Cargar receta del original
+        this.receta = detalles
+          .filter(d => d.insumo)
+          .map(d => ({ insumo: d.insumo!, cantidad: d.cantidad }));
+
+        this.modalAbierto = true;
+        document.body.style.overflow = 'hidden';
+      },
+      error: () => this.toastService.error('Error al cargar el producto para duplicar'),
+    });
+  }
+
   cerrarModal(): void {
     this.modalAbierto = false;
     document.body.style.overflow = '';
-    this.editando = false;
+    this.editando   = false;
+    this.duplicando = false;
     this.productoId = undefined;
     this.imagenPreview = null;
     this.receta = [];

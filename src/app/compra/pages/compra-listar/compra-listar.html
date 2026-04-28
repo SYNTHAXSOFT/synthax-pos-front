@@ -142,7 +142,14 @@
               <tr class="spx-compra-row" [class.spx-compra-row--void]="!c.activo">
                 <td class="spx-compra-td spx-compra-td--id">#{{ c.id }}</td>
                 <td class="spx-compra-td">
-                  <code class="spx-compra-code">{{ c.codigo ?? '—' }}</code>
+                  <div class="spx-compra-codigo-wrap">
+                    <code class="spx-compra-code">{{ c.codigo ?? '—' }}</code>
+                    @if (c.descripcion) {
+                      <span class="spx-compra-desc" [title]="c.descripcion">
+                        {{ c.descripcion | slice:0:40 }}{{ c.descripcion.length > 40 ? '…' : '' }}
+                      </span>
+                    }
+                  </div>
                 </td>
                 <td class="spx-compra-td">
                   <div class="spx-compra-insumo">
@@ -154,7 +161,17 @@
                 </td>
                 <td class="spx-compra-td spx-compra-td--num">{{ c.cantidad }}</td>
                 <td class="spx-compra-td spx-compra-td--num">$ {{ c.valorUnidad | number:'1.0-0' }}</td>
-                <td class="spx-compra-td spx-compra-td--total">$ {{ c.valorTotal | number:'1.0-0' }}</td>
+                <td class="spx-compra-td spx-compra-td--total">
+                  <div class="spx-compra-total-wrap">
+                    <span class="spx-compra-total-value">$ {{ c.valorTotal | number:'1.0-0' }}</span>
+                    @if (c.formaPago?.nombre) {
+                      <span class="spx-compra-total-fp">
+                        <i class="fa-solid fa-wallet"></i>
+                        {{ c.formaPago!.nombre }}
+                      </span>
+                    }
+                  </div>
+                </td>
                 <td class="spx-compra-td spx-compra-td--date">{{ c.fechaCreacion | date:'dd/MM/yy HH:mm' }}</td>
                 <td class="spx-compra-td">
                   <span class="spx-compra-badge" [class.spx-compra-badge--active]="c.activo" [class.spx-compra-badge--void]="!c.activo">

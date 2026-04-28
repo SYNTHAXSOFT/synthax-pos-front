@@ -86,11 +86,11 @@
                 <label class="spx-form-label">Valor unitario (COP) <span class="spx-form-required">*</span></label>
                 <div class="spx-form-input-group">
                   <span class="spx-form-input-prefix">$</span>
-                  <input type="number" class="spx-form-input" min="1" step="1" placeholder="0"
+                  <input type="number" class="spx-form-input" min="0" step="1" placeholder="0"
                     formControlName="valorUnidad" [class.is-invalid]="isValidField('valorUnidad')">
                 </div>
                 @if (isValidField('valorUnidad')) {
-                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Valor unitario requerido</span>
+                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Ingresa un valor válido (no puede ser negativo)</span>
                 }
               </div>
             </div>
@@ -104,6 +104,17 @@
               <span class="spx-compra-total__value">
                 {{ subtotal | currency:'COP':'symbol':'1.0-0' }}
               </span>
+            </div>
+
+            <!-- Descripción de la compra -->
+            <div class="spx-form-group" style="margin-bottom:1rem">
+              <label class="spx-form-label">
+                Descripción
+                <span style="font-size:0.72rem;font-weight:400;color:#64748b;margin-left:0.3rem;">(opcional)</span>
+              </label>
+              <textarea class="spx-form-textarea" rows="2"
+                placeholder="Ej: Compra a Proveedor XYZ, factura #1234, aplica para inventario de temporada..."
+                formControlName="descripcion"></textarea>
             </div>
 
             <!-- Forma de pago -->

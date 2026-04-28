@@ -4,7 +4,8 @@
   <app-producto-listar
     [modoModal]="true"
     (nuevoProducto)="abrirModal()"
-    (editarProducto)="abrirModalEditar($event)">
+    (editarProducto)="abrirModalEditar($event)"
+    (duplicarProducto)="abrirModalDuplicar($event)">
   </app-producto-listar>
 
   <!-- Modal overlay -->
@@ -19,8 +20,18 @@
               <i class="fa-solid fa-tag"></i>
             </div>
             <div>
-              <p class="spx-modal-header__title">{{ editando ? 'Editar Producto' : 'Nuevo Producto' }}</p>
-              <p class="spx-modal-header__sub">Los campos con <span class="spx-form-required">*</span> son obligatorios</p>
+              <p class="spx-modal-header__title">
+                @if (duplicando) { Duplicar Producto }
+                @else if (editando) { Editar Producto }
+                @else { Nuevo Producto }
+              </p>
+              <p class="spx-modal-header__sub">
+                @if (duplicando) {
+                  Ingresa un <strong>código único</strong> para el nuevo producto — el resto está pre-diligenciado
+                } @else {
+                  Los campos con <span class="spx-form-required">*</span> son obligatorios
+                }
+              </p>
             </div>
           </div>
           <button class="spx-modal-close" (click)="cerrarModal()" title="Cerrar">
@@ -36,8 +47,18 @@
 
               <!-- Código -->
               <div class="spx-form-group">
-                <label class="spx-form-label">Código <span class="spx-form-required">*</span></label>
-                <input type="text" class="spx-form-input" placeholder="PROD-001" formControlName="codigo">
+                <label class="spx-form-label">
+                  Código <span class="spx-form-required">*</span>
+                  @if (duplicando) {
+                    <span style="font-size:0.72rem;font-weight:500;color:#06b6d4;margin-left:0.35rem;">
+                      <i class="fa-solid fa-triangle-exclamation"></i> Debe ser único
+                    </span>
+                  }
+                </label>
+                <input type="text" class="spx-form-input"
+                  [placeholder]="duplicando ? 'Nuevo código único...' : 'PROD-001'"
+                  [style.border-color]="duplicando && !myForm.value.codigo ? '#06b6d4' : ''"
+                  formControlName="codigo">
                 @if (isValidField('codigo')) {
                   <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ getFieldError('codigo') }}</span>
                 }
@@ -176,9 +197,12 @@
               <button type="submit" class="spx-form-btn-submit" [disabled]="guardandoReceta">
                 @if (guardandoReceta) {
                   <i class="fa-solid fa-spinner fa-spin"></i> Guardando...
+                } @else if (duplicando) {
+                  <i class="fa-solid fa-copy"></i> Crear Copia
+                } @else if (editando) {
+                  <i class="fa-solid fa-floppy-disk"></i> Actualizar Producto
                 } @else {
-                  <i class="fa-solid fa-floppy-disk"></i>
-                  {{ editando ? 'Actualizar Producto' : 'Guardar Producto' }}
+                  <i class="fa-solid fa-floppy-disk"></i> Guardar Producto
                 }
               </button>
             </div>

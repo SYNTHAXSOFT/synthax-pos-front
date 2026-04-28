@@ -106,7 +106,8 @@ export class CompraRegistrarPageComponent implements OnInit, OnDestroy {
     restauranteId: [null, [Validators.required]],
     insumoId:      [null, [Validators.required]],
     cantidad:      [null, [Validators.required, Validators.min(0.01)]],
-    valorUnidad:   [null, [Validators.required, Validators.min(1)]],
+    valorUnidad:   [null, [Validators.required, Validators.min(0)]],
+    descripcion:   [''],
   });
 
   /** Subtotal calculado en tiempo real */
@@ -177,6 +178,7 @@ export class CompraRegistrarPageComponent implements OnInit, OnDestroy {
       valorUnidad:    v.valorUnidad,
       cantidad:       v.cantidad,
       valorTotal:     this.subtotal,
+      descripcion:    v.descripcion?.trim() || undefined,
       insumo:         { id: v.insumoId },
       restaurante:    { id: v.restauranteId },
       formaPago:      { id: this.formaPagoSeleccionadaId },

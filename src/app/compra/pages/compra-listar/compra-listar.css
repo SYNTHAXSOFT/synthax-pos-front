@@ -331,9 +331,34 @@
 }
 .spx-compra-td--id   { color: var(--spx-muted); white-space: nowrap; }
 .spx-compra-td--num  { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.spx-compra-td--total { font-weight: 700; white-space: nowrap; }
+.spx-compra-td--total { white-space: nowrap; }
+
+.spx-compra-total-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.18rem;
+}
+.spx-compra-total-value {
+  font-weight: 700;
+  white-space: nowrap;
+}
+.spx-compra-total-fp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #60a5fa;
+  white-space: nowrap;
+}
 .spx-compra-td--date { color: var(--spx-muted); font-size: 0.8rem; white-space: nowrap; }
 
+.spx-compra-codigo-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
 .spx-compra-code {
   font-size: 0.75rem;
   background: rgba(40,53,67,0.7);
@@ -341,6 +366,15 @@
   border-radius: 0.25rem;
   color: var(--spx-muted);
   white-space: nowrap;
+  align-self: flex-start;
+}
+.spx-compra-desc {
+  font-size: 0.75rem;
+  color: var(--spx-muted);
+  font-style: italic;
+  line-height: 1.3;
+  max-width: 18rem;
+  cursor: default;
 }
 .spx-compra-insumo {
   display: flex;

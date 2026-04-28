@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PedidoService } from '../../services/pedido.service';
@@ -23,6 +23,10 @@ export class PedidoListarPageComponent implements OnInit, OnChanges {
   @Input() ventaId?: number;
   /** Cuando la venta está PAGADA, todos los ítems son solo lectura */
   @Input() ventaPagada: boolean = false;
+  /** Muestra el botón "Agregar producto" en el header */
+  @Input() puedeAgregar: boolean = false;
+  /** Emite cuando el usuario hace clic en "Agregar producto" */
+  @Output() agregarProductoClick = new EventEmitter<void>();
 
   public pedidos:  Pedido[]  = [];
   public cargando: boolean   = false;
