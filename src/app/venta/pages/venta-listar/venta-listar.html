@@ -257,6 +257,16 @@
                       <button class="spx-venta-btn spx-venta-btn--print" (click)="imprimirTirillaExistente(venta)" title="Reimprimir tirilla">
                         <i class="fa-solid fa-print"></i>
                       </button>
+                      @if (puedeEditarVenta) {
+                        <button class="spx-venta-btn spx-venta-btn--reabrir" (click)="reabrir(venta)" title="Reabrir venta">
+                          <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                      }
+                    }
+                    @if (puedeEditarVenta) {
+                      <button class="spx-venta-btn spx-venta-btn--edit" (click)="abrirModalEditar(venta)" title="Editar venta">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </button>
                     }
                   </div>
                 </td>
@@ -280,6 +290,119 @@
   }
 
 </div>
+
+<!-- ══ Modal: Editar Venta ══════════════════════════════════════════════════ -->
+@if (modalEditar) {
+  <div class="spx-modal-overlay" (click)="cerrarModalEditar()">
+    <div class="spx-modal spx-modal--editar" (click)="$event.stopPropagation()">
+
+      <!-- Barra de acento superior -->
+      <div class="spx-modal__accent-bar"></div>
+
+      <!-- Header -->
+      <div class="spx-modal__header">
+        <div class="spx-modal__icon spx-modal__icon--edit">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </div>
+        <div class="spx-modal__header-info">
+          <p class="spx-modal__title">Editar Venta</p>
+          <p class="spx-modal__venta-id">{{ ventaEditando?.codigo ?? '#' + ventaEditando?.id }}</p>
+        </div>
+        <button class="spx-modal__close" (click)="cerrarModalEditar()" title="Cancelar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="spx-modal__body">
+
+        @if (cargandoEdicion) {
+          <div class="spx-modal__loading">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Cargando datos…
+          </div>
+        } @else {
+
+          <!-- Tipo de pedido -->
+          <div class="spx-edit-field">
+            <label class="spx-edit-label">
+              <i class="fa-solid fa-tag"></i>
+              Tipo de pedido <span class="spx-edit-required">*</span>
+            </label>
+            <select class="spx-edit-select" [(ngModel)]="editTipoPedidoId">
+              <option [ngValue]="null" disabled>Seleccione un tipo…</option>
+              @for (tp of tiposPedidoEdit; track tp.id) {
+                <option [ngValue]="tp.id">{{ tp.nombre }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Mesa (opcional) -->
+          <div class="spx-edit-field">
+            <label class="spx-edit-label">
+              <i class="fa-solid fa-chair"></i>
+              Mesa
+              <span class="spx-edit-optional">(opcional)</span>
+            </label>
+            <select class="spx-edit-select" [(ngModel)]="editMesaId">
+              <option [ngValue]="null">Sin mesa asignada</option>
+              @for (m of mesasEdit; track m.id) {
+                <option [ngValue]="m.id">{{ m.nombre }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Observación -->
+          <div class="spx-edit-field">
+            <label class="spx-edit-label">
+              <i class="fa-solid fa-comment-dots"></i>
+              Observación
+              <span class="spx-edit-optional">(opcional)</span>
+            </label>
+            <textarea class="spx-edit-textarea" rows="3"
+              placeholder="Instrucciones especiales, notas de entrega…"
+              [(ngModel)]="editObservacion"></textarea>
+          </div>
+
+          <!-- Info de solo lectura -->
+          <div class="spx-edit-readonly-row">
+            <div class="spx-edit-readonly-item">
+              <span class="spx-edit-readonly-label">Estado</span>
+              <span class="spx-venta-badge {{ getBadgeClass(ventaEditando?.estado) }}">
+                {{ ventaEditando?.estado }}
+              </span>
+            </div>
+            @if (ventaEditando?.usuarioCreador) {
+              <div class="spx-edit-readonly-item">
+                <span class="spx-edit-readonly-label">Creada por</span>
+                <span class="spx-edit-readonly-value">
+                  {{ ventaEditando?.usuarioCreador?.nombre }} {{ ventaEditando?.usuarioCreador?.apellido }}
+                </span>
+              </div>
+            }
+          </div>
+
+        }
+      </div>
+
+      <!-- Footer -->
+      <div class="spx-modal__footer">
+        <button class="spx-modal__btn-cancel" (click)="cerrarModalEditar()" [disabled]="guardandoEdicion">
+          <i class="fa-solid fa-xmark"></i> Cancelar
+        </button>
+        <button class="spx-modal__btn-confirm" (click)="guardarEdicion()"
+          [disabled]="guardandoEdicion || cargandoEdicion || !editTipoPedidoId">
+          @if (guardandoEdicion) {
+            <i class="fa-solid fa-spinner fa-spin"></i> Guardando…
+          } @else {
+            <i class="fa-solid fa-floppy-disk"></i> Guardar cambios
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
 
 <!-- ══ Modal: Cerrar Venta ══════════════════════════════════════════════════ -->
 @if (modalCerrar) {

@@ -8,15 +8,15 @@
     <div class="spx-modal-backdrop" (click)="cerrarModal()">
       <div class="spx-modal-container" (click)="$event.stopPropagation()">
 
-        <!-- Modal header -->
+        <!-- Header -->
         <div class="spx-modal-header">
           <div class="spx-modal-header__info">
             <div class="spx-modal-header__icon">
               <i class="fa-solid fa-cart-shopping"></i>
             </div>
             <div>
-              <p class="spx-modal-header__title">Registrar Compra de Insumo</p>
-              <p class="spx-modal-header__sub">Los campos con <span class="spx-form-required">*</span> son obligatorios</p>
+              <p class="spx-modal-header__title">Registrar Orden de Compra</p>
+              <p class="spx-modal-header__sub">Agrega uno o varios insumos en una sola orden</p>
             </div>
           </div>
           <button class="spx-modal-close" (click)="cerrarModal()" title="Cerrar">
@@ -24,23 +24,29 @@
           </button>
         </div>
 
-        <!-- Modal body -->
+        <!-- Body -->
         <div class="spx-modal-body">
           <form [formGroup]="myForm" (ngSubmit)="onSave()">
 
-            <!-- Fila 1: Código + Restaurante -->
-            <div class="spx-form-grid spx-form-grid--4" style="margin-bottom:1rem">
+            <!-- ── Fila 1: Código + Restaurante ── -->
+            <div class="spx-form-grid spx-form-grid--4" style="margin-bottom:1.25rem">
               <div class="spx-form-group">
-                <label class="spx-form-label">Código de compra <span class="spx-form-required">*</span></label>
+                <label class="spx-form-label">
+                  Código de orden <span class="spx-form-required">*</span>
+                </label>
                 <input type="text" class="spx-form-input" placeholder="CMP-001"
                   formControlName="codigo" [class.is-invalid]="isValidField('codigo')">
                 @if (isValidField('codigo')) {
-                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Código obligatorio (mín. 2 caracteres)</span>
+                  <span class="spx-form-error">
+                    <i class="fa-solid fa-circle-exclamation"></i>Código obligatorio (mín. 2 caracteres)
+                  </span>
                 }
               </div>
 
               <div class="spx-form-group spx-form-col-span-3">
-                <label class="spx-form-label">Restaurante <span class="spx-form-required">*</span></label>
+                <label class="spx-form-label">
+                  Restaurante <span class="spx-form-required">*</span>
+                </label>
                 <select class="spx-form-select" formControlName="restauranteId"
                   [class.is-invalid]="isValidField('restauranteId')"
                   (change)="onRestauranteChange()">
@@ -50,74 +56,190 @@
                   }
                 </select>
                 @if (isValidField('restauranteId')) {
-                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Restaurante obligatorio</span>
+                  <span class="spx-form-error">
+                    <i class="fa-solid fa-circle-exclamation"></i>Restaurante obligatorio
+                  </span>
                 }
               </div>
             </div>
 
-            <!-- Fila 2: Insumo (ancho completo) -->
-            <div class="spx-form-group" style="margin-bottom:1rem">
-              <label class="spx-form-label">Insumo <span class="spx-form-required">*</span></label>
-              <select class="spx-form-select" formControlName="insumoId"
-                [class.is-invalid]="isValidField('insumoId')"
-                [attr.disabled]="!myForm.value.restauranteId ? true : null">
-                <option [value]="null">{{ myForm.value.restauranteId ? 'Seleccione un insumo...' : 'Primero seleccione un restaurante' }}</option>
-                @for (i of insumos; track i.id) {
-                  <option [value]="i.id">{{ i.descripcion }} — Stock: {{ i.stock }} {{ i.medida }}</option>
-                }
-              </select>
-              @if (isValidField('insumoId')) {
-                <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Insumo obligatorio</span>
-              }
-            </div>
+            <!-- ── Sección: Líneas de insumos ── -->
+            <div class="spx-items-section">
 
-            <!-- Fila 3: Cantidad (30%) + Valor unitario (70%) -->
-            <div class="spx-compra-row-cantval" style="margin-bottom:1rem">
-              <div class="spx-form-group">
-                <label class="spx-form-label">Cantidad <span class="spx-form-required">*</span></label>
-                <input type="number" class="spx-form-input" min="0.01" step="0.01" placeholder="0"
-                  formControlName="cantidad" [class.is-invalid]="isValidField('cantidad')">
-                @if (isValidField('cantidad')) {
-                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Cantidad requerida (mayor a 0)</span>
+              <!-- Cabecera de la tabla -->
+              <div class="spx-items-header">
+                <span class="spx-items-header__title">
+                  <i class="fa-solid fa-list-ul"></i> Insumos
+                </span>
+                <button type="button" class="spx-items-add-btn" (click)="agregarLinea()">
+                  <i class="fa-solid fa-plus"></i> Agregar insumo
+                </button>
+              </div>
+
+              <!-- Encabezados de columna (solo desktop) -->
+              <div class="spx-items-col-headers">
+                <span class="spx-items-col--insumo">Insumo <span class="spx-form-required">*</span></span>
+                <span class="spx-items-col--cant">Cantidad <span class="spx-form-required">*</span></span>
+                <span class="spx-items-col--vunit">Valor unitario <span class="spx-form-required">*</span></span>
+                <span class="spx-items-col--vagr">Valor agregado</span>
+                <span class="spx-items-col--desc">Descuento</span>
+                <span class="spx-items-col--total">Total línea</span>
+                <span class="spx-items-col--del"></span>
+              </div>
+
+              <!-- Líneas -->
+              <div formArrayName="items" class="spx-items-list">
+                @for (item of items.controls; track $index) {
+                  <div class="spx-item-row" [formGroupName]="$index">
+
+                    <!-- Insumo -->
+                    <div class="spx-items-col--insumo spx-item-field">
+                      <label class="spx-item-label-mobile">Insumo</label>
+                      <select class="spx-form-select spx-item-select"
+                        formControlName="insumoId"
+                        [class.is-invalid]="isValidLineaField($index, 'insumoId')"
+                        [attr.disabled]="!myForm.value.restauranteId ? true : null">
+                        <option [value]="null">
+                          {{ myForm.value.restauranteId ? 'Seleccione...' : 'Primero seleccione restaurante' }}
+                        </option>
+                        @for (ins of insumos; track ins.id) {
+                          <option [value]="ins.id">{{ ins.descripcion }} ({{ ins.medida }})</option>
+                        }
+                      </select>
+                      @if (isValidLineaField($index, 'insumoId')) {
+                        <span class="spx-form-error spx-item-error">
+                          <i class="fa-solid fa-circle-exclamation"></i>Obligatorio
+                        </span>
+                      }
+                    </div>
+
+                    <!-- Cantidad -->
+                    <div class="spx-items-col--cant spx-item-field">
+                      <label class="spx-item-label-mobile">Cantidad</label>
+                      <input type="number" class="spx-form-input spx-item-input"
+                        min="0.01" step="0.01" placeholder="0"
+                        formControlName="cantidad"
+                        [class.is-invalid]="isValidLineaField($index, 'cantidad')">
+                      @if (isValidLineaField($index, 'cantidad')) {
+                        <span class="spx-form-error spx-item-error">
+                          <i class="fa-solid fa-circle-exclamation"></i>Requerida &gt; 0
+                        </span>
+                      }
+                    </div>
+
+                    <!-- Valor unitario -->
+                    <div class="spx-items-col--vunit spx-item-field">
+                      <label class="spx-item-label-mobile">Valor unitario</label>
+                      <div class="spx-form-input-group">
+                        <span class="spx-form-input-prefix">$</span>
+                        <input type="number" class="spx-form-input spx-item-input"
+                          min="0" step="1" placeholder="0"
+                          formControlName="valorUnidad"
+                          [class.is-invalid]="isValidLineaField($index, 'valorUnidad')">
+                      </div>
+                      @if (isValidLineaField($index, 'valorUnidad')) {
+                        <span class="spx-form-error spx-item-error">
+                          <i class="fa-solid fa-circle-exclamation"></i>Valor inválido
+                        </span>
+                      }
+                    </div>
+
+                    <!-- Valor agregado (IVA / adicionales) -->
+                    <div class="spx-items-col--vagr spx-item-field">
+                      <label class="spx-item-label-mobile">Valor agregado</label>
+                      <div class="spx-form-input-group">
+                        <span class="spx-form-input-prefix">$</span>
+                        <input type="number" class="spx-form-input spx-item-input"
+                          min="0" step="1" placeholder="0"
+                          formControlName="valorAgregado">
+                      </div>
+                    </div>
+
+                    <!-- Descuento por línea -->
+                    <div class="spx-items-col--desc spx-item-field">
+                      <label class="spx-item-label-mobile">Descuento</label>
+                      <div class="spx-form-input-group">
+                        <span class="spx-form-input-prefix">$</span>
+                        <input type="number" class="spx-form-input spx-item-input"
+                          min="0" step="1" placeholder="0"
+                          formControlName="descuento">
+                      </div>
+                    </div>
+
+                    <!-- Total línea (solo lectura) -->
+                    <div class="spx-items-col--total spx-item-field">
+                      <label class="spx-item-label-mobile">Total línea</label>
+                      <div class="spx-item-total">
+                        {{ totalLinea($index) | currency:'COP':'symbol':'1.0-0' }}
+                      </div>
+                    </div>
+
+                    <!-- Eliminar línea -->
+                    <div class="spx-items-col--del spx-item-field spx-item-field--del">
+                      <button type="button" class="spx-item-del-btn"
+                        [disabled]="items.length === 1"
+                        [title]="items.length === 1 ? 'Debe haber al menos un insumo' : 'Eliminar línea'"
+                        (click)="quitarLinea($index)">
+                        <i class="fa-solid fa-trash-can"></i>
+                      </button>
+                    </div>
+
+                  </div>
                 }
               </div>
 
-              <div class="spx-form-group">
-                <label class="spx-form-label">Valor unitario (COP) <span class="spx-form-required">*</span></label>
-                <div class="spx-form-input-group">
+            </div><!-- /spx-items-section -->
+
+            <!-- ── Totales ── -->
+            <div class="spx-totales-section">
+
+              <!-- Subtotal -->
+              <div class="spx-totales-row spx-totales-row--sub">
+                <span class="spx-totales-label">
+                  <i class="fa-solid fa-sigma"></i> Subtotal
+                </span>
+                <span class="spx-totales-value">
+                  {{ subtotalGeneral | currency:'COP':'symbol':'1.0-0' }}
+                </span>
+              </div>
+
+              <!-- Descuento adicional -->
+              <div class="spx-totales-row spx-totales-row--desc">
+                <label class="spx-totales-label" for="descuentoAdicional">
+                  <i class="fa-solid fa-tag"></i> Descuento adicional
+                </label>
+                <div class="spx-totales-input-wrap">
                   <span class="spx-form-input-prefix">$</span>
-                  <input type="number" class="spx-form-input" min="0" step="1" placeholder="0"
-                    formControlName="valorUnidad" [class.is-invalid]="isValidField('valorUnidad')">
+                  <input id="descuentoAdicional" type="number" class="spx-form-input spx-totales-input"
+                    min="0" step="1" placeholder="0"
+                    formControlName="descuentoAdicional">
                 </div>
-                @if (isValidField('valorUnidad')) {
-                  <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i>Ingresa un valor válido (no puede ser negativo)</span>
-                }
               </div>
-            </div>
 
-            <!-- Resumen: Valor Total calculado -->
-            <div class="spx-compra-total">
-              <span class="spx-compra-total__label">
-                <i class="fa-solid fa-calculator"></i>
-                Valor total de la compra
-              </span>
-              <span class="spx-compra-total__value">
-                {{ subtotal | currency:'COP':'symbol':'1.0-0' }}
-              </span>
-            </div>
+              <!-- Total final -->
+              <div class="spx-totales-row spx-totales-row--final">
+                <span class="spx-totales-label spx-totales-label--final">
+                  <i class="fa-solid fa-calculator"></i> TOTAL A PAGAR
+                </span>
+                <span class="spx-totales-value spx-totales-value--final">
+                  {{ totalFinal | currency:'COP':'symbol':'1.0-0' }}
+                </span>
+              </div>
 
-            <!-- Descripción de la compra -->
-            <div class="spx-form-group" style="margin-bottom:1rem">
+            </div><!-- /spx-totales-section -->
+
+            <!-- ── Descripción ── -->
+            <div class="spx-form-group" style="margin-bottom:1.25rem">
               <label class="spx-form-label">
                 Descripción
                 <span style="font-size:0.72rem;font-weight:400;color:#64748b;margin-left:0.3rem;">(opcional)</span>
               </label>
               <textarea class="spx-form-textarea" rows="2"
-                placeholder="Ej: Compra a Proveedor XYZ, factura #1234, aplica para inventario de temporada..."
+                placeholder="Ej: Compra a Proveedor XYZ, factura #1234..."
                 formControlName="descripcion"></textarea>
             </div>
 
-            <!-- Forma de pago -->
+            <!-- ── Forma de pago ── -->
             <div class="spx-compra-fp">
               <p class="spx-compra-fp__title">
                 <i class="fa-solid fa-wallet"></i>
@@ -145,7 +267,7 @@
               </div>
             </div>
 
-            <!-- Imagen de soporte / factura (opcional) -->
+            <!-- ── Imagen soporte ── -->
             <div class="spx-compra-soporte">
               <p class="spx-compra-soporte__title">
                 <i class="fa-solid fa-file-image"></i>
@@ -153,21 +275,16 @@
                 <span class="spx-compra-soporte__badge">Opcional</span>
               </p>
 
-              <!-- Input file oculto -->
               <input #fileInput type="file" accept="image/*" style="display:none"
                      (change)="onSoporteSeleccionado($event)">
 
               @if (!soportePreview) {
-                <!-- Zona de carga vacía -->
                 <div class="spx-compra-drop" (click)="abrirSelectorSoporte()">
-                  <div class="spx-compra-drop__icon">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                  </div>
+                  <div class="spx-compra-drop__icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
                   <p class="spx-compra-drop__title">Haz clic para adjuntar la factura o soporte</p>
                   <p class="spx-compra-drop__hint">JPG, PNG, WEBP — máx. 5 MB</p>
                 </div>
               } @else {
-                <!-- Vista previa de la imagen cargada -->
                 <div class="spx-compra-preview">
                   <img [src]="soportePreview" alt="Soporte" class="spx-compra-preview__img">
                   <div class="spx-compra-preview__info">
@@ -192,22 +309,25 @@
 
             <div class="spx-form-hint">
               <i class="fa-solid fa-circle-info"></i>
-              Al registrar, el stock del insumo se incrementará y el saldo de la forma de pago se descontará automáticamente.
+              Al registrar, el stock de cada insumo se incrementará y el saldo de la forma de pago se descontará automáticamente.
             </div>
 
-            <!-- Modal actions -->
+            <!-- Acciones -->
             <div class="spx-modal-actions">
-              <button type="button" class="spx-modal-btn-cancel" (click)="cerrarModal()">
-                <i class="fa-solid fa-xmark"></i>
-                Cancelar
+              <button type="button" class="spx-modal-btn-cancel" (click)="cerrarModal()" [disabled]="guardando">
+                <i class="fa-solid fa-xmark"></i> Cancelar
               </button>
-              <button type="submit" class="spx-form-btn-submit">
-                <i class="fa-solid fa-cart-plus"></i>
-                Registrar Compra
+              <button type="submit" class="spx-form-btn-submit" [disabled]="guardando">
+                @if (guardando) {
+                  <i class="fa-solid fa-spinner fa-spin"></i> Guardando…
+                } @else {
+                  <i class="fa-solid fa-cart-plus"></i> Registrar Orden
+                }
               </button>
             </div>
+
           </form>
-        </div>
+        </div><!-- /body -->
 
       </div>
     </div>

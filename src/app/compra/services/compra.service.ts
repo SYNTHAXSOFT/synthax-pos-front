@@ -2,7 +2,7 @@ import { environment } from '../../../environments/environment';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Compra, CompraRequest } from '../interfaces/compra.interface';
+import { Compra, CompraOrdenRequest, CompraRequest } from '../interfaces/compra.interface';
 import { API_ENDPOINTS } from '../../utils/constantes-utils';
 
 @Injectable({ providedIn: 'root' })
@@ -12,6 +12,11 @@ export class CompraService {
 
   crear(compra: CompraRequest): Observable<Compra> {
     return this.http.post<Compra>(this.base, compra);
+  }
+
+  /** Registra una orden con múltiples insumos en una sola transacción. */
+  crearOrden(orden: CompraOrdenRequest): Observable<Compra[]> {
+    return this.http.post<Compra[]>(`${this.base}/orden`, orden);
   }
 
   obtenerTodas(): Observable<Compra[]> {

@@ -78,6 +78,10 @@ export class VentaService {
     return this.http.patch<Venta>(`${this.base}/${id}/anular`, {});
   }
 
+  reabrirVenta(id: number): Observable<Venta> {
+    return this.http.patch<Venta>(`${this.base}/${id}/reabrir`, {});
+  }
+
   desactivar(id: number): Observable<Venta> {
     return this.http.patch<Venta>(`${this.base}/${id}/desactivar`, {});
   }

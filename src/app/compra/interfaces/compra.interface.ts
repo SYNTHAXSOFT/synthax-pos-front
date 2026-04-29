@@ -38,3 +38,23 @@ export interface CompraRequest {
   imagenSoporte?: string;
   activo?: boolean;
 }
+
+/** Una línea dentro de una orden multi-insumo */
+export interface CompraLineaRequest {
+  insumoId: number;
+  cantidad: number;
+  valorUnidad: number;
+  valorAgregado?: number;
+  descuento?: number;
+  valorTotal?: number;
+}
+
+/** Payload para POST /api/compras/orden */
+export interface CompraOrdenRequest {
+  codigo: string;
+  restauranteId: number;
+  formaPagoId: number;
+  descripcion?: string;
+  imagenSoporte?: string;
+  lineas: CompraLineaRequest[];
+}

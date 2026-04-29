@@ -17,6 +17,10 @@ import { FormaPagoService } from '../../../forma-pago/services/forma-pago.servic
 import { FormaPago } from '../../../forma-pago/interfaces/forma-pago.interface';
 import { ClienteService } from '../../../cliente/services/cliente.service';
 import { Cliente } from '../../../cliente/interfaces/cliente.interface';
+import { TipoPedidoService } from '../../../tipo-pedido/services/tipo-pedido.service';
+import { TipoPedido } from '../../../tipo-pedido/interfaces/tipo-pedido.interface';
+import { MesaService } from '../../../mesa/services/mesa.service';
+import { Mesa } from '../../../mesa/interfaces/mesa.interface';
 
 @Component({
   selector: 'app-venta-listar',
@@ -31,6 +35,8 @@ export class VentaListarPageComponent implements OnInit {
   private readonly impuestoService   = inject(ImpuestoService);
   private readonly formaPagoService  = inject(FormaPagoService);
   private readonly clienteService    = inject(ClienteService);
+  private readonly tipoPedidoService = inject(TipoPedidoService);
+  private readonly mesaService       = inject(MesaService);
   private readonly router            = inject(Router);
   private readonly authService       = inject(AuthService);
   private readonly toastService      = inject(ToastService);
@@ -371,6 +377,35 @@ export class VentaListarPageComponent implements OnInit {
     this.ventaService.anularVenta(id).subscribe({
       next:  () => { this.toastService.success('Venta anulada'); this.cargarVentas(); },
       error: (err) => { this.toastService.error('Error: ' + (err.error?.error || 'No se pudo anular la venta')); },
+    });
+  }
+
+  async reabrir(venta: Venta): Promise<void> {
+    if (!venta.id) return;
+    const fp    = venta.formaPago?.nombre ?? 'la forma de pago';
+    const total = venta.valorTotal
+      ? `$${venta.valorTotal.toLocaleString('es-CO')}`
+      : 'el valor cobrado';
+
+    const ok = await this.confirmService.confirm({
+      message: `¿Reabrir la venta ${venta.codigo ?? '#' + venta.id}?\n\n` +
+               `Se revertirán los siguientes efectos del cierre:\n` +
+               `• El stock de insumos será restaurado\n` +
+               `• Se descontará ${total} de "${fp}"\n` +
+               `• Los pedidos volverán al estado Preparado\n\n` +
+               `La venta quedará ABIERTA y podrá modificarse normalmente.`,
+      type: 'warning',
+    });
+    if (!ok) return;
+
+    this.ventaService.reabrirVenta(venta.id).subscribe({
+      next: () => {
+        this.toastService.success(`Venta ${venta.codigo ?? '#' + venta.id} reabierta. Stock y saldo revertidos.`);
+        this.cargarVentas();
+      },
+      error: (err) => {
+        this.toastService.error('Error: ' + (err.error?.error || 'No se pudo reabrir la venta'));
+      },
     });
   }
 
@@ -863,6 +898,90 @@ export class VentaListarPageComponent implements OnInit {
       case 'ANULADA': return 'spx-venta-badge spx-venta-badge--void';
       default:        return 'spx-venta-badge';
     }
+  }
+
+  // ── Modal de edición ─────────────────────────────────────────────────────
+  public modalEditar:        boolean       = false;
+  public ventaEditando:      Venta | null  = null;
+  public guardandoEdicion:   boolean       = false;
+  public editTipoPedidoId:   number | null = null;
+  public editMesaId:         number | null = null;
+  public editObservacion:    string        = '';
+  public tiposPedidoEdit:    TipoPedido[]  = [];
+  public mesasEdit:          Mesa[]        = [];
+  public cargandoEdicion:    boolean       = false;
+
+  /** Solo PROPIETARIO, ADMINISTRADOR y ROOT pueden editar ventas */
+  get puedeEditarVenta(): boolean {
+    const rol = this.authService.getUserRole() ?? '';
+    return ['PROPIETARIO', 'ADMINISTRADOR', 'ROOT'].includes(rol);
+  }
+
+  abrirModalEditar(venta: Venta): void {
+    this.ventaEditando    = venta;
+    this.editTipoPedidoId = venta.tipoPedido?.id ?? null;
+    this.editMesaId       = venta.mesa?.id       ?? null;
+    this.editObservacion  = venta.observacion     ?? '';
+    this.guardandoEdicion = false;
+    this.cargandoEdicion  = true;
+    this.modalEditar      = true;
+
+    forkJoin({
+      tipos: this.tipoPedidoService.obtenerActivos(),
+      mesas: this.mesaService.obtenerActivos(),
+    }).subscribe({
+      next: ({ tipos, mesas }) => {
+        this.tiposPedidoEdit = tipos;
+        this.mesasEdit       = mesas;
+        this.cargandoEdicion = false;
+      },
+      error: () => {
+        this.toastService.error('Error al cargar los datos de edición');
+        this.cargandoEdicion = false;
+      },
+    });
+  }
+
+  cerrarModalEditar(): void {
+    this.modalEditar      = false;
+    this.ventaEditando    = null;
+    this.guardandoEdicion = false;
+    this.cargandoEdicion  = false;
+    this.editTipoPedidoId = null;
+    this.editMesaId       = null;
+    this.editObservacion  = '';
+    this.tiposPedidoEdit  = [];
+    this.mesasEdit        = [];
+  }
+
+  guardarEdicion(): void {
+    if (!this.ventaEditando?.id || !this.editTipoPedidoId) {
+      this.toastService.warning('El tipo de pedido es obligatorio.');
+      return;
+    }
+
+    this.guardandoEdicion = true;
+    const payload: any = {
+      tipoPedido:     { id: this.editTipoPedidoId },
+      mesa:           this.editMesaId ? { id: this.editMesaId } : null,
+      observacion:    this.editObservacion.trim() || null,
+      usuarioCreador: { id: this.ventaEditando.usuarioCreador?.id },
+      estado:         this.ventaEditando.estado,
+      activo:         this.ventaEditando.activo ?? true,
+    };
+
+    this.ventaService.actualizar(this.ventaEditando.id, payload).subscribe({
+      next: () => {
+        this.toastService.success('Venta actualizada correctamente.');
+        this.guardandoEdicion = false;
+        this.cerrarModalEditar();
+        this.cargarVentas();
+      },
+      error: (err) => {
+        this.guardandoEdicion = false;
+        this.toastService.error('Error: ' + (err.error?.error || 'No se pudo actualizar la venta'));
+      },
+    });
   }
 
   // ── Lightbox de imagen de soporte ────────────────────────────────────────
