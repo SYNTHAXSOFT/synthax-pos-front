@@ -87,16 +87,16 @@ th,td{border:1px solid #ccc;padding:4px 8px}th{background:#f0f0f0}
 <p style="text-align:center">Fecha: ${fecha}</p>
 <h3>Resumen</h3>
 <table><tr><td>Monto inicial</td><td class="r">$ ${fmt(r.montoInicial)}</td></tr>
-<tr><td>Total ventas</td><td class="r">$ ${fmt(r.totalVentasDia)}</td></tr>
-<tr><td>Total compras</td><td class="r">$ ${fmt(r.totalComprasDia)}</td></tr>
+<tr><td>Total ventas de la sesión</td><td class="r">$ ${fmt(r.totalVentasDia)}</td></tr>
+<tr><td>Total compras de la sesión</td><td class="r">$ ${fmt(r.totalComprasDia)}</td></tr>
 <tr class="total"><td>Efectivo a entregar</td><td class="r">$ ${fmt(r.efectivoAEntregar)}</td></tr></table>
-<h3>Ventas del día</h3>
+<h3>Ventas de la sesión</h3>
 <table><tr><th>#</th><th>Tipo</th><th>Cliente</th><th>Método de Pago</th><th>Productos</th><th class="r">Valor</th></tr>
 ${(r.listaVentas ?? []).map(v => `<tr><td>${v.codigo ?? v.ventaId}</td><td>${v.tipoVenta}</td>
 <td>${v.cliente}</td><td>${v.metodoPago}</td><td>${(v.productos ?? []).join(', ') || '—'}</td>
 <td class="r">$ ${fmt(v.valor)}</td></tr>`).join('')}
 <tr class="total"><td colspan="5">Total</td><td class="r">$ ${fmt(r.totalVentasDia)}</td></tr></table>
-<h3>Compras del día</h3>
+<h3>Compras de la sesión</h3>
 <table><tr><th>Insumo</th><th>Cantidad</th><th class="r">Total</th></tr>
 ${(r.listaCompras ?? []).map(c => `<tr><td>${c.insumo?.descripcion ?? '—'}</td>
 <td>${c.cantidad}</td><td class="r">$ ${fmt(c.valorTotal)}</td></tr>`).join('')}

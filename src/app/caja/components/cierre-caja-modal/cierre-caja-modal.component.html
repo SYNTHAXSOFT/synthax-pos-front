@@ -11,7 +11,7 @@
     </div>
     <div>
       <h2 class="caja-modal__title">Cierre de Caja</h2>
-      <p class="caja-modal__subtitle">Revisa el reporte antes de finalizar el día</p>
+      <p class="caja-modal__subtitle">Revisa el reporte antes de cerrar la sesión</p>
     </div>
     @if (!cerrando) {
       <button class="caja-modal__close" (click)="cancelar()">
@@ -26,7 +26,7 @@
     @if (cargando) {
       <div class="caja-report__loading">
         <div class="caja-spin"></div>
-        <p>Generando reporte del día...</p>
+        <p>Generando reporte de la sesión...</p>
       </div>
     }
 
@@ -42,11 +42,11 @@
       <!-- ── Métricas rápidas ─────────────────────────────────────── -->
       <div class="caja-report__metrics">
         <div class="caja-metric caja-metric--green">
-          <span class="caja-metric__lbl">Ventas del día</span>
+          <span class="caja-metric__lbl">Ventas de la sesión</span>
           <span class="caja-metric__val">$ {{ fmt(reporte.totalVentasDia) }}</span>
         </div>
         <div class="caja-metric caja-metric--amber">
-          <span class="caja-metric__lbl">Compras del día</span>
+          <span class="caja-metric__lbl">Compras de la sesión</span>
           <span class="caja-metric__val">$ {{ fmt(reporte.totalComprasDia) }}</span>
         </div>
         <div class="caja-metric caja-metric--blue">
@@ -60,15 +60,15 @@
         </div>
       </div>
 
-      <!-- ── Ventas del día ─────────────────────────────────────────── -->
+      <!-- ── Ventas de la sesión ────────────────────────────────────── -->
       <div class="caja-report__section">
         <h3 class="caja-report__section-title">
-          <i class="fa-solid fa-receipt"></i> Ventas del Día
+          <i class="fa-solid fa-receipt"></i> Ventas de la Sesión
           <span class="caja-report__section-badge">{{ reporte.listaVentas?.length ?? 0 }}</span>
         </h3>
 
         @if (!reporte.listaVentas || reporte.listaVentas.length === 0) {
-          <p class="caja-report__empty">Sin ventas registradas hoy.</p>
+          <p class="caja-report__empty">Sin ventas registradas en esta sesión.</p>
         } @else {
           <div class="caja-report__table-wrap">
             <table class="caja-report__table">
@@ -105,14 +105,14 @@
         }
       </div>
 
-      <!-- ── Compras del día ───────────────────────────────────────── -->
+      <!-- ── Compras de la sesión ──────────────────────────────────── -->
       <div class="caja-report__section">
         <h3 class="caja-report__section-title">
-          <i class="fa-solid fa-cart-flatbed"></i> Compras del Día
+          <i class="fa-solid fa-cart-flatbed"></i> Compras de la Sesión
         </h3>
 
         @if (!reporte.listaCompras || reporte.listaCompras.length === 0) {
-          <p class="caja-report__empty">Sin compras registradas hoy.</p>
+          <p class="caja-report__empty">Sin compras registradas en esta sesión.</p>
         } @else {
           <div class="caja-report__table-wrap">
             <table class="caja-report__table">
@@ -160,8 +160,8 @@
                 <tr>
                   <th>Método</th>
                   <th class="r">Valor Inicial</th>
-                  <th class="r">Ingresos día</th>
-                  <th class="r">Egresos día</th>
+                  <th class="r">Ingresos sesión</th>
+                  <th class="r">Egresos sesión</th>
                   <th class="r">Valor Final</th>
                   <th class="r">Diferencia</th>
                 </tr>
@@ -261,11 +261,11 @@
       <!-- ── Efectivo a entregar ──────────────────────────────────── -->
       <div class="caja-report__efectivo">
         <div class="caja-report__efectivo-calc">
-          <span>Ingresos efectivo del día</span>
+          <span>Ingresos efectivo de la sesión</span>
           <span>$ {{ fmt(getIngresosEfectivo()) }}</span>
         </div>
         <div class="caja-report__efectivo-calc">
-          <span>Compras en efectivo del día</span>
+          <span>Compras en efectivo de la sesión</span>
           <span>— $ {{ fmt(getEgresosEfectivo()) }}</span>
         </div>
         <div class="caja-report__efectivo-total">
