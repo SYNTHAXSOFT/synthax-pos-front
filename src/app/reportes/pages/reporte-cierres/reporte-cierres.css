@@ -140,6 +140,30 @@
   min-width: 160px;
 }
 
+/* Barra de acciones (botón PDF) */
+.spx-cierre-detail__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.spx-cierre-detail__btn-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: var(--spx-radius-sm);
+  padding: 0.45rem 1rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.spx-cierre-detail__btn-pdf:hover { background: #b91c1c; }
+.spx-cierre-detail__btn-pdf i { font-size: 0.82rem; }
+
 /* Texto vacío inline cuando no hay registros */
 .spx-cierre-detail__empty-inline {
   font-size: 0.8rem;

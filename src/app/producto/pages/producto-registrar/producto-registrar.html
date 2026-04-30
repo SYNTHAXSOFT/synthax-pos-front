@@ -138,12 +138,54 @@
               <div class="spx-receta__add-row">
                 <div class="spx-form-group" style="flex:1;min-width:0">
                   <label class="spx-form-label">Insumo</label>
-                  <select class="spx-form-select" [(ngModel)]="insumoSeleccionadoId" [ngModelOptions]="{standalone:true}">
-                    <option [ngValue]="null" disabled>— Seleccionar insumo —</option>
-                    @for (ins of insumos; track ins.id) {
-                      <option [ngValue]="ins.id">{{ ins.descripcion }} ({{ ins.medida }}) · Stock: {{ ins.stock }}</option>
-                    }
-                  </select>
+
+                  @if (insumoAutocompletado) {
+                    <div class="spx-insumo-chip">
+                      <div class="spx-insumo-chip__info">
+                        <span class="spx-insumo-chip__name">{{ insumoAutocompletado.descripcion }}</span>
+                        <span class="spx-insumo-chip__medida">{{ insumoAutocompletado.medida }}</span>
+                      </div>
+                      <button type="button" class="spx-insumo-chip__remove"
+                        (click)="limpiarInsumoAC()" title="Quitar insumo">
+                        <i class="fa-solid fa-xmark"></i>
+                      </button>
+                    </div>
+                  } @else {
+                    <div class="spx-insumo-search-wrap">
+                      <div class="spx-insumo-search">
+                        <i class="fa-solid fa-magnifying-glass spx-insumo-search__icon"></i>
+                        <input
+                          class="spx-insumo-search__input"
+                          type="text"
+                          placeholder="Buscar por código o nombre..."
+                          [(ngModel)]="insumoBusqueda"
+                          [ngModelOptions]="{standalone:true}"
+                          (ngModelChange)="onInsumoBusquedaChange($event)"
+                          (focus)="mostrarDropdownInsumo = insumoBusqueda.trim().length > 0"
+                          autocomplete="off"
+                        />
+                      </div>
+                      @if (mostrarDropdownInsumo) {
+                        <div class="spx-insumo-dropdown">
+                          @for (ins of insumosFiltrados(); track ins.id) {
+                            <button type="button" class="spx-insumo-option"
+                              (click)="seleccionarInsumoAC(ins)">
+                              <span class="spx-insumo-option__info">
+                                <span class="spx-insumo-option__name">{{ ins.descripcion }}</span>
+                                <span class="spx-insumo-option__medida">{{ ins.medida }}</span>
+                              </span>
+                            </button>
+                          }
+                          @if (insumosFiltrados().length === 0) {
+                            <div class="spx-insumo-noresult">
+                              <i class="fa-solid fa-box-open"></i>
+                              No se encontró el insumo
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
                 </div>
                 <div class="spx-form-group" style="width:9rem;flex-shrink:0">
                   <label class="spx-form-label">Cantidad</label>

@@ -129,6 +129,14 @@
                   <p class="spx-cierre-detail__error">{{ reporteError }}</p>
                 }
                 @if (reporteDetalle && !reporteCargando) {
+                  <!-- Barra de acciones -->
+                  <div class="spx-cierre-detail__actions">
+                    <button class="spx-cierre-detail__btn-pdf"
+                            (click)="exportarPDF(s, reporteDetalle)">
+                      <i class="fa-solid fa-file-pdf"></i> Exportar PDF
+                    </button>
+                  </div>
+
                   <!-- Totales -->
                   <div class="spx-cierre-totales">
                     <div class="spx-cierre-total spx-cierre-total--green">

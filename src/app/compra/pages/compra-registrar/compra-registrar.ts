@@ -1,5 +1,6 @@
 import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
   AbstractControl,
   FormArray,
@@ -23,7 +24,7 @@ import { FormaPago } from '../../../forma-pago/interfaces/forma-pago.interface';
 @Component({
   selector: 'app-compra-registrar',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CompraListarPageComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, CompraListarPageComponent],
   templateUrl: './compra-registrar.html',
   styleUrls: [
     '../../../shared/styles/spx-forms.css',
@@ -51,6 +52,11 @@ export class CompraRegistrarPageComponent implements OnInit, OnDestroy {
 
   /** Control de visibilidad del modal */
   public modalAbierto: boolean = false;
+
+  // ── Autocomplete de insumo por línea ──────────────────────────────────────
+  public insumosBusqueda:       string[]          = [''];
+  public mostrarDropdownInsumo: boolean[]         = [false];
+  public insumoSeleccionado:    (Insumo | null)[] = [null];
 
   /** Imagen de soporte / factura (Base64) */
   public soportePreview: string = '';
@@ -82,10 +88,18 @@ export class CompraRegistrarPageComponent implements OnInit, OnDestroy {
 
   agregarLinea(): void {
     this.items.push(this.crearLineaForm());
+    this.insumosBusqueda.push('');
+    this.mostrarDropdownInsumo.push(false);
+    this.insumoSeleccionado.push(null);
   }
 
   quitarLinea(i: number): void {
-    if (this.items.length > 1) this.items.removeAt(i);
+    if (this.items.length > 1) {
+      this.items.removeAt(i);
+      this.insumosBusqueda.splice(i, 1);
+      this.mostrarDropdownInsumo.splice(i, 1);
+      this.insumoSeleccionado.splice(i, 1);
+    }
   }
 
   lineaCtrl(i: number, field: string): AbstractControl {
@@ -165,9 +179,11 @@ export class CompraRegistrarPageComponent implements OnInit, OnDestroy {
   onRestauranteChange(): void {
     const rId = this.myForm.value.restauranteId;
     this.insumos = [];
-    // Limpiar insumo en todas las líneas
     for (let i = 0; i < this.items.length; i++) {
       this.items.at(i).patchValue({ insumoId: null });
+      this.insumoSeleccionado[i]    = null;
+      this.insumosBusqueda[i]       = '';
+      this.mostrarDropdownInsumo[i] = false;
     }
     if (rId) {
       this.insumoService.obtenerActivosPorRestaurante(rId).subscribe({
@@ -251,9 +267,11 @@ export class CompraRegistrarPageComponent implements OnInit, OnDestroy {
   private _resetForm(): void {
     const restauranteId = this.esRoot ? null : (this.authService.getRestauranteId() ?? null);
     this.formaPagoSeleccionadaId = null;
-    // Reconstruir FormArray con una sola línea vacía
     while (this.items.length > 0) this.items.removeAt(0);
     this.items.push(this.crearLineaForm());
+    this.insumosBusqueda       = [''];
+    this.mostrarDropdownInsumo = [false];
+    this.insumoSeleccionado    = [null];
     this.myForm.reset({
       restauranteId,
       descuentoAdicional: 0,
@@ -265,6 +283,40 @@ export class CompraRegistrarPageComponent implements OnInit, OnDestroy {
     } else {
       this.insumos = [];
     }
+  }
+
+  // ── Métodos autocomplete insumo ───────────────────────────────────────────
+
+  insumosFiltrados(i: number): Insumo[] {
+    const term = (this.insumosBusqueda[i] ?? '').trim().toLowerCase();
+    if (!term) return this.insumos.slice(0, 8);
+    return this.insumos.filter(ins =>
+      (ins.codigo        ?? '').toLowerCase().includes(term) ||
+      (ins.descripcion   ?? '').toLowerCase().includes(term)
+    ).slice(0, 8);
+  }
+
+  onInsumoBusquedaChange(i: number, value: string): void {
+    this.insumosBusqueda[i]       = value;
+    this.mostrarDropdownInsumo[i] = value.trim().length > 0;
+    if (this.insumoSeleccionado[i]) {
+      this.insumoSeleccionado[i] = null;
+      this.items.at(i).patchValue({ insumoId: null });
+    }
+  }
+
+  seleccionarInsumo(i: number, ins: Insumo): void {
+    this.insumoSeleccionado[i]    = ins;
+    this.insumosBusqueda[i]       = '';
+    this.mostrarDropdownInsumo[i] = false;
+    this.items.at(i).patchValue({ insumoId: ins.id });
+  }
+
+  limpiarInsumo(i: number): void {
+    this.insumoSeleccionado[i]    = null;
+    this.insumosBusqueda[i]       = '';
+    this.mostrarDropdownInsumo[i] = false;
+    this.items.at(i).patchValue({ insumoId: null });
   }
 
   // ── Imagen soporte ────────────────────────────────────────────────────────

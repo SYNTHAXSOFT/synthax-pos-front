@@ -89,24 +89,69 @@
 
               <!-- Líneas -->
               <div formArrayName="items" class="spx-items-list">
-                @for (item of items.controls; track $index) {
-                  <div class="spx-item-row" [formGroupName]="$index">
+                @for (item of items.controls; track $index; let rowIdx = $index) {
+                  <div class="spx-item-row" [formGroupName]="rowIdx">
 
                     <!-- Insumo -->
                     <div class="spx-items-col--insumo spx-item-field">
                       <label class="spx-item-label-mobile">Insumo</label>
-                      <select class="spx-form-select spx-item-select"
-                        formControlName="insumoId"
-                        [class.is-invalid]="isValidLineaField($index, 'insumoId')"
-                        [attr.disabled]="!myForm.value.restauranteId ? true : null">
-                        <option [value]="null">
-                          {{ myForm.value.restauranteId ? 'Seleccione...' : 'Primero seleccione restaurante' }}
-                        </option>
-                        @for (ins of insumos; track ins.id) {
-                          <option [value]="ins.id">{{ ins.descripcion }} ({{ ins.medida }})</option>
-                        }
-                      </select>
-                      @if (isValidLineaField($index, 'insumoId')) {
+
+                      @if (insumoSeleccionado[rowIdx]) {
+                        <!-- Chip: insumo seleccionado -->
+                        <div class="spx-insumo-chip">
+                          <div class="spx-insumo-chip__info">
+                            <span class="spx-insumo-chip__code">{{ insumoSeleccionado[rowIdx]!.codigo }}</span>
+                            <span class="spx-insumo-chip__name">{{ insumoSeleccionado[rowIdx]!.descripcion }}</span>
+                            <span class="spx-insumo-chip__medida">{{ insumoSeleccionado[rowIdx]!.medida }}</span>
+                          </div>
+                          <button type="button" class="spx-insumo-chip__remove"
+                            (click)="limpiarInsumo(rowIdx)" title="Quitar insumo">
+                            <i class="fa-solid fa-xmark"></i>
+                          </button>
+                        </div>
+                      } @else {
+                        <!-- Buscador + dropdown envueltos en wrapper con posición relativa -->
+                        <div class="spx-insumo-search-wrap">
+                          <div class="spx-insumo-search"
+                            [class.spx-insumo-search--disabled]="!myForm.value.restauranteId"
+                            [class.is-invalid]="isValidLineaField(rowIdx, 'insumoId')">
+                            <i class="fa-solid fa-magnifying-glass spx-insumo-search__icon"></i>
+                            <input
+                              class="spx-insumo-search__input"
+                              type="text"
+                              [placeholder]="myForm.value.restauranteId ? 'Buscar por código o nombre...' : 'Primero seleccione restaurante'"
+                              [disabled]="!myForm.value.restauranteId"
+                              [(ngModel)]="insumosBusqueda[rowIdx]"
+                              [ngModelOptions]="{standalone: true}"
+                              (ngModelChange)="onInsumoBusquedaChange(rowIdx, $event)"
+                              (focus)="mostrarDropdownInsumo[rowIdx] = (insumosBusqueda[rowIdx] ?? '').trim().length > 0"
+                              autocomplete="off"
+                            />
+                          </div>
+
+                          @if (mostrarDropdownInsumo[rowIdx]) {
+                            <div class="spx-insumo-dropdown">
+                              @for (ins of insumosFiltrados(rowIdx); track ins.id) {
+                                <button type="button" class="spx-insumo-option"
+                                  (click)="seleccionarInsumo(rowIdx, ins)">
+                                  <span class="spx-insumo-option__info">
+                                    <span class="spx-insumo-option__name">{{ ins.descripcion }}</span>
+                                    <span class="spx-insumo-option__medida">{{ ins.medida }}</span>
+                                  </span>
+                                </button>
+                              }
+                              @if (insumosFiltrados(rowIdx).length === 0) {
+                                <div class="spx-insumo-noresult">
+                                  <i class="fa-solid fa-box-open"></i>
+                                  No se encontró el insumo
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+
+                      @if (isValidLineaField(rowIdx, 'insumoId')) {
                         <span class="spx-form-error spx-item-error">
                           <i class="fa-solid fa-circle-exclamation"></i>Obligatorio
                         </span>
@@ -119,8 +164,8 @@
                       <input type="number" class="spx-form-input spx-item-input"
                         min="0.01" step="0.01" placeholder="0"
                         formControlName="cantidad"
-                        [class.is-invalid]="isValidLineaField($index, 'cantidad')">
-                      @if (isValidLineaField($index, 'cantidad')) {
+                        [class.is-invalid]="isValidLineaField(rowIdx, 'cantidad')">
+                      @if (isValidLineaField(rowIdx, 'cantidad')) {
                         <span class="spx-form-error spx-item-error">
                           <i class="fa-solid fa-circle-exclamation"></i>Requerida &gt; 0
                         </span>
@@ -135,9 +180,9 @@
                         <input type="number" class="spx-form-input spx-item-input"
                           min="0" step="1" placeholder="0"
                           formControlName="valorUnidad"
-                          [class.is-invalid]="isValidLineaField($index, 'valorUnidad')">
+                          [class.is-invalid]="isValidLineaField(rowIdx, 'valorUnidad')">
                       </div>
-                      @if (isValidLineaField($index, 'valorUnidad')) {
+                      @if (isValidLineaField(rowIdx, 'valorUnidad')) {
                         <span class="spx-form-error spx-item-error">
                           <i class="fa-solid fa-circle-exclamation"></i>Valor inválido
                         </span>
@@ -170,7 +215,7 @@
                     <div class="spx-items-col--total spx-item-field">
                       <label class="spx-item-label-mobile">Total línea</label>
                       <div class="spx-item-total">
-                        {{ totalLinea($index) | currency:'COP':'symbol':'1.0-0' }}
+                        {{ totalLinea(rowIdx) | currency:'COP':'symbol':'1.0-0' }}
                       </div>
                     </div>
 
@@ -179,7 +224,7 @@
                       <button type="button" class="spx-item-del-btn"
                         [disabled]="items.length === 1"
                         [title]="items.length === 1 ? 'Debe haber al menos un insumo' : 'Eliminar línea'"
-                        (click)="quitarLinea($index)">
+                        (click)="quitarLinea(rowIdx)">
                         <i class="fa-solid fa-trash-can"></i>
                       </button>
                     </div>

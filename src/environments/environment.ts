@@ -6,6 +6,6 @@ export const environment = {
   companySlogan: 'Seguimiento a tus Empresa',
 
   URL: 'https://apipos.synthaxsoft.com/api',
-  //URL: 'http://localhost:8080/api',
+   //URL: 'http://localhost:8080/api',
 
 };

@@ -133,7 +133,7 @@
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 12px;
   margin-bottom: 1.25rem;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Barra superior */
@@ -564,6 +564,201 @@
 .spx-compra-fp__saldo { font-size: 0.75rem; color: #64748b; margin-left: auto; }
 .spx-compra-fp__item--selected .spx-compra-fp__nombre { color: #e2e8f0; }
 .spx-compra-fp__item--selected .spx-compra-fp__saldo { color: #94a3b8; }
+
+/* ── Autocomplete insumo ──────────────────────────────────────────────── */
+
+.spx-insumo-search-wrap {
+  position: relative;
+}
+
+.spx-insumo-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 34px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  transition: border-color 0.15s;
+}
+.spx-insumo-search:focus-within {
+  border-color: rgba(13, 127, 242, 0.5);
+  background: rgba(13, 127, 242, 0.04);
+}
+.spx-insumo-search.is-invalid {
+  border-color: rgba(239, 68, 68, 0.5);
+}
+.spx-insumo-search--disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.spx-insumo-search__icon {
+  padding: 0 0.5rem;
+  color: #475569;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.spx-insumo-search__input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e2e8f0;
+  font-size: 0.8rem;
+  padding: 0 0.5rem 0 0;
+  height: 100%;
+  min-width: 0;
+}
+.spx-insumo-search__input::placeholder { color: #475569; }
+
+.spx-insumo-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: #1e2d3d;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.spx-insumo-dropdown::-webkit-scrollbar { width: 4px; }
+.spx-insumo-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+  border-radius: 2px;
+}
+
+.spx-insumo-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.45rem 0.75rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.12s;
+}
+.spx-insumo-option:last-child { border-bottom: none; }
+.spx-insumo-option:hover { background: rgba(13, 127, 242, 0.12); }
+
+.spx-insumo-option__code {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #0d7ff2;
+  background: rgba(13, 127, 242, 0.12);
+  border: 1px solid rgba(13, 127, 242, 0.2);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.spx-insumo-option__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.spx-insumo-option__name {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spx-insumo-option__medida {
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+.spx-insumo-noresult {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.8rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Chip de insumo seleccionado */
+.spx-insumo-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  height: 34px;
+  padding: 0 0.5rem 0 0.75rem;
+  background: rgba(13, 127, 242, 0.1);
+  border: 1px solid rgba(13, 127, 242, 0.3);
+  border-radius: 7px;
+}
+
+.spx-insumo-chip__info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.spx-insumo-chip__code {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #0d7ff2;
+  background: rgba(13, 127, 242, 0.15);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.spx-insumo-chip__name {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spx-insumo-chip__medida {
+  font-size: 0.7rem;
+  color: #64748b;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.spx-insumo-chip__remove {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.spx-insumo-chip__remove:hover {
+  background: #ef4444;
+  color: #fff;
+}
 
 /* ── Responsive ───────────────────────────────────────────────────── */
 

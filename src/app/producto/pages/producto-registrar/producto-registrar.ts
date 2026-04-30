@@ -41,6 +41,11 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
   public cantidadInsumo: number = 1;
   public guardandoReceta: boolean = false;
 
+  // ── Autocomplete insumo receta ────────────────────────────────────────────
+  public insumoBusqueda:        string       = '';
+  public mostrarDropdownInsumo: boolean      = false;
+  public insumoAutocompletado:  Insumo|null  = null;
+
   public myForm: FormGroup = this.fb.group({
     codigo:      ['', [Validators.required, Validators.minLength(2)]],
     nombre:      ['', [Validators.required, Validators.minLength(3)]],
@@ -69,6 +74,7 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
     this.receta = [];
     this.insumoSeleccionadoId = null;
     this.cantidadInsumo = 1;
+    this._resetAutocomplete();
     this.myForm.reset({ activo: true });
     this.modalAbierto = true;
     document.body.style.overflow = 'hidden';
@@ -84,6 +90,7 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
         this.receta = [];
         this.insumoSeleccionadoId = null;
         this.cantidadInsumo = 1;
+        this._resetAutocomplete();
         this.myForm.patchValue(p);
 
         this.detalleProductoService.obtenerPorProducto(id).subscribe({
@@ -125,6 +132,7 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
         this.imagenPreview        = producto.imagen ?? null;
         this.insumoSeleccionadoId = null;
         this.cantidadInsumo       = 1;
+        this._resetAutocomplete();
 
         // Cargar receta del original
         this.receta = detalles
@@ -148,6 +156,7 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
     this.receta = [];
     this.insumoSeleccionadoId = null;
     this.cantidadInsumo = 1;
+    this._resetAutocomplete();
     this.myForm.reset({ activo: true });
   }
 
@@ -187,6 +196,44 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
     return this.insumos.find(i => i.id === +this.insumoSeleccionadoId!) ?? null;
   }
 
+  insumosFiltrados(): Insumo[] {
+    const term = this.insumoBusqueda.trim().toLowerCase();
+    if (!term) return this.insumos.slice(0, 8);
+    return this.insumos.filter(ins =>
+      (ins.codigo      ?? '').toLowerCase().includes(term) ||
+      (ins.descripcion ?? '').toLowerCase().includes(term)
+    ).slice(0, 8);
+  }
+
+  onInsumoBusquedaChange(value: string): void {
+    this.insumoBusqueda        = value;
+    this.mostrarDropdownInsumo = value.trim().length > 0;
+    if (this.insumoAutocompletado) {
+      this.insumoAutocompletado = null;
+      this.insumoSeleccionadoId = null;
+    }
+  }
+
+  seleccionarInsumoAC(ins: Insumo): void {
+    this.insumoAutocompletado  = ins;
+    this.insumoSeleccionadoId  = ins.id ?? null;
+    this.insumoBusqueda        = '';
+    this.mostrarDropdownInsumo = false;
+  }
+
+  limpiarInsumoAC(): void {
+    this.insumoAutocompletado  = null;
+    this.insumoSeleccionadoId  = null;
+    this.insumoBusqueda        = '';
+    this.mostrarDropdownInsumo = false;
+  }
+
+  private _resetAutocomplete(): void {
+    this.insumoBusqueda        = '';
+    this.mostrarDropdownInsumo = false;
+    this.insumoAutocompletado  = null;
+  }
+
   agregarInsumo(): void {
     if (!this.insumoSeleccionadoId) { this.toastService.error('Selecciona un insumo'); return; }
     if (!this.cantidadInsumo || this.cantidadInsumo <= 0) { this.toastService.error('La cantidad debe ser mayor a 0'); return; }
@@ -203,6 +250,7 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
     }
     this.insumoSeleccionadoId = null;
     this.cantidadInsumo = 1;
+    this._resetAutocomplete();
   }
 
   quitarInsumo(index: number): void {
