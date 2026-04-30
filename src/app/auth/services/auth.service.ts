@@ -6,6 +6,7 @@ import { LoginRequest, LoginResponse, RestauranteLogin } from '../interfaces/aut
 import { environment } from '../../../environments/environment';
 import { API_ENDPOINTS } from '../../utils/constantes-utils';
 import { BrandingService } from '../../shared/services/branding.service';
+import { clearHttpCache } from '../../shared/interceptors/http-cache.interceptor';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -47,6 +48,7 @@ export class AuthService {
   }
 
   logout(): void {
+    clearHttpCache();
     localStorage.removeItem(this.USER_KEY);
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.RESTAURANTE_KEY);

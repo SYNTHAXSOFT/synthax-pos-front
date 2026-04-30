@@ -58,9 +58,14 @@
         <input type="text" [(ngModel)]="filtroUsuario" placeholder="Nombre del usuario...">
       </div>
     </div>
-    <button class="spx-rpt__clear" (click)="limpiarFiltros()">
-      <i class="fa-solid fa-times"></i> Limpiar
-    </button>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      <button class="spx-rpt__clear" (click)="recargar()" [disabled]="cargando">
+        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+      </button>
+      <button class="spx-rpt__clear" (click)="limpiarFiltros()" [disabled]="cargando">
+        <i class="fa-solid fa-times"></i> Limpiar
+      </button>
+    </div>
   </div>
 
   <!-- Loading -->
@@ -68,6 +73,17 @@
     <div class="spx-rpt__loading">
       <div class="spx-rpt__spinner"></div>
       <p>Cargando ventas...</p>
+    </div>
+  }
+
+  <!-- Error de carga -->
+  @if (errorCarga) {
+    <div class="spx-rpt__loading">
+      <i class="fa-solid fa-circle-exclamation" style="font-size:2rem;color:#ef4444"></i>
+      <p style="margin-top:.75rem">No se pudieron cargar las ventas. Verifica tu conexión.</p>
+      <button class="spx-rpt__clear" style="margin-top:.5rem" (click)="recargar()">
+        <i class="fa-solid fa-rotate-right"></i> Reintentar
+      </button>
     </div>
   }
 

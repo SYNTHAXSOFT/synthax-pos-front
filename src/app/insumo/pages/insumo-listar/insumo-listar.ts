@@ -1,6 +1,7 @@
 import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { timeout } from 'rxjs/operators';
 import { InsumoService } from '../../services/insumo.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Insumo } from '../../interfaces/insumo.interface';
@@ -26,7 +27,8 @@ export class InsumoListarPageComponent implements OnInit {
   @Output() editarInsumo = new EventEmitter<number>();
 
   public insumos: Insumo[] = [];
-  public cargando: boolean = false;
+  public cargando: boolean  = false;
+  public errorCarga         = false;
 
   searchTerm: string = '';
   filtroEstado: 'todos' | 'ok' | 'bajo' | 'sin' = 'todos';
@@ -39,14 +41,15 @@ export class InsumoListarPageComponent implements OnInit {
   }
 
   cargarInsumos(): void {
-    this.cargando = true;
+    this.cargando   = true;
+    this.errorCarga = false;
     const obs = this.restauranteId
       ? this.insumoService.obtenerPorRestaurante(this.restauranteId)
       : this.insumoService.obtenerTodos();
 
-    obs.subscribe({
+    obs.pipe(timeout(30_000)).subscribe({
       next: (data) => { this.insumos = data; this.cargando = false; },
-      error: (err) => { console.error('Error al cargar insumos:', err); this.cargando = false; },
+      error: ()    => { this.cargando = false; this.errorCarga = true; },
     });
   }
 

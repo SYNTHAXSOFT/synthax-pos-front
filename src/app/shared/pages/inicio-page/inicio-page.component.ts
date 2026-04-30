@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, timeout } from 'rxjs/operators';
 import { AuthService } from '../../../auth/services/auth.service';
 import { VentaService } from '../../../venta/services/venta.service';
 import { CompraService } from '../../../compra/services/compra.service';
@@ -164,55 +164,55 @@ export class InicioPageComponent implements OnInit {
 
   ngOnInit(): void {
     const restauranteId = this.authService.getRestauranteId();
+    const fechaDesde    = this.toLocalDateTimeStr(this.startOfToday());
 
-    // Usamos el inicio del día como fecha mínima para no cargar todo el historial.
-    // Si la caja tiene una apertura posterior a medianoche, el filtro del getter
-    // `esDesdeApertura` lo refina aún más en el cliente.
-    const fechaDesde = this.toLocalDateTimeStr(this.startOfToday());
-
-    const dataSources: any = {
-      ventas: (restauranteId
-        ? this.ventaService.obtenerDesde(fechaDesde)
-        : this.ventaService.obtenerTodos()
-      ).pipe(catchError(() => of([]))),
-
-      compras: (restauranteId
-        ? this.compraService.obtenerDesde(restauranteId, fechaDesde)
-        : this.compraService.obtenerTodas()
-      ).pipe(catchError(() => of([]))),
-
-      formasPago: this.formaPagoService.obtenerActivas().pipe(catchError(() => of([]))),
-
-      pedidos: (restauranteId
-        ? this.pedidoService.obtenerDesde(restauranteId, fechaDesde)
-        : this.pedidoService.obtenerTodos()
-      ).pipe(catchError(() => of([]))),
+    // ── Fase 1: datos ligeros (caja + formas de pago) ─────────────────────────
+    // Se resuelven primero para quitar el spinner lo antes posible.
+    const fase1: any = {
+      formasPago: this.formaPagoService.obtenerActivas()
+        .pipe(timeout(15_000), catchError(() => of([]))),
     };
-
     if (this.puedeOperarCaja) {
-      // catchError: si el endpoint falla (ej. cajero sin restaurante asignado)
-      // no rompe el forkJoin — simplemente marca la caja como cerrada.
-      dataSources['cajaEstado'] = this.cajaService.obtenerEstado().pipe(
-        catchError(() => of({ abierta: false, sesion: null }))
-      );
+      fase1['cajaEstado'] = this.cajaService.obtenerEstado()
+        .pipe(timeout(15_000), catchError(() => of({ abierta: false, sesion: null })));
     }
 
-    forkJoin(dataSources).subscribe({
+    forkJoin(fase1).subscribe({
       next: (res: any) => {
-        this.ventas     = res['ventas'];
-        this.compras    = res['compras'];
-        this.formasPago = res['formasPago'];
-        this.pedidos    = res['pedidos'];
-
+        this.formasPago = res['formasPago'] ?? [];
         if (res['cajaEstado']) {
-          this.cajaAbierta = res['cajaEstado'].abierta;
-          this.cajaSesion  = res['cajaEstado'].sesion;
+          this.cajaAbierta   = res['cajaEstado'].abierta;
+          this.cajaSesion    = res['cajaEstado'].sesion;
           this.fechaApertura = this.cajaSesion?.fechaApertura
             ? new Date(this.cajaSesion.fechaApertura)
             : null;
         }
-
         this.cargando = false;
+
+        // ── Fase 2: datos pesados (ventas, compras, pedidos) ─────────────────
+        // Carga en segundo plano — el dashboard ya es visible.
+        forkJoin({
+          ventas: (restauranteId
+            ? this.ventaService.obtenerDesde(fechaDesde)
+            : this.ventaService.obtenerTodos()
+          ).pipe(timeout(30_000), catchError(() => of([]))),
+
+          compras: (restauranteId
+            ? this.compraService.obtenerDesde(restauranteId, fechaDesde)
+            : this.compraService.obtenerTodas()
+          ).pipe(timeout(30_000), catchError(() => of([]))),
+
+          pedidos: (restauranteId
+            ? this.pedidoService.obtenerDesde(restauranteId, fechaDesde)
+            : this.pedidoService.obtenerTodos()
+          ).pipe(timeout(30_000), catchError(() => of([]))),
+        }).subscribe({
+          next: ({ ventas, compras, pedidos }) => {
+            this.ventas  = ventas;
+            this.compras = compras;
+            this.pedidos = pedidos;
+          },
+        });
       },
       error: () => { this.cargando = false; },
     });
@@ -252,19 +252,20 @@ export class InicioPageComponent implements OnInit {
       ventas: (restauranteId
         ? this.ventaService.obtenerDesde(fechaDesde)
         : this.ventaService.obtenerTodos()
-      ).pipe(catchError(() => of([]))),
+      ).pipe(timeout(30_000), catchError(() => of([]))),
 
       compras: (restauranteId
         ? this.compraService.obtenerDesde(restauranteId, fechaDesde)
         : this.compraService.obtenerTodas()
-      ).pipe(catchError(() => of([]))),
+      ).pipe(timeout(30_000), catchError(() => of([]))),
 
-      formasPago: this.formaPagoService.obtenerActivas().pipe(catchError(() => of([]))),
+      formasPago: this.formaPagoService.obtenerActivas()
+        .pipe(timeout(15_000), catchError(() => of([]))),
 
       pedidos: (restauranteId
         ? this.pedidoService.obtenerDesde(restauranteId, fechaDesde)
         : this.pedidoService.obtenerTodos()
-      ).pipe(catchError(() => of([]))),
+      ).pipe(timeout(30_000), catchError(() => of([]))),
     }).subscribe({
       next: (res) => {
         this.ventas     = res.ventas;

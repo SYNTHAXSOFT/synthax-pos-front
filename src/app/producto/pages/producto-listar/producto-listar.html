@@ -72,6 +72,15 @@
       <p>Cargando productos...</p>
     </div>
   }
+  @if (errorCarga) {
+    <div class="spx-prod-loading">
+      <i class="fa-solid fa-circle-exclamation" style="font-size:2rem;color:#ef4444"></i>
+      <p style="margin-top:.75rem">No se pudieron cargar los productos. Verifica tu conexión.</p>
+      <button style="margin-top:.75rem;padding:.5rem 1rem;border-radius:.5rem;border:none;background:#3b82f6;color:#fff;cursor:pointer" (click)="cargarProductos()">
+        <i class="fa-solid fa-rotate-right"></i> Reintentar
+      </button>
+    </div>
+  }
 
   <!-- Grid -->
   @if (!cargando) {

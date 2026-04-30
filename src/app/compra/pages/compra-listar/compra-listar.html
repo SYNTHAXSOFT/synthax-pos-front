@@ -88,6 +88,9 @@
         <input type="date" class="spx-compra-daterange__input"
           [(ngModel)]="fechaHasta" [min]="fechaDesde || ''">
       </div>
+      <button class="spx-compra-daterange__clear" (click)="buscar()" [disabled]="cargando" title="Buscar">
+        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+      </button>
       @if (fechaDesde || fechaHasta) {
         <button class="spx-compra-daterange__clear" (click)="limpiarFechas()" title="Limpiar fechas">
           <i class="fa-solid fa-xmark"></i> Limpiar
@@ -110,6 +113,15 @@
     <div class="spx-compra-loading">
       <div class="spx-compra-spinner"></div>
       <p>Cargando compras...</p>
+    </div>
+  }
+  @if (errorCarga) {
+    <div class="spx-compra-loading">
+      <i class="fa-solid fa-circle-exclamation" style="font-size:2rem;color:#ef4444"></i>
+      <p style="margin-top:.75rem">No se pudieron cargar las compras. Verifica tu conexión.</p>
+      <button class="spx-compra-btn-primary" style="margin-top:.75rem" (click)="buscar()">
+        <i class="fa-solid fa-rotate-right"></i> Reintentar
+      </button>
     </div>
   }
 

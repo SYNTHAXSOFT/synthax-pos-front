@@ -2,6 +2,7 @@ import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { timeout } from 'rxjs/operators';
 import { CompraService } from '../../services/compra.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Compra } from '../../interfaces/compra.interface';
@@ -27,7 +28,8 @@ export class CompraListarPageComponent implements OnInit {
   @Output() nuevaCompra = new EventEmitter<void>();
 
   public compras: Compra[] = [];
-  public cargando: boolean = false;
+  public cargando: boolean  = false;
+  public errorCarga         = false;
 
   // Filters
   searchTerm: string = '';
@@ -41,11 +43,14 @@ export class CompraListarPageComponent implements OnInit {
     if (!this.restauranteId) {
       this.restauranteId = this.authService.getRestauranteId() ?? undefined;
     }
-    // Por defecto: mostrar solo las compras de hoy
-    const hoy = this.fechaHoy();
-    this.fechaDesde = hoy;
-    this.fechaHasta = hoy;
+    // Por defecto: mes actual para no traer todo el historial
+    if (!this.fechaDesde) this.fechaDesde = this.inicioMesActual();
     this.cargarCompras();
+  }
+
+  private inicioMesActual(): string {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
   }
 
   private fechaHoy(): string {
@@ -62,15 +67,25 @@ export class CompraListarPageComponent implements OnInit {
   }
 
   cargarCompras(): void {
-    this.cargando = true;
-    const obs = this.restauranteId
-      ? this.compraService.obtenerPorRestaurante(this.restauranteId)
-      : this.compraService.obtenerTodas();
+    this.cargando   = true;
+    this.errorCarga = false;
+
+    const fechaDesdeISO = this.fechaDesde ? `${this.fechaDesde}T00:00:00` : `${this.inicioMesActual()}T00:00:00`;
+
+    const obs = (this.restauranteId
+      ? this.compraService.obtenerDesde(this.restauranteId, fechaDesdeISO)
+      : this.compraService.obtenerTodas()
+    ).pipe(timeout(30_000));
 
     obs.subscribe({
       next: (data) => { this.compras = data; this.cargando = false; },
-      error: (err) => { console.error('Error al cargar compras:', err); this.cargando = false; },
+      error: ()    => { this.cargando = false; this.errorCarga = true; },
     });
+  }
+
+  buscar(): void {
+    this.compras = [];
+    this.cargarCompras();
   }
 
   get comprasFiltradas(): Compra[] {

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find \"C:\\\\Users\\\\Usuario\\\\Documents\\\\sintax-soft\\\\POS\\\\synthax-pos-front\" -type f \\\\\\( -name \"*.ts\" -o -name \"*.html\" \\\\\\) -exec grep -l \"35\\\\.6706\\\\|39\\\\.9748\" {} \\\\;)",
+      "Bash(find \"C:\\\\Users\\\\Usuario\\\\Documents\\\\sintax-soft\\\\POS\\\\synthax-pos-front/src\" -type f -name \"*.html\" -exec grep -l \"svg\\\\|path\" {} \\\\;)",
+      "Bash(xargs grep *)"
+    ]
+  }
+}

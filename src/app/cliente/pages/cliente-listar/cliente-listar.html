@@ -62,6 +62,15 @@
       <p>Cargando clientes...</p>
     </div>
   }
+  @if (errorCarga) {
+    <div class="spx-cli__loading">
+      <i class="fa-solid fa-circle-exclamation" style="font-size:2rem;color:#ef4444"></i>
+      <p style="margin-top:.75rem">No se pudieron cargar los clientes. Verifica tu conexión.</p>
+      <button style="margin-top:.75rem;padding:.5rem 1rem;border-radius:.5rem;border:none;background:#3b82f6;color:#fff;cursor:pointer" (click)="cargar()">
+        <i class="fa-solid fa-rotate-right"></i> Reintentar
+      </button>
+    </div>
+  }
 
   <!-- ── Table ────────────────────────────────────────────────── -->
   @if (!cargando) {

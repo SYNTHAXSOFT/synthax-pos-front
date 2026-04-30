@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { timeout } from 'rxjs/operators';
 import { ClienteService } from '../../services/cliente.service';
 import { Cliente } from '../../interfaces/cliente.interface';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -29,8 +30,9 @@ export class ClienteListarComponent implements OnInit {
 
   // ── State ────────────────────────────────────────────────────────────────
 
-  cargando  = true;
-  guardando = false;
+  cargando   = true;
+  errorCarga = false;
+  guardando  = false;
   clientes: Cliente[] = [];
 
   // ── Filters ──────────────────────────────────────────────────────────────
@@ -64,10 +66,11 @@ export class ClienteListarComponent implements OnInit {
   }
 
   cargar(): void {
-    this.cargando = true;
-    this.clienteService.listar().subscribe({
+    this.cargando   = true;
+    this.errorCarga = false;
+    this.clienteService.listar().pipe(timeout(30_000)).subscribe({
       next: (data) => { this.clientes = data; this.cargando = false; },
-      error: ()    => { this.cargando = false; },
+      error: ()    => { this.cargando = false; this.errorCarga = true; },
     });
   }
 

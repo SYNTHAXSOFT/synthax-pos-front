@@ -2,7 +2,9 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { timeout } from 'rxjs/operators';
 import { VentaService } from '../../../venta/services/venta.service';
+import { AuthService } from '../../../auth/services/auth.service';
 import { Venta } from '../../../venta/interfaces/venta.interface';
 
 @Component({
@@ -14,8 +16,10 @@ import { Venta } from '../../../venta/interfaces/venta.interface';
 })
 export class ReporteVentasComponent implements OnInit {
   private ventaService = inject(VentaService);
+  private authService  = inject(AuthService);
 
   cargando = true;
+  errorCarga = false;
   ventas: Venta[] = [];
 
   filtroEstado      = '';
@@ -27,10 +31,28 @@ export class ReporteVentasComponent implements OnInit {
   filtroUsuario     = '';
 
   ngOnInit(): void {
-    this.ventaService.obtenerTodos().subscribe({
+    // Carga solo el mes en curso por defecto para evitar transferir todo el historial.
+    // El usuario puede ampliar el rango con los filtros de fecha.
+    if (!this.filtroFechaInicio) this.filtroFechaInicio = this.inicioMesActual();
+
+    const fechaDesde = `${this.filtroFechaInicio}T00:00:00`;
+    this.ventaService.obtenerDesde(fechaDesde).pipe(timeout(30_000)).subscribe({
       next: (data) => { this.ventas = data; this.cargando = false; },
-      error: () => { this.cargando = false; },
+      error: () => { this.cargando = false; this.errorCarga = true; },
     });
+  }
+
+  private inicioMesActual(): string {
+    const d = new Date();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    return `${d.getFullYear()}-${mm}-01`;
+  }
+
+  recargar(): void {
+    this.cargando   = true;
+    this.errorCarga = false;
+    this.ventas     = [];
+    this.ngOnInit();
   }
 
   get ventasFiltradas(): Venta[] {

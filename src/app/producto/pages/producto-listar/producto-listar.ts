@@ -1,6 +1,7 @@
 import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { timeout } from 'rxjs/operators';
 import { ProductoService } from '../../services/producto.service';
 import { Producto } from '../../interfaces/producto.interface';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -24,7 +25,8 @@ export class ProductoListarPageComponent implements OnInit {
   @Output() duplicarProducto = new EventEmitter<number>();
 
   public productos: Producto[] = [];
-  public cargando: boolean = false;
+  public cargando: boolean  = false;
+  public errorCarga         = false;
 
   searchTerm: string = '';
   filtroEstado: 'todos' | 'activo' | 'inactivo' = 'todos';
@@ -34,10 +36,11 @@ export class ProductoListarPageComponent implements OnInit {
   }
 
   cargarProductos(): void {
-    this.cargando = true;
-    this.productoService.obtenerTodos().subscribe({
+    this.cargando   = true;
+    this.errorCarga = false;
+    this.productoService.obtenerTodos().pipe(timeout(30_000)).subscribe({
       next: (data) => { this.productos = data; this.cargando = false; },
-      error: (err)  => { console.error('Error al cargar productos:', err); this.cargando = false; },
+      error: ()    => { this.cargando = false; this.errorCarga = true; },
     });
   }
 
