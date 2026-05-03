@@ -110,6 +110,13 @@
                     <i class="fa-solid fa-clock"></i> {{ duracion(s.fechaApertura, s.fechaCierre) }}
                   </span>
                 }
+                @if (s.id === idSesionReabrible) {
+                  <button class="spx-cierre-row__btn-reabrir"
+                          (click)="abrirModalReapertura(s, $event)"
+                          title="Reabrir esta sesión de caja">
+                    <i class="fa-solid fa-rotate-left"></i> Reabrir
+                  </button>
+                }
                 <i class="fa-solid spx-cierre-row__chevron"
                    [class.fa-chevron-down]="sesionExpandida !== s.id"
                    [class.fa-chevron-up]="sesionExpandida === s.id"></i>
@@ -129,13 +136,66 @@
                   <p class="spx-cierre-detail__error">{{ reporteError }}</p>
                 }
                 @if (reporteDetalle && !reporteCargando) {
-                  <!-- Barra de acciones -->
+                  <!-- Barra de acciones (PDF + Log) -->
                   <div class="spx-cierre-detail__actions">
+                    <button class="spx-cierre-detail__btn-log"
+                            (click)="toggleLog(s.id, $event)">
+                      <i class="fa-solid fa-timeline"></i>
+                      {{ logExpandido.has(s.id) ? 'Ocultar historial' : 'Ver historial de eventos' }}
+                    </button>
                     <button class="spx-cierre-detail__btn-pdf"
                             (click)="exportarPDF(s, reporteDetalle)">
                       <i class="fa-solid fa-file-pdf"></i> Exportar PDF
                     </button>
                   </div>
+
+                  <!-- Log de eventos -->
+                  @if (logExpandido.has(s.id)) {
+                    <div class="spx-cierre-log">
+                      @if (logCargando.has(s.id)) {
+                        <div class="spx-cierre-log__loading">
+                          <i class="fa-solid fa-spinner fa-spin"></i> Cargando historial...
+                        </div>
+                      } @else if ((logPorSesion.get(s.id) ?? []).length === 0) {
+                        <p class="spx-cierre-log__empty">Sin eventos registrados para esta sesión.</p>
+                      } @else {
+                        <div class="spx-cierre-log__timeline">
+                          @for (entry of logPorSesion.get(s.id) ?? []; track entry.id) {
+                            <div class="spx-cierre-log__item"
+                                 [class.spx-cierre-log__item--apertura]="entry.tipoEvento === 'APERTURA'"
+                                 [class.spx-cierre-log__item--cierre]="entry.tipoEvento === 'CIERRE'"
+                                 [class.spx-cierre-log__item--reapertura]="entry.tipoEvento === 'REAPERTURA'">
+                              <div class="spx-cierre-log__dot"></div>
+                              <div class="spx-cierre-log__content">
+                                <div class="spx-cierre-log__header">
+                                  <span class="spx-cierre-log__badge">
+                                    @if (entry.tipoEvento === 'APERTURA') {
+                                      <i class="fa-solid fa-lock-open"></i> Apertura
+                                    } @else if (entry.tipoEvento === 'CIERRE') {
+                                      <i class="fa-solid fa-lock"></i> Cierre
+                                    } @else {
+                                      <i class="fa-solid fa-rotate-left"></i> Reapertura
+                                    }
+                                  </span>
+                                  <span class="spx-cierre-log__fecha">{{ fmtFecha(entry.fechaEvento) }}</span>
+                                  @if (entry.usuarioNombre) {
+                                    <span class="spx-cierre-log__usuario">
+                                      <i class="fa-solid fa-user"></i> {{ entry.usuarioNombre }}
+                                    </span>
+                                  }
+                                </div>
+                                @if (entry.motivo) {
+                                  <p class="spx-cierre-log__motivo">
+                                    <i class="fa-solid fa-comment-dots"></i> {{ entry.motivo }}
+                                  </p>
+                                }
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
 
                   <!-- Totales -->
                   <div class="spx-cierre-totales">
@@ -342,6 +402,61 @@
           </div>
         }
       }
+    </div>
+  }
+
+  <!-- Modal de motivo para reapertura -->
+  @if (mostrarModalMotivo) {
+    <div class="spx-modal-backdrop" (click)="cerrarModalReapertura()">
+      <div class="spx-modal-container" style="max-width:480px" (click)="$event.stopPropagation()">
+        <div class="spx-modal-header">
+          <div class="spx-modal-header__info">
+            <div class="spx-modal-header__icon" style="background:rgba(245,158,11,0.12);color:#f59e0b">
+              <i class="fa-solid fa-rotate-left"></i>
+            </div>
+            <div>
+              <p class="spx-modal-header__title">Reabrir Sesión #{{ sesionParaReabrir?.id }}</p>
+              <p class="spx-modal-header__sub">
+                El efectivo descuentado al cerrar será devuelto al saldo actual.
+              </p>
+            </div>
+          </div>
+          <button class="spx-modal-close" (click)="cerrarModalReapertura()" title="Cancelar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="spx-modal-body">
+          <div class="spx-form-group">
+            <label class="spx-form-label">
+              Motivo de reapertura <span class="spx-form-required">*</span>
+            </label>
+            <textarea
+              class="spx-form-textarea"
+              rows="3"
+              placeholder="Describe el motivo por el que se reabre la caja..."
+              [(ngModel)]="motivoReapertura"
+              maxlength="500">
+            </textarea>
+            <span style="font-size:0.72rem;color:#64748b;display:block;margin-top:0.25rem">
+              {{ motivoReapertura.length }}/500 caracteres
+            </span>
+          </div>
+        </div>
+        <div class="spx-modal-actions">
+          <button type="button" class="spx-modal-btn-cancel" (click)="cerrarModalReapertura()">
+            <i class="fa-solid fa-xmark"></i> Cancelar
+          </button>
+          <button type="button" class="spx-cierre-detail__btn-reabrir-confirm"
+                  [disabled]="!motivoReapertura.trim() || reabriendo"
+                  (click)="confirmarReapertura()">
+            @if (reabriendo) {
+              <i class="fa-solid fa-spinner fa-spin"></i> Reabriendo...
+            } @else {
+              <i class="fa-solid fa-rotate-left"></i> Confirmar Reapertura
+            }
+          </button>
+        </div>
+      </div>
     </div>
   }
 

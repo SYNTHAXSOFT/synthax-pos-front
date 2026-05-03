@@ -173,6 +173,193 @@
   font-style: italic;
 }
 
+/* ── Botón Reabrir (en la fila) ────────────── */
+.spx-cierre-row__btn-reabrir {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: var(--spx-radius-sm);
+  padding: 0.35rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.spx-cierre-row__btn-reabrir:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.6);
+}
+
+/* ── Botón Log (en barra de acciones) ─────── */
+.spx-cierre-detail__btn-log {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(99, 102, 241, 0.1);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--spx-radius-sm);
+  padding: 0.45rem 1rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  margin-right: auto;
+}
+.spx-cierre-detail__btn-log:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+/* ── Botón confirmar reapertura (modal) ────── */
+.spx-cierre-detail__btn-reabrir-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f59e0b;
+  color: #1a1a2e;
+  border: none;
+  border-radius: var(--spx-radius-sm);
+  padding: 0.55rem 1.25rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+.spx-cierre-detail__btn-reabrir-confirm:hover:not(:disabled) { background: #d97706; }
+.spx-cierre-detail__btn-reabrir-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Log timeline ─────────────────────────── */
+.spx-cierre-log {
+  margin-bottom: 1.25rem;
+  background: rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--spx-border);
+  border-radius: var(--spx-radius-sm);
+  padding: 1rem 1.25rem;
+}
+
+.spx-cierre-log__loading,
+.spx-cierre-log__empty {
+  font-size: 0.8rem;
+  color: var(--spx-text-muted);
+  font-style: italic;
+  margin: 0;
+  padding: 0.25rem 0;
+}
+
+.spx-cierre-log__timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.spx-cierre-log__item {
+  display: flex;
+  gap: 0.85rem;
+  padding: 0.65rem 0;
+  position: relative;
+}
+
+/* Línea vertical entre eventos */
+.spx-cierre-log__item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 0.43rem;
+  top: calc(0.65rem + 1rem);
+  bottom: 0;
+  width: 1px;
+  background: var(--spx-border);
+}
+
+.spx-cierre-log__dot {
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  background: var(--spx-border);
+  border: 2px solid var(--spx-surface);
+}
+
+.spx-cierre-log__item--apertura .spx-cierre-log__dot  { background: #22c55e; }
+.spx-cierre-log__item--cierre   .spx-cierre-log__dot  { background: #94a3b8; }
+.spx-cierre-log__item--reapertura .spx-cierre-log__dot { background: #f59e0b; }
+
+.spx-cierre-log__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.spx-cierre-log__header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.spx-cierre-log__badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  background: var(--spx-surface);
+  border: 1px solid var(--spx-border);
+  color: var(--spx-text-sub);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.spx-cierre-log__item--apertura .spx-cierre-log__badge {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #4ade80;
+}
+.spx-cierre-log__item--cierre .spx-cierre-log__badge {
+  background: rgba(148, 163, 184, 0.1);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #94a3b8;
+}
+.spx-cierre-log__item--reapertura .spx-cierre-log__badge {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.spx-cierre-log__fecha {
+  font-size: 0.75rem;
+  color: var(--spx-text-muted);
+}
+
+.spx-cierre-log__usuario {
+  font-size: 0.72rem;
+  color: var(--spx-text-sub);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.spx-cierre-log__usuario i { font-size: 0.65rem; color: var(--spx-text-muted); }
+
+.spx-cierre-log__motivo {
+  margin: 0.3rem 0 0;
+  font-size: 0.78rem;
+  color: var(--spx-text-sub);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  font-style: italic;
+}
+.spx-cierre-log__motivo i {
+  font-size: 0.7rem;
+  color: #f59e0b;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
 /* ── Totales del cierre ────────────────────── */
 .spx-cierre-totales {
   display: grid;

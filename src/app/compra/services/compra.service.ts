@@ -55,4 +55,12 @@ export class CompraService {
   anular(id: number): Observable<Compra> {
     return this.http.patch<Compra>(`${this.base}/${id}/anular`, {});
   }
+
+  /**
+   * Obtiene únicamente la imagen de soporte de una compra (carga lazy).
+   * No se llama en el listado — solo al hacer clic en "Ver factura".
+   */
+  obtenerFactura(id: number): Observable<{ imagenSoporte: string; codigo: string }> {
+    return this.http.get<{ imagenSoporte: string; codigo: string }>(`${this.base}/${id}/factura`);
+  }
 }

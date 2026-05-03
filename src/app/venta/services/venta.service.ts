@@ -85,4 +85,12 @@ export class VentaService {
   desactivar(id: number): Observable<Venta> {
     return this.http.patch<Venta>(`${this.base}/${id}/desactivar`, {});
   }
+
+  /**
+   * Obtiene únicamente la imagen de soporte de una venta (carga lazy).
+   * No se llama en el listado — solo al hacer clic en "Ver comprobante".
+   */
+  obtenerComprobante(id: number): Observable<{ imagenSoporte: string; codigo: string }> {
+    return this.http.get<{ imagenSoporte: string; codigo: string }>(`${this.base}/${id}/comprobante`);
+  }
 }

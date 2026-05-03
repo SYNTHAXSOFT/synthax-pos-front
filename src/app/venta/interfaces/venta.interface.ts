@@ -49,8 +49,10 @@ export interface Venta {
   /** Forma de pago utilizada al cerrar la venta. */
   formaPago?: { id?: number; nombre?: string; saldoActual?: number };
 
-  /** Imagen de soporte adjunta al cerrar la venta (Base64, opcional). */
+  /** Solo presente en vista de detalle (GET /id). Excluido del listado. */
   imagenSoporte?: string;
+  /** Presente en el listado: true si la venta tiene comprobante adjunto. */
+  tieneComprobante?: boolean;
 
   /** Calculado por el backend: número de pedidos asociados a esta venta. */
   numeroPedidos?: number;

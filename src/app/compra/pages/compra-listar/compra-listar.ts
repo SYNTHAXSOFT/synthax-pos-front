@@ -152,32 +152,49 @@ export class CompraListarPageComponent implements OnInit {
       .reduce((acc, c) => acc + (c.valorTotal ?? 0), 0);
   }
 
-  // ── Visor de soporte ──────────────────────────────────────────────
+  // ── Visor de soporte (lazy) ───────────────────────────────────────
 
   public soporteViewing: string | null = null;
   public soporteViewingCodigo: string  = '';
+  public soporteCargando: boolean      = false;
 
+  /**
+   * Abre el modal y carga la imagen de la factura solo en ese momento.
+   * La imagen NO viene en el listado — se pide al endpoint /factura al hacer clic.
+   */
   verSoporte(compra: Compra): void {
-    if (!compra.imagenSoporte) return;
-    this.soporteViewing      = compra.imagenSoporte;
+    this.soporteViewing       = null;
     this.soporteViewingCodigo = compra.codigo ?? `#${compra.id}`;
+    this.soporteCargando      = true;
     document.body.style.overflow = 'hidden';
+
+    this.compraService.obtenerFactura(compra.id!).subscribe({
+      next: (resp) => {
+        this.soporteViewing  = resp.imagenSoporte;
+        this.soporteCargando = false;
+      },
+      error: () => {
+        this.soporteCargando = false;
+        this.cerrarSoporte();
+        this.toastService.error('No se pudo cargar la factura');
+      },
+    });
   }
 
   cerrarSoporte(): void {
-    this.soporteViewing = null;
+    this.soporteViewing  = null;
+    this.soporteCargando = false;
     document.body.style.overflow = '';
   }
 
-  descargarSoporte(compra: Compra): void {
-    if (!compra.imagenSoporte) return;
-    const base64 = compra.imagenSoporte;
-    // Extraer extensión del tipo MIME (data:image/png;base64,...)
+  descargarSoporte(): void {
+    if (!this.soporteViewing) return;
+    const base64    = this.soporteViewing;
     const mimeMatch = base64.match(/data:(image\/\w+);base64,/);
     const ext       = mimeMatch ? mimeMatch[1].split('/')[1] : 'jpg';
     const link      = document.createElement('a');
     link.href       = base64;
-    link.download   = `soporte-${compra.codigo ?? compra.id}.${ext}`;
+    link.download   = `soporte-${this.soporteViewingCodigo}.${ext}`;
     link.click();
   }
 }

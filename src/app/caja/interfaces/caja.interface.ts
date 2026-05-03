@@ -9,6 +9,19 @@ export interface CajaSesion {
   estado:           'ABIERTA' | 'CERRADA';
 }
 
+export interface ReaperturaCajaRequest {
+  motivo: string;
+}
+
+export interface CajaSesionLogEntry {
+  id:            number;
+  cajaSesionId:  number;
+  tipoEvento:    'APERTURA' | 'CIERRE' | 'REAPERTURA';
+  fechaEvento:   string;
+  motivo?:       string;
+  usuarioNombre?: string;
+}
+
 export interface CajaEstadoResponse {
   abierta: boolean;
   sesion:  CajaSesion | null;

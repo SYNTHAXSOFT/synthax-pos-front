@@ -91,7 +91,8 @@ export class ProductoListarPageComponent implements OnInit {
     });
   }
 
-  getInitials(nombre: string): string {
+  getInitials(nombre?: string): string {
+    if (!nombre) return '?';
     return nombre.split(' ').slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('');
   }
 }

@@ -8,7 +8,9 @@ import {
   AperturaCajaRequest,
   CajaEstadoResponse,
   CajaSesion,
-  CierreReporteDTO
+  CajaSesionLogEntry,
+  CierreReporteDTO,
+  ReaperturaCajaRequest
 } from '../interfaces/caja.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -61,5 +63,17 @@ export class CajaService {
 
   listarSesiones(): Observable<CajaSesion[]> {
     return this.http.get<CajaSesion[]>(`${this.base}/sesiones`, { headers: this.headers() });
+  }
+
+  reabrir(motivo: string): Observable<CajaSesion> {
+    const body: ReaperturaCajaRequest = { motivo };
+    return this.http.post<CajaSesion>(`${this.base}/reabrir`, body, { headers: this.headers() })
+      .pipe(tap(() => this.cajaAbierta.set(true)));
+  }
+
+  obtenerLog(sesionId: number): Observable<CajaSesionLogEntry[]> {
+    return this.http.get<CajaSesionLogEntry[]>(
+      `${this.base}/sesiones/${sesionId}/log`, { headers: this.headers() }
+    );
   }
 }

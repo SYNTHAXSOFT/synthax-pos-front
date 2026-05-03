@@ -239,10 +239,11 @@ export class VentaListarPageComponent implements OnInit {
     return `${yyyy}-${mm}-${dd}`;
   }
 
-  /** Limpia el rango de fechas (PROPIETARIO / ADMINISTRADOR) */
+  /** Limpia el rango de fechas y reconsulta (PROPIETARIO / ADMINISTRADOR) */
   limpiarFechas(): void {
     this.fechaDesde = '';
     this.fechaHasta = '';
+    this.cargarVentas();
   }
 
   /** YYYY-MM-DDTHH:mm:ss sin zona — formato que acepta LocalDateTime.parse() en Java. */
@@ -1003,22 +1004,46 @@ export class VentaListarPageComponent implements OnInit {
     });
   }
 
-  // ── Lightbox de imagen de soporte ────────────────────────────────────────
+  // ── Lightbox de imagen de soporte (lazy) ─────────────────────────────────
   ventaImagenActiva: Venta | null = null;
+  comprobanteViewing: string | null = null;
+  comprobanteCargando: boolean      = false;
 
+  /**
+   * Abre el lightbox y carga la imagen solo al hacer clic.
+   * La imagen NO se envía en el listado — se pide al endpoint /comprobante en ese momento.
+   */
   verImagen(v: Venta): void {
-    this.ventaImagenActiva = v;
+    this.ventaImagenActiva  = v;
+    this.comprobanteViewing = null;
+    this.comprobanteCargando = true;
+    document.body.style.overflow = 'hidden';
+
+    this.ventaService.obtenerComprobante(v.id!).subscribe({
+      next: (resp) => {
+        this.comprobanteViewing  = resp.imagenSoporte;
+        this.comprobanteCargando = false;
+      },
+      error: () => {
+        this.comprobanteCargando = false;
+        this.cerrarImagen();
+        this.toastService.error('No se pudo cargar el comprobante');
+      },
+    });
   }
 
   cerrarImagen(): void {
-    this.ventaImagenActiva = null;
+    this.ventaImagenActiva   = null;
+    this.comprobanteViewing  = null;
+    this.comprobanteCargando = false;
+    document.body.style.overflow = '';
   }
 
-  descargarImagen(v: Venta): void {
-    if (!v.imagenSoporte) return;
+  descargarImagen(): void {
+    if (!this.comprobanteViewing) return;
     const a = document.createElement('a');
-    a.href     = v.imagenSoporte;
-    a.download = `soporte-venta-${v.id}.jpg`;
+    a.href     = this.comprobanteViewing;
+    a.download = `comprobante-venta-${this.ventaImagenActiva?.codigo ?? this.ventaImagenActiva?.id}.jpg`;
     a.click();
   }
 }

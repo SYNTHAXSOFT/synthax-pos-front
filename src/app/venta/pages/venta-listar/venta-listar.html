@@ -97,6 +97,7 @@
             </label>
             <input type="date" class="spx-venta-daterange__input"
               [(ngModel)]="fechaDesde"
+              (ngModelChange)="cargarVentas()"
               [max]="fechaHasta || ''">
           </div>
           <span class="spx-venta-daterange__sep">→</span>
@@ -104,6 +105,7 @@
             <label class="spx-venta-daterange__label">Hasta</label>
             <input type="date" class="spx-venta-daterange__input"
               [(ngModel)]="fechaHasta"
+              (ngModelChange)="cargarVentas()"
               [min]="fechaDesde || ''">
           </div>
           @if (fechaDesde || fechaHasta) {
@@ -230,9 +232,9 @@
                   }
                 </td>
                 <td class="spx-venta-td spx-venta-th-center">
-                  @if (venta.imagenSoporte) {
-                    <button class="spx-venta-img-btn" (click)="verImagen(venta)" title="Ver imagen de soporte">
-                      <i class="fa-solid fa-image"></i>
+                  @if (venta.tieneComprobante) {
+                    <button class="spx-venta-img-btn" (click)="verImagen(venta)" title="Ver comprobante">
+                      <i class="fa-solid fa-file-image"></i>
                     </button>
                   } @else {
                     <span class="spx-venta-td--muted">—</span>
@@ -810,24 +812,26 @@
 }
 <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-<!-- ══ Lightbox: Imagen de soporte ════════════════════════════════════════ -->
-@if (ventaImagenActiva) {
+<!-- ══ Lightbox: Comprobante de venta (lazy) ══════════════════════════════ -->
+@if (ventaImagenActiva || comprobanteCargando) {
   <div class="spx-lightbox" (click)="cerrarImagen()">
     <div class="spx-lightbox__box" (click)="$event.stopPropagation()">
 
       <div class="spx-lightbox__header">
         <div class="spx-lightbox__header-info">
-          <i class="fa-solid fa-image"></i>
-          <span>Soporte · Venta <strong>{{ ventaImagenActiva.codigo ?? '#' + ventaImagenActiva.id }}</strong></span>
-          @if (ventaImagenActiva.fechaCreacion) {
-            <span class="spx-lightbox__fecha">{{ ventaImagenActiva.fechaCreacion | date:'dd/MM/yy HH:mm' }}</span>
+          <i class="fa-solid fa-file-image"></i>
+          <span>Comprobante · Venta <strong>{{ ventaImagenActiva?.codigo ?? '#' + ventaImagenActiva?.id }}</strong></span>
+          @if (ventaImagenActiva?.fechaCreacion) {
+            <span class="spx-lightbox__fecha">{{ ventaImagenActiva!.fechaCreacion | date:'dd/MM/yy HH:mm' }}</span>
           }
         </div>
         <div class="spx-lightbox__actions">
-          <button class="spx-lightbox__btn-download" (click)="descargarImagen(ventaImagenActiva)" title="Descargar imagen">
-            <i class="fa-solid fa-download"></i>
-            Descargar
-          </button>
+          @if (comprobanteViewing) {
+            <button class="spx-lightbox__btn-download" (click)="descargarImagen()" title="Descargar imagen">
+              <i class="fa-solid fa-download"></i>
+              Descargar
+            </button>
+          }
           <button class="spx-lightbox__btn-close" (click)="cerrarImagen()" title="Cerrar">
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -835,7 +839,14 @@
       </div>
 
       <div class="spx-lightbox__img-wrap">
-        <img [src]="ventaImagenActiva.imagenSoporte" alt="Imagen de soporte" class="spx-lightbox__img" />
+        @if (comprobanteCargando) {
+          <div class="spx-lightbox__loading">
+            <div class="spx-lightbox__spinner"></div>
+            <p>Cargando comprobante...</p>
+          </div>
+        } @else {
+          <img [src]="comprobanteViewing!" alt="Comprobante de venta" class="spx-lightbox__img" />
+        }
       </div>
 
     </div>

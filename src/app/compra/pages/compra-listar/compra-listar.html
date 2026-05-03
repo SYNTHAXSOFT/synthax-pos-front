@@ -192,14 +192,10 @@
                 </td>
                 <td class="spx-compra-td">
                   <div class="spx-compra-actions">
-                    @if (c.imagenSoporte) {
+                    @if (c.tieneFactura) {
                       <button class="spx-compra-btn-action spx-compra-btn-action--view"
-                              (click)="verSoporte(c)" title="Ver soporte">
-                        <i class="fa-solid fa-eye"></i>
-                      </button>
-                      <button class="spx-compra-btn-action spx-compra-btn-action--download"
-                              (click)="descargarSoporte(c)" title="Descargar soporte">
-                        <i class="fa-solid fa-download"></i>
+                              (click)="verSoporte(c)" title="Ver factura">
+                        <i class="fa-solid fa-file-image"></i> Factura
                       </button>
                     }
                     @if (c.activo) {
@@ -229,23 +225,25 @@
 
 </div>
 
-<!-- ══ Modal: Visor de soporte ═══════════════════════════════════════ -->
-@if (soporteViewing) {
+<!-- ══ Modal: Visor de factura (lazy) ════════════════════════════════ -->
+@if (soporteViewing || soporteCargando) {
   <div class="spx-soporte-overlay" (click)="cerrarSoporte()">
     <div class="spx-soporte-modal" (click)="$event.stopPropagation()">
 
       <div class="spx-soporte-modal__header">
         <div class="spx-soporte-modal__title">
           <i class="fa-solid fa-file-image"></i>
-          Soporte — {{ soporteViewingCodigo }}
+          Factura — {{ soporteViewingCodigo }}
         </div>
         <div class="spx-soporte-modal__actions">
-          <button class="spx-soporte-btn spx-soporte-btn--download"
-                  (click)="descargarSoporte({ imagenSoporte: soporteViewing!, codigo: soporteViewingCodigo })"
-                  title="Descargar imagen">
-            <i class="fa-solid fa-download"></i>
-            Descargar
-          </button>
+          @if (soporteViewing) {
+            <button class="spx-soporte-btn spx-soporte-btn--download"
+                    (click)="descargarSoporte()"
+                    title="Descargar imagen">
+              <i class="fa-solid fa-download"></i>
+              Descargar
+            </button>
+          }
           <button class="spx-soporte-btn spx-soporte-btn--close"
                   (click)="cerrarSoporte()" title="Cerrar">
             <i class="fa-solid fa-xmark"></i>
@@ -254,7 +252,14 @@
       </div>
 
       <div class="spx-soporte-modal__body">
-        <img [src]="soporteViewing" alt="Soporte de compra" class="spx-soporte-modal__img">
+        @if (soporteCargando) {
+          <div class="spx-soporte-modal__loading">
+            <div class="spx-soporte-modal__spinner"></div>
+            <p>Cargando factura...</p>
+          </div>
+        } @else {
+          <img [src]="soporteViewing!" alt="Factura de compra" class="spx-soporte-modal__img">
+        }
       </div>
 
     </div>

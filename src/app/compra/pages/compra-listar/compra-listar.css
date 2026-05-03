@@ -465,14 +465,17 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
+  gap: 0.35rem;
   height: 32px;
+  padding: 0 0.75rem;
   border-radius: 7px;
   border: 1px solid;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .spx-compra-btn-action--view {
@@ -615,6 +618,30 @@
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Estado de carga dentro del modal */
+.spx-soporte-modal__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: #64748b;
+  font-size: 0.875rem;
+  padding: 3rem;
+}
+.spx-soporte-modal__loading p { margin: 0; }
+
+.spx-soporte-modal__spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255, 255, 255, 0.08);
+  border-top-color: #0d7ff2;
+  border-radius: 50%;
+  animation: spx-spin 0.7s linear infinite;
+}
+@keyframes spx-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ── Responsive ──────────────────────────── */

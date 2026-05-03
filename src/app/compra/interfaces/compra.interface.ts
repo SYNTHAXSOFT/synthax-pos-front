@@ -21,7 +21,10 @@ export interface Compra {
   insumo?: InsumoRef;
   restaurante?: RestauranteRef;
   formaPago?: { id?: number; nombre?: string };
+  /** Solo presente en vista de detalle (GET /id). Excluido del listado. */
   imagenSoporte?: string;
+  /** Presente en el listado: true si la compra tiene factura adjunta. */
+  tieneFactura?: boolean;
   activo?: boolean;
   fechaCreacion?: string;
 }

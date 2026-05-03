@@ -164,7 +164,6 @@ export class InicioPageComponent implements OnInit {
 
   ngOnInit(): void {
     const restauranteId = this.authService.getRestauranteId();
-    const fechaDesde    = this.toLocalDateTimeStr(this.startOfToday());
 
     // ── Fase 1: datos ligeros (caja + formas de pago) ─────────────────────────
     // Se resuelven primero para quitar el spinner lo antes posible.
@@ -190,6 +189,13 @@ export class InicioPageComponent implements OnInit {
         this.cargando = false;
 
         // ── Fase 2: datos pesados (ventas, compras, pedidos) ─────────────────
+        // fechaDesde se calcula AQUÍ, después de conocer el estado de caja,
+        // para usar la apertura real de la sesión en lugar del inicio del día.
+        const base       = this.cajaAbierta && this.fechaApertura
+                             ? this.fechaApertura
+                             : this.startOfToday();
+        const fechaDesde = this.toLocalDateTimeStr(base);
+
         // Carga en segundo plano — el dashboard ya es visible.
         forkJoin({
           ventas: (restauranteId

@@ -67,7 +67,7 @@
   @if (cargando) {
     <div class="spx-dash-loading">
       <div class="spx-dash-spinner"></div>
-      <p>Cargando resumen del día...</p>
+      <p>Cargando resumen...</p>
     </div>
   }
 
@@ -77,44 +77,44 @@
     @if (!esMesero) {
     <div class="spx-metrics">
 
-      <!-- Ingresos del día -->
+      <!-- Ingresos del día / sesión -->
       <div class="spx-metric spx-metric--green">
         <div class="spx-metric__header">
           <div class="spx-metric__icon spx-metric__icon--green"><i class="fa-solid fa-coins"></i></div>
-          <span class="spx-badge spx-badge--green">Hoy</span>
+          <span class="spx-badge spx-badge--green">{{ cajaAbierta ? 'Sesión' : 'Hoy' }}</span>
         </div>
-        <p class="spx-metric__label">Ingresos del Día</p>
+        <p class="spx-metric__label">{{ cajaAbierta ? 'Ingresos de la Sesión' : 'Ingresos del Día' }}</p>
         <p class="spx-metric__value">$ {{ fmt(totalVentasHoy) }}</p>
         <p class="spx-metric__sub">{{ ventasHoyPagadas.length }} ventas pagadas</p>
       </div>
 
-      <!-- Ventas totales del día -->
+      <!-- Ventas totales del día / sesión -->
       <div class="spx-metric spx-metric--blue">
         <div class="spx-metric__header">
           <div class="spx-metric__icon spx-metric__icon--blue"><i class="fa-solid fa-receipt"></i></div>
-          <span class="spx-badge spx-badge--blue">Hoy</span>
+          <span class="spx-badge spx-badge--blue">{{ cajaAbierta ? 'Sesión' : 'Hoy' }}</span>
         </div>
-        <p class="spx-metric__label">Ventas del Día</p>
+        <p class="spx-metric__label">{{ cajaAbierta ? 'Ventas de la Sesión' : 'Ventas del Día' }}</p>
         <p class="spx-metric__value">{{ ventasHoy.length }}</p>
         <p class="spx-metric__sub">{{ ventasHoyAbiertas.length }} abiertas · {{ ventasHoyAnuladas.length }} anuladas</p>
       </div>
 
-      <!-- Compras del día -->
+      <!-- Compras del día / sesión -->
       <div class="spx-metric spx-metric--amber">
         <div class="spx-metric__header">
           <div class="spx-metric__icon spx-metric__icon--amber"><i class="fa-solid fa-cart-flatbed"></i></div>
-          <span class="spx-badge spx-badge--amber">Hoy</span>
+          <span class="spx-badge spx-badge--amber">{{ cajaAbierta ? 'Sesión' : 'Hoy' }}</span>
         </div>
-        <p class="spx-metric__label">Compras del Día</p>
+        <p class="spx-metric__label">{{ cajaAbierta ? 'Compras de la Sesión' : 'Compras del Día' }}</p>
         <p class="spx-metric__value">{{ comprasHoy.length }}</p>
         <p class="spx-metric__sub">$ {{ fmt(totalComprasHoy) }}</p>
       </div>
 
-      <!-- Pedidos devueltos -->
+      <!-- Pedidos devueltos del día / sesión -->
       <div class="spx-metric spx-metric--rose">
         <div class="spx-metric__header">
           <div class="spx-metric__icon spx-metric__icon--rose"><i class="fa-solid fa-rotate-left"></i></div>
-          <span class="spx-badge spx-badge--rose">Hoy</span>
+          <span class="spx-badge spx-badge--rose">{{ cajaAbierta ? 'Sesión' : 'Hoy' }}</span>
         </div>
         <p class="spx-metric__label">Pedidos Devueltos</p>
         <p class="spx-metric__value">{{ pedidosDevueltosHoy }}</p>

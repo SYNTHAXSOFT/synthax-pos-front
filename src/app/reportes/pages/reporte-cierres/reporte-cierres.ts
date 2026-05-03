@@ -3,19 +3,21 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CajaService } from '../../../caja/services/caja.service';
-import { CajaSesion, CierreReporteDTO } from '../../../caja/interfaces/caja.interface';
+import { CajaSesion, CajaSesionLogEntry, CierreReporteDTO } from '../../../caja/interfaces/caja.interface';
 import { AuthService } from '../../../auth/services/auth.service';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-reporte-cierres',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './reporte-cierres.html',
-  styleUrls: ['./reporte-cierres.css'],
+  styleUrls: ['../../../shared/styles/spx-forms.css', './reporte-cierres.css'],
 })
 export class ReporteCierresComponent implements OnInit {
   private cajaService  = inject(CajaService);
   private authService  = inject(AuthService);
+  private toastService = inject(ToastService);
 
   cargando = true;
   sesiones: CajaSesion[] = [];
@@ -29,7 +31,23 @@ export class ReporteCierresComponent implements OnInit {
   reporteDetalle: CierreReporteDTO | null = null;
   reporteError    = '';
 
+  // ── Reapertura ──────────────────────────────────────────────────────────────
+  mostrarModalMotivo  = false;
+  motivoReapertura    = '';
+  reabriendo          = false;
+  sesionParaReabrir: CajaSesion | null = null;
+
+  // ── Log de eventos ─────────────────────────────────────────────────────────
+  logPorSesion: Map<number, CajaSesionLogEntry[]> = new Map();
+  logCargando:  Set<number>                        = new Set();
+  logExpandido: Set<number>                        = new Set();
+
   ngOnInit(): void {
+    this.cargarSesiones();
+  }
+
+  cargarSesiones(): void {
+    this.cargando = true;
     this.cajaService.listarSesiones().subscribe({
       next: (data) => { this.sesiones = data; this.cargando = false; },
       error: () => { this.cargando = false; },
@@ -82,6 +100,82 @@ export class ReporteCierresComponent implements OnInit {
     this.filtroFechaInicio = '';
     this.filtroFechaFin    = '';
     this.filtroEstado      = '';
+  }
+
+  // ── Reapertura ──────────────────────────────────────────────────────────────
+
+  /**
+   * La sesión reabrirle es la más reciente (sesiones[0], orden DESC)
+   * siempre y cuando esté CERRADA — si la más reciente está ABIERTA,
+   * ya hay una sesión en curso y no se puede reabrir la anterior.
+   */
+  get idSesionReabrible(): number | null {
+    if (!this.sesiones.length) return null;
+    const ultima = this.sesiones[0];
+    return ultima.estado === 'CERRADA' ? ultima.id : null;
+  }
+
+  abrirModalReapertura(sesion: CajaSesion, event: Event): void {
+    event.stopPropagation();
+    this.sesionParaReabrir = sesion;
+    this.motivoReapertura  = '';
+    this.mostrarModalMotivo = true;
+  }
+
+  cerrarModalReapertura(): void {
+    this.mostrarModalMotivo = false;
+    this.sesionParaReabrir  = null;
+    this.motivoReapertura   = '';
+  }
+
+  confirmarReapertura(): void {
+    if (!this.motivoReapertura.trim()) return;
+    this.reabriendo = true;
+
+    this.cajaService.reabrir(this.motivoReapertura.trim()).subscribe({
+      next: () => {
+        this.toastService.success('Caja reabierta exitosamente');
+        this.reabriendo = false;
+        this.cerrarModalReapertura();
+        // Refrescar lista para reflejar el nuevo estado
+        this.sesionExpandida = null;
+        this.reporteDetalle  = null;
+        this.logPorSesion.clear();
+        this.logExpandido.clear();
+        this.cargarSesiones();
+      },
+      error: (err) => {
+        this.toastService.error(err?.error?.mensaje || 'Error al reabrir la caja');
+        this.reabriendo = false;
+      },
+    });
+  }
+
+  // ── Log de eventos ─────────────────────────────────────────────────────────
+
+  toggleLog(sesionId: number, event: Event): void {
+    event.stopPropagation();
+
+    if (this.logExpandido.has(sesionId)) {
+      this.logExpandido.delete(sesionId);
+      return;
+    }
+
+    this.logExpandido.add(sesionId);
+
+    if (!this.logPorSesion.has(sesionId)) {
+      this.logCargando.add(sesionId);
+      this.cajaService.obtenerLog(sesionId).subscribe({
+        next: (entries) => {
+          this.logPorSesion.set(sesionId, entries);
+          this.logCargando.delete(sesionId);
+        },
+        error: () => {
+          this.logPorSesion.set(sesionId, []);
+          this.logCargando.delete(sesionId);
+        },
+      });
+    }
   }
 
   fmt(n: number): string {
