@@ -2,7 +2,7 @@ import { environment } from '../../../environments/environment';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Venta, VentaRequest } from '../interfaces/venta.interface';
+import { PagoItem, Venta, VentaRequest } from '../interfaces/venta.interface';
 import { API_ENDPOINTS } from '../../utils/constantes-utils';
 
 @Injectable({ providedIn: 'root' })
@@ -50,6 +50,8 @@ export class VentaService {
     clienteId?: number,
     solicitaFacturaElectronica?: boolean,
     imagenSoporte?: string,
+    /** Lista de pagos para multipago. Cuando viene con ≥2 ítems, formaPagoId se ignora. */
+    pagos?: PagoItem[],
   ): Observable<Venta> {
     let params = new HttpParams().set('valorTotal', valorTotal.toString());
     if (usuarioFacturadorId != null) {
@@ -61,7 +63,8 @@ export class VentaService {
     if (motivoDescuento) {
       params = params.set('motivoDescuento', motivoDescuento);
     }
-    if (formaPagoId != null) {
+    // formaPagoId solo se envía en pago único (sin lista de pagos)
+    if (formaPagoId != null && !(pagos && pagos.length > 0)) {
       params = params.set('formaPagoId', formaPagoId.toString());
     }
     if (clienteId != null) {
@@ -70,7 +73,9 @@ export class VentaService {
     if (solicitaFacturaElectronica != null) {
       params = params.set('solicitaFacturaElectronica', solicitaFacturaElectronica.toString());
     }
-    const body = imagenSoporte ? { imagenSoporte } : {};
+    const body: Record<string, unknown> = {};
+    if (imagenSoporte) body['imagenSoporte'] = imagenSoporte;
+    if (pagos && pagos.length > 0) body['pagos'] = pagos;
     return this.http.patch<Venta>(`${this.base}/${id}/cerrar`, body, { params });
   }
 

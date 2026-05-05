@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
 import { VentaService } from '../../services/venta.service';
-import { Venta } from '../../interfaces/venta.interface';
+import { PagoItem, Venta } from '../../interfaces/venta.interface';
 import { ESTADOS_VENTA } from '../../../utils/constantes-utils';
 import { AuthService } from '../../../auth/services/auth.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -126,6 +126,10 @@ export class VentaListarPageComponent implements OnInit {
   public formasPago: FormaPago[]        = [];
   public formaPagoSeleccionadaId: number | null = null;
 
+  // ── Multipago ─────────────────────────────────────────────────────────────
+  public esMultipago: boolean = false;
+  public pagosMultiples: { formaPagoId: number | null; monto: number | null }[] = [];
+
   // ── Cliente y factura electrónica ─────────────────────────────────────────
   public clientesDisponibles: Cliente[]  = [];
   public clienteBusqueda: string         = '';
@@ -197,6 +201,23 @@ export class VentaListarPageComponent implements OnInit {
 
   get totalFinal(): number {
     return this.totalConImpuestos - this.valorDescuento + this.totalServiciosAdicionales;
+  }
+
+  get sumaPagosMultiples(): number {
+    return this.pagosMultiples.reduce((s, p) => s + (p.monto ?? 0), 0);
+  }
+
+  get saldoPendienteMultipago(): number {
+    return this.totalFinal - this.sumaPagosMultiples;
+  }
+
+  /** true cuando todos los ítems tienen forma de pago + monto positivo y la suma cuadra con el total (tolerancia 1 COP). */
+  get pagosMultiplesValidos(): boolean {
+    return (
+      this.pagosMultiples.length >= 2 &&
+      this.pagosMultiples.every(p => p.formaPagoId != null && (p.monto ?? 0) > 0) &&
+      Math.abs(this.saldoPendienteMultipago) < 1
+    );
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -381,6 +402,19 @@ export class VentaListarPageComponent implements OnInit {
     });
   }
 
+  async cancelarVentaVacia(id?: number): Promise<void> {
+    if (!id) return;
+    const ok = await this.confirmService.confirm({
+      message: 'Esta venta no tiene productos. ¿Deseas cancelarla y eliminarla del listado?',
+      type: 'danger',
+    });
+    if (!ok) return;
+    this.ventaService.anularVenta(id).subscribe({
+      next:  () => { this.toastService.success('Venta cancelada'); this.cargarVentas(); },
+      error: (err) => { this.toastService.error('Error: ' + (err.error?.error || 'No se pudo cancelar la venta')); },
+    });
+  }
+
   async reabrir(venta: Venta): Promise<void> {
     if (!venta.id) return;
     const fp    = venta.formaPago?.nombre ?? 'la forma de pago';
@@ -434,6 +468,8 @@ export class VentaListarPageComponent implements OnInit {
     this.mostrarFormServicio     = false;
     this.nuevoServicioDescripcion = '';
     this.nuevoServicioValor      = null;
+    this.esMultipago             = false;
+    this.pagosMultiples          = [];
     this.modalCerrar             = true;
 
     forkJoin({
@@ -531,6 +567,31 @@ export class VentaListarPageComponent implements OnInit {
     });
   }
 
+  // ── Métodos de multipago ─────────────────────────────────────────────────
+
+  toggleMultipago(): void {
+    this.esMultipago = !this.esMultipago;
+    if (this.esMultipago) {
+      // Inicializa con 2 filas vacías
+      this.pagosMultiples = [
+        { formaPagoId: null, monto: null },
+        { formaPagoId: null, monto: null },
+      ];
+      this.formaPagoSeleccionadaId = null;
+    } else {
+      this.pagosMultiples = [];
+    }
+  }
+
+  agregarPagoMultiple(): void {
+    this.pagosMultiples = [...this.pagosMultiples, { formaPagoId: null, monto: null }];
+  }
+
+  quitarPagoMultiple(index: number): void {
+    if (this.pagosMultiples.length <= 2) return; // mínimo 2 filas
+    this.pagosMultiples = this.pagosMultiples.filter((_, i) => i !== index);
+  }
+
   cerrarModal(): void {
     this.modalCerrar                = false;
     this.ventaCierreId              = null;
@@ -557,6 +618,8 @@ export class VentaListarPageComponent implements OnInit {
     this.mostrarFormServicio        = false;
     this.nuevoServicioDescripcion   = '';
     this.nuevoServicioValor         = null;
+    this.esMultipago                = false;
+    this.pagosMultiples             = [];
   }
 
   // ── Métodos de imagen de soporte ─────────────────────────────────────────
@@ -644,10 +707,25 @@ export class VentaListarPageComponent implements OnInit {
   confirmarCierre(): void {
     if (!this.ventaCierreId) return;
     if (this.cargandoModalData) return;
-    if (!this.formaPagoSeleccionadaId) {
-      this.toastService.warning('Debes seleccionar una forma de pago.');
-      return;
+
+    if (this.esMultipago) {
+      if (this.pagosMultiples.some(p => p.formaPagoId == null || (p.monto ?? 0) <= 0)) {
+        this.toastService.warning('Completa la forma de pago y el monto de cada ítem.');
+        return;
+      }
+      if (Math.abs(this.saldoPendienteMultipago) >= 1) {
+        const sum = this.sumaPagosMultiples.toLocaleString('es-CO');
+        const tot = this.totalFinal.toLocaleString('es-CO');
+        this.toastService.warning(`La suma de pagos ($${sum}) no coincide con el total ($${tot}).`);
+        return;
+      }
+    } else {
+      if (!this.formaPagoSeleccionadaId) {
+        this.toastService.warning('Debes seleccionar una forma de pago.');
+        return;
+      }
     }
+
     if (this.descuentoPct > 0 && !this.motivoDescuento.trim()) {
       this.toastService.warning('Debes ingresar el motivo del descuento.');
       return;
@@ -659,16 +737,22 @@ export class VentaListarPageComponent implements OnInit {
     // Capturamos datos para la tirilla antes de cerrar el modal
     const ventaEnCierre = this.ventasAbiertas?.find(v => v.id === this.ventaCierreId);
 
+    // Lista de pagos para multipago (undefined = pago único)
+    const pagos: PagoItem[] | undefined = this.esMultipago
+      ? this.pagosMultiples.map(p => ({ formaPagoId: p.formaPagoId!, monto: p.monto! }))
+      : undefined;
+
     this.ventaService.cerrarVenta(
       this.ventaCierreId,
       this.totalFinal,
       facturadorId,
       this.descuentoPct > 0 ? this.descuentoPct : undefined,
       this.motivoDescuento.trim() || undefined,
-      this.formaPagoSeleccionadaId ?? undefined,
+      this.esMultipago ? undefined : (this.formaPagoSeleccionadaId ?? undefined),
       this.clienteSeleccionado?.id,
       this.solicitaFacturaElectronica || undefined,
       this.soportePreview || undefined,
+      pagos,
     ).subscribe({
       next: (ventaCerrada) => {
         this.toastService.success('Venta cerrada · Stock de insumos actualizado');

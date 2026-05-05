@@ -58,6 +58,12 @@ export interface Venta {
   numeroPedidos?: number;
 }
 
+/** Un ítem de pago para cierre con múltiples medios de pago. */
+export interface PagoItem {
+  formaPagoId: number;
+  monto: number;
+}
+
 /** Payload para crear/actualizar una Venta (el backend resuelve los IDs) */
 export interface VentaRequest {
   tipoPedido: { id: number };

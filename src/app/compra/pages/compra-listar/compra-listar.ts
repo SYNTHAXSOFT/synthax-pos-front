@@ -43,8 +43,10 @@ export class CompraListarPageComponent implements OnInit {
     if (!this.restauranteId) {
       this.restauranteId = this.authService.getRestauranteId() ?? undefined;
     }
-    // Por defecto: mes actual para no traer todo el historial
-    if (!this.fechaDesde) this.fechaDesde = this.inicioMesActual();
+    // Por defecto: día actual
+    const hoy = this.fechaHoy();
+    if (!this.fechaDesde) this.fechaDesde = hoy;
+    if (!this.fechaHasta) this.fechaHasta = hoy;
     this.cargarCompras();
   }
 
@@ -70,7 +72,7 @@ export class CompraListarPageComponent implements OnInit {
     this.cargando   = true;
     this.errorCarga = false;
 
-    const fechaDesdeISO = this.fechaDesde ? `${this.fechaDesde}T00:00:00` : `${this.inicioMesActual()}T00:00:00`;
+    const fechaDesdeISO = this.fechaDesde ? `${this.fechaDesde}T00:00:00` : `${this.fechaHoy()}T00:00:00`;
 
     const obs = (this.restauranteId
       ? this.compraService.obtenerDesde(this.restauranteId, fechaDesdeISO)

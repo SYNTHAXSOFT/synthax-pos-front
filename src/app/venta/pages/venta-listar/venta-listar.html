@@ -211,6 +211,11 @@
                           <i class="fa-solid fa-wallet"></i>
                           {{ venta.formaPago!.nombre }}
                         </span>
+                      } @else {
+                        <span class="spx-venta-total-fp spx-venta-total-fp--multi">
+                          <i class="fa-solid fa-layer-group"></i>
+                          Multipago
+                        </span>
                       }
                     </div>
                   } @else if (venta.estado === 'ABIERTA') {
@@ -246,6 +251,13 @@
                       <i class="fa-solid fa-list-ul"></i>
                       Pedidos
                     </button>
+                    @if (venta.estado === 'ABIERTA' && (venta.numeroPedidos ?? 0) === 0) {
+                      <!-- Venta vacía: cualquier usuario puede cancelarla -->
+                      <button class="spx-venta-btn spx-venta-btn--danger" (click)="cancelarVentaVacia(venta.id)" title="Cancelar venta vacía">
+                        <i class="fa-solid fa-trash"></i>
+                        Cancelar
+                      </button>
+                    }
                     @if (venta.estado === 'ABIERTA' && !esCocinero && !esMesero && !esDomiciliario && (venta.numeroPedidos ?? 0) > 0) {
                       <button class="spx-venta-btn spx-venta-btn--success" (click)="abrirModalCerrar(venta)" title="Cerrar venta">
                         <i class="fa-solid fa-cash-register"></i>
@@ -580,19 +592,38 @@
             </div>
           }
 
-          <!-- ── Formas de pago (horizontal) ──────────── -->
+          <!-- ── Formas de pago ──────────────────────── -->
           <div class="spx-modal__section">
-            <p class="spx-modal__section-title">
-              <i class="fa-solid fa-wallet"></i>
-              Forma de pago
-              <span class="spx-modal__required-dot">*</span>
-            </p>
+
+            <!-- Título + toggle multipago -->
+            <div class="spx-modal__fp-header">
+              <p class="spx-modal__section-title">
+                <i class="fa-solid fa-wallet"></i>
+                Forma de pago
+                <span class="spx-modal__required-dot">*</span>
+              </p>
+              @if (formasPago.length > 0) {
+                <button type="button"
+                  class="spx-modal__multipago-toggle"
+                  [class.spx-modal__multipago-toggle--active]="esMultipago"
+                  (click)="toggleMultipago()">
+                  @if (esMultipago) {
+                    <i class="fa-solid fa-minus"></i> Pago único
+                  } @else {
+                    <i class="fa-solid fa-layer-group"></i> Pago dividido
+                  }
+                </button>
+              }
+            </div>
+
             @if (formasPago.length === 0) {
               <div class="spx-modal__fp-empty">
                 <i class="fa-solid fa-triangle-exclamation"></i>
                 <span>No hay formas de pago activas. Crea una en <strong>Formas de Pago</strong> antes de cerrar ventas.</span>
               </div>
-            } @else {
+
+            } @else if (!esMultipago) {
+              <!-- Pago único — cards horizontales -->
               <div class="spx-modal__fp-cards">
                 @for (fp of formasPago; track fp.id) {
                   <button
@@ -605,6 +636,67 @@
                   </button>
                 }
               </div>
+
+            } @else {
+              <!-- Multipago — filas dinámicas -->
+              <div class="spx-modal__multipago-rows">
+                @for (pago of pagosMultiples; track $index) {
+                  <div class="spx-modal__multipago-row">
+                    <select class="spx-modal__multipago-select" [(ngModel)]="pago.formaPagoId">
+                      <option [ngValue]="null" disabled>Medio de pago…</option>
+                      @for (fp of formasPago; track fp.id) {
+                        <option [ngValue]="fp.id">{{ fp.nombre }}</option>
+                      }
+                    </select>
+                    <input class="spx-modal__multipago-monto"
+                      type="number"
+                      placeholder="Monto"
+                      min="1" step="1"
+                      [(ngModel)]="pago.monto" />
+                    @if (pagosMultiples.length > 2) {
+                      <button type="button"
+                        class="spx-modal__multipago-remove"
+                        (click)="quitarPagoMultiple($index)"
+                        title="Quitar">
+                        <i class="fa-solid fa-xmark"></i>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+
+              <!-- Indicador de balance -->
+              <div class="spx-modal__multipago-balance"
+                [class.spx-modal__multipago-balance--ok]="pagosMultiplesValidos"
+                [class.spx-modal__multipago-balance--warn]="!pagosMultiplesValidos">
+                <span class="spx-modal__multipago-balance__sum">
+                  <i class="fa-solid fa-sigma"></i>
+                  Suma: $ {{ sumaPagosMultiples | number:'1.0-0' }}
+                  &nbsp;/&nbsp;
+                  Total: $ {{ totalFinal | number:'1.0-0' }}
+                </span>
+                @if (pagosMultiplesValidos) {
+                  <span class="spx-modal__multipago-balance__msg spx-modal__multipago-balance__msg--ok">
+                    <i class="fa-solid fa-circle-check"></i> ¡Cuadra correctamente!
+                  </span>
+                } @else if (saldoPendienteMultipago > 0.5) {
+                  <span class="spx-modal__multipago-balance__msg spx-modal__multipago-balance__msg--warn">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Faltan $ {{ saldoPendienteMultipago | number:'1.0-0' }}
+                  </span>
+                } @else if (saldoPendienteMultipago < -0.5) {
+                  <span class="spx-modal__multipago-balance__msg spx-modal__multipago-balance__msg--warn">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Excede $ {{ (0 - saldoPendienteMultipago) | number:'1.0-0' }}
+                  </span>
+                }
+              </div>
+
+              <!-- Agregar medio de pago -->
+              <button type="button" class="spx-modal__client-create" (click)="agregarPagoMultiple()">
+                <i class="fa-solid fa-plus"></i>
+                Agregar otro medio de pago
+              </button>
             }
           </div>
 

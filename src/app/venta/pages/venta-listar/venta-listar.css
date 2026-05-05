@@ -1512,6 +1512,160 @@
   transform: scale(1.1);
 }
 
+/* ── Multipago ─────────────────────────────── */
+
+/* Fila título + toggle */
+.spx-modal__fp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.spx-modal__fp-header .spx-modal__section-title { margin: 0; }
+
+/* Botón toggle "Pago dividido / Pago único" */
+.spx-modal__multipago-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  background: rgba(245,158,11,0.07);
+  border: 1px solid rgba(245,158,11,0.25);
+  color: #f59e0b;
+  white-space: nowrap;
+}
+.spx-modal__multipago-toggle:hover {
+  background: rgba(245,158,11,0.14);
+  border-color: rgba(245,158,11,0.45);
+}
+.spx-modal__multipago-toggle--active {
+  background: rgba(13,127,242,0.1);
+  border-color: rgba(13,127,242,0.3);
+  color: #60a5fa;
+}
+.spx-modal__multipago-toggle--active:hover {
+  background: rgba(13,127,242,0.18);
+  border-color: rgba(13,127,242,0.5);
+}
+
+/* Contenedor de filas de multipago */
+.spx-modal__multipago-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Una fila: select + input + botón eliminar */
+.spx-modal__multipago-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.spx-modal__multipago-select {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.7rem;
+  background: #0d1820;
+  border: 1px solid #1f3044;
+  border-radius: 0.5rem;
+  color: #f1f5f9;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  appearance: auto;
+}
+.spx-modal__multipago-select:focus { border-color: #0d7ff2; }
+
+.spx-modal__multipago-monto {
+  width: 8rem;
+  flex-shrink: 0;
+  padding: 0.5rem 0.7rem;
+  background: #0d1820;
+  border: 1px solid #1f3044;
+  border-radius: 0.5rem;
+  color: #f1f5f9;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+  text-align: right;
+}
+.spx-modal__multipago-monto:focus { border-color: #0d7ff2; }
+.spx-modal__multipago-monto::placeholder { color: #475569; }
+
+.spx-modal__multipago-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #ef4444;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.spx-modal__multipago-remove:hover { background: rgba(239,68,68,0.2); }
+
+/* Indicador de balance */
+.spx-modal__multipago-balance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.55rem 0.875rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  border: 1px solid;
+  transition: all 0.2s;
+}
+.spx-modal__multipago-balance--ok {
+  background: rgba(34,197,94,0.08);
+  border-color: rgba(34,197,94,0.3);
+}
+.spx-modal__multipago-balance--warn {
+  background: rgba(245,158,11,0.07);
+  border-color: rgba(245,158,11,0.3);
+}
+
+.spx-modal__multipago-balance__sum {
+  font-weight: 600;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.spx-modal__multipago-balance--ok .spx-modal__multipago-balance__sum { color: #4ade80; }
+.spx-modal__multipago-balance--warn .spx-modal__multipago-balance__sum { color: #fbbf24; }
+
+.spx-modal__multipago-balance__msg {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 700;
+}
+.spx-modal__multipago-balance__msg--ok   { color: #22c55e; }
+.spx-modal__multipago-balance__msg--warn { color: #f59e0b; }
+
+/* Indicador "Multipago" en la tabla */
+.spx-venta-total-fp--multi {
+  color: #f59e0b;
+}
+
 /* ── Lightbox ──────────────────────────────── */
 .spx-lightbox {
   position: fixed;
