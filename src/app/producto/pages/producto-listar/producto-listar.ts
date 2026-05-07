@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { timeout } from 'rxjs/operators';
 import { ProductoService } from '../../services/producto.service';
+import { DetalleProductoService } from '../../services/detalle-producto.service';
 import { Producto } from '../../interfaces/producto.interface';
+import { LineaReceta } from '../../interfaces/detalle-producto.interface';
 import { ToastService } from '../../../shared/services/toast.service';
 import { ConfirmService } from '../../../shared/services/confirm.service';
 
@@ -15,13 +17,14 @@ import { ConfirmService } from '../../../shared/services/confirm.service';
   styleUrls: ['./producto-listar.css'],
 })
 export class ProductoListarPageComponent implements OnInit {
-  private readonly productoService = inject(ProductoService);
-  private readonly toastService    = inject(ToastService);
-  private readonly confirmService  = inject(ConfirmService);
+  private readonly productoService        = inject(ProductoService);
+  private readonly detalleProductoService = inject(DetalleProductoService);
+  private readonly toastService           = inject(ToastService);
+  private readonly confirmService         = inject(ConfirmService);
 
   @Input() modoModal: boolean = false;
-  @Output() nuevoProducto   = new EventEmitter<void>();
-  @Output() editarProducto  = new EventEmitter<number>();
+  @Output() nuevoProducto    = new EventEmitter<void>();
+  @Output() editarProducto   = new EventEmitter<number>();
   @Output() duplicarProducto = new EventEmitter<number>();
 
   public productos: Producto[] = [];
@@ -30,6 +33,14 @@ export class ProductoListarPageComponent implements OnInit {
 
   searchTerm: string = '';
   filtroEstado: 'todos' | 'activo' | 'inactivo' = 'todos';
+
+  // ── Recetas lazy ─────────────────────────────────────────────────────────
+  /** IDs de tarjetas con la sección receta expandida */
+  public expandedRecetas = new Set<number>();
+  /** Caché de recetas ya cargadas: id → líneas (o [] si no tiene) */
+  public recetasCache    = new Map<number, LineaReceta[]>();
+  /** IDs con carga en curso */
+  public cargandoReceta  = new Set<number>();
 
   ngOnInit(): void {
     this.cargarProductos();
@@ -94,5 +105,37 @@ export class ProductoListarPageComponent implements OnInit {
   getInitials(nombre?: string): string {
     if (!nombre) return '?';
     return nombre.split(' ').slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('');
+  }
+
+  // ── Recetas lazy ─────────────────────────────────────────────────────────
+
+  toggleReceta(id: number): void {
+    if (this.expandedRecetas.has(id)) {
+      this.expandedRecetas.delete(id);
+      return;
+    }
+    this.expandedRecetas.add(id);
+    // Si ya está en caché no vuelve a pedir
+    if (this.recetasCache.has(id) || this.cargandoReceta.has(id)) return;
+
+    this.cargandoReceta.add(id);
+    this.detalleProductoService.obtenerPorProducto(id).subscribe({
+      next: (detalles) => {
+        this.recetasCache.set(
+          id,
+          detalles.filter(d => d.insumo).map(d => ({ insumo: d.insumo!, cantidad: d.cantidad }))
+        );
+        this.cargandoReceta.delete(id);
+      },
+      error: () => {
+        this.recetasCache.set(id, []);
+        this.cargandoReceta.delete(id);
+        this.toastService.error('No se pudo cargar la receta');
+      },
+    });
+  }
+
+  recetaDe(id: number): LineaReceta[] {
+    return this.recetasCache.get(id) ?? [];
   }
 }

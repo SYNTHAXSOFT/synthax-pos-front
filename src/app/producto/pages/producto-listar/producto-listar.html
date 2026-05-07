@@ -149,6 +149,56 @@
                   </button>
                 }
               </div>
+
+              <!-- Receta toggle -->
+              <button class="spx-prod-card__receta-toggle"
+                      [class.spx-prod-card__receta-toggle--open]="expandedRecetas.has(p.id!)"
+                      (click)="toggleReceta(p.id!)">
+                <span>
+                  <i class="fa-solid fa-flask-vial"></i>
+                  Receta
+                  @if (recetasCache.has(p.id!)) {
+                    <span class="spx-prod-card__receta-count">{{ recetaDe(p.id!).length }}</span>
+                  }
+                </span>
+                <i class="fa-solid fa-chevron-down spx-prod-card__receta-chevron"></i>
+              </button>
+
+              <!-- Receta panel -->
+              @if (expandedRecetas.has(p.id!)) {
+                <div class="spx-prod-card__receta-panel">
+                  @if (cargandoReceta.has(p.id!)) {
+                    <div class="spx-prod-card__receta-loading">
+                      <i class="fa-solid fa-spinner fa-spin"></i> Cargando receta...
+                    </div>
+                  } @else if (recetaDe(p.id!).length === 0) {
+                    <p class="spx-prod-card__receta-empty">
+                      <i class="fa-solid fa-triangle-exclamation"></i>
+                      Sin receta configurada
+                    </p>
+                  } @else {
+                    <table class="spx-prod-card__receta-table">
+                      <thead>
+                        <tr>
+                          <th>Insumo</th>
+                          <th>Medida</th>
+                          <th class="spx-prod-card__receta-th-num">Cant.</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (linea of recetaDe(p.id!); track linea.insumo.id) {
+                          <tr>
+                            <td>{{ linea.insumo.descripcion }}</td>
+                            <td><span class="spx-prod-card__receta-badge">{{ linea.insumo.medida }}</span></td>
+                            <td class="spx-prod-card__receta-th-num">{{ linea.cantidad }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  }
+                </div>
+              }
+
             </div>
 
           </div>
