@@ -94,6 +94,41 @@
                 </label>
               </div>
 
+              <!-- Control Stock -->
+              <div class="spx-form-group spx-form-col-span-4">
+                <div style="border-top:1px solid var(--spx-border,#283543);padding-top:1rem;margin-top:0.25rem">
+                  <label class="spx-form-check" style="margin-bottom:0.5rem">
+                    <input type="checkbox" class="spx-form-check__input" formControlName="visibleEnControlStock" id="visibleControlStock">
+                    <span class="spx-form-check__label" style="font-weight:600">
+                      <i class="fa-solid fa-chart-line" style="color:#3b82f6;margin-right:0.35rem"></i>
+                      Visible en reporte Control Stock
+                    </span>
+                  </label>
+
+                  @if (myForm.value.visibleEnControlStock) {
+                    <div class="spx-cs-roles">
+                      <p class="spx-cs-roles__title">
+                        <i class="fa-solid fa-users-gear"></i> Roles con acceso a este insumo en Control Stock
+                      </p>
+                      <div class="spx-cs-roles__grid">
+                        @for (rol of ROLES_CONTROL_STOCK; track rol) {
+                          <label class="spx-form-check">
+                            <input type="checkbox" class="spx-form-check__input"
+                              [checked]="rolesSeleccionados.has(rol)"
+                              (change)="toggleRolControlStock(rol)">
+                            <span class="spx-form-check__label">{{ rol }}</span>
+                          </label>
+                        }
+                      </div>
+                      <p class="spx-cs-roles__hint">
+                        <i class="fa-solid fa-circle-info"></i>
+                        Sin seleccionar = todos los roles con acceso a Control Stock pueden verlo.
+                      </p>
+                    </div>
+                  }
+                </div>
+              </div>
+
             </div>
 
             <!-- Acciones -->

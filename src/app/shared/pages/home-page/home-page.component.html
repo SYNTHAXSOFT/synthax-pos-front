@@ -64,6 +64,14 @@
           </div>
         </div>
 
+        <!-- Sesión expirada (redirección automática por token vencido) -->
+        @if (sesionExpirada && !errorMessage) {
+          <div class="spx-error spx-error--sesion">
+            <i class="fa fa-clock-rotate-left"></i>
+            <span>Tu sesión expiró. Por favor inicia sesión nuevamente.</span>
+          </div>
+        }
+
         <!-- Error genérico -->
         @if (errorMessage && !cajaCerrada) {
           <div class="spx-error">

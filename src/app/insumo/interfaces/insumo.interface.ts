@@ -13,6 +13,8 @@ export interface Insumo {
   restaurante?: RestauranteRef;
   activo?: boolean;
   fechaCreacion?: string;
+  visibleEnControlStock?: boolean;
+  rolesControlStock?: string; // JSON array string e.g. '["CAJERO","MESERO"]'
 }
 
 export interface InsumoRequest {
@@ -22,4 +24,17 @@ export interface InsumoRequest {
   medida: string;
   restaurante: { id: number };
   activo?: boolean;
+  visibleEnControlStock?: boolean;
+  rolesControlStock?: string | null;
+}
+
+/** Item retornado por GET /api/caja/control-stock */
+export interface InsumoControlStockItem {
+  insumoId: number;
+  insumoDescripcion: string;
+  medida: string;
+  stockInicial: number;
+  stockComprado: number;
+  stockVendido: number;
+  stockFinal: number;
 }

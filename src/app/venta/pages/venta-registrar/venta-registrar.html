@@ -3,8 +3,15 @@
   <!-- Header con botón Nueva Venta -->
   <div class="spx-reg-header">
     <div>
-      <h1 class="spx-form-title" style="margin:0 0 0.25rem 0">Ventas</h1>
-      <p class="spx-form-subtitle" style="margin:0">Gestión y registro de ventas</p>
+      @if (esCocinero) {
+        <h1 class="spx-form-title" style="margin:0 0 0.25rem 0">
+          <i class="fa-solid fa-fire-burner" style="color:#f59e0b;margin-right:0.4rem"></i>Panel de Cocina
+        </h1>
+        <p class="spx-form-subtitle" style="margin:0">Órdenes activas del día</p>
+      } @else {
+        <h1 class="spx-form-title" style="margin:0 0 0.25rem 0">Ventas</h1>
+        <p class="spx-form-subtitle" style="margin:0">Gestión y registro de ventas</p>
+      }
     </div>
     @if (!esCocinero) {
       <button class="spx-reg-btn-nueva" (click)="abrirModalNuevaVenta()">
@@ -14,8 +21,12 @@
     }
   </div>
 
-  <!-- Listado -->
-  <app-venta-listar></app-venta-listar>
+  <!-- Vista del Cocinero: carrusel de órdenes -->
+  @if (esCocinero) {
+    <app-cocinero-dashboard></app-cocinero-dashboard>
+  } @else {
+    <app-venta-listar></app-venta-listar>
+  }
 
 </div>
 

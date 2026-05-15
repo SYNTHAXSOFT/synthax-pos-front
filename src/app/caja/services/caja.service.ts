@@ -12,6 +12,7 @@ import {
   CierreReporteDTO,
   ReaperturaCajaRequest
 } from '../interfaces/caja.interface';
+import { InsumoControlStockItem } from '../../insumo/interfaces/insumo.interface';
 
 @Injectable({ providedIn: 'root' })
 export class CajaService {
@@ -74,6 +75,12 @@ export class CajaService {
   obtenerLog(sesionId: number): Observable<CajaSesionLogEntry[]> {
     return this.http.get<CajaSesionLogEntry[]>(
       `${this.base}/sesiones/${sesionId}/log`, { headers: this.headers() }
+    );
+  }
+
+  obtenerControlStock(): Observable<InsumoControlStockItem[]> {
+    return this.http.get<InsumoControlStockItem[]>(
+      `${this.base}/control-stock`, { headers: this.headers() }
     );
   }
 }

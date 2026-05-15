@@ -1499,3 +1499,35 @@
   transition: background 0.15s, color 0.15s;
 }
 .spx-insumo-chip__remove:hover { background: #ef4444; color: #fff; }
+
+/* ── Control Stock — Sección de roles en insumo-registrar ──────────────── */
+.spx-cs-roles {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background: rgba(13, 127, 242, 0.06);
+  border: 1px solid rgba(13, 127, 242, 0.2);
+  border-radius: 0.625rem;
+}
+.spx-cs-roles__title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--spx-text, #f1f5f9);
+  margin: 0 0 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.spx-cs-roles__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 0.6rem;
+}
+.spx-cs-roles__hint {
+  font-size: 0.77rem;
+  color: var(--spx-text-muted, #64748b);
+  margin: 0.5rem 0 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+}

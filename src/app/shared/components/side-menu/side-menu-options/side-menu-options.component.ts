@@ -88,6 +88,7 @@ export class SideMenuOptionsComponent {
     if (n.includes('restaurante'))       return 'fa-solid fa-store';
     if (n.includes('identidad'))         return 'fa-solid fa-palette';
     if (n.includes('branding'))          return 'fa-solid fa-palette';
+    if (n.startsWith('control'))         return 'fa-solid fa-chart-line';
     if (n.includes('insumo'))            return 'fa-solid fa-boxes-stacked';
     if (n.includes('compra'))            return 'fa-solid fa-cart-flatbed';
     if (n.includes('cliente'))           return 'fa-solid fa-user-tie';

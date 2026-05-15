@@ -183,6 +183,17 @@ export const routes: Routes = [
         // CAJERO y MESERO solo pueden acceder al reporte de mesas (sub-ruta protegida)
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO'], hideFromMenu: true },
       },
+      {
+        path: 'control-stock',
+        title: 'Control Stock',
+        loadComponent: () =>
+          import('./reportes/pages/control-stock/control-stock').then(
+            (m) => m.ControlStockComponent
+          ),
+        canActivate: [RoleGuard, CajaGuard],
+        // Visible para todos los roles operativos (el backend filtra por rol e insumo)
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO'], hideForRoles: ['ROOT'] },
+      },
 
       // ── Clientes ─────────────────────────────────────────────────────────────
       {

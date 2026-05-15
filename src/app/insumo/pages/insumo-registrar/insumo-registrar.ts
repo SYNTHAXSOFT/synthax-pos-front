@@ -33,13 +33,21 @@ export class InsumoRegistrarPageComponent implements OnInit, OnDestroy {
   public esRoot: boolean = false;
   public modalAbierto: boolean = false;
 
+  /** Roles disponibles para configurar visibilidad en Control Stock */
+  public readonly ROLES_CONTROL_STOCK = [
+    'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO'
+  ];
+  /** Roles seleccionados actualmente para el insumo en edición/creación */
+  public rolesSeleccionados = new Set<string>();
+
   public myForm: FormGroup = this.fb.group({
-    codigo:        ['', [Validators.required, Validators.minLength(2)]],
-    descripcion:   ['', [Validators.required]],
-    stock:         [0,  [Validators.min(0)]],
-    medida:        ['UNIDAD', [Validators.required]],
-    restauranteId: [null, [Validators.required]],
-    activo:        [true],
+    codigo:                 ['', [Validators.required, Validators.minLength(2)]],
+    descripcion:            ['', [Validators.required]],
+    stock:                  [0,  [Validators.min(0)]],
+    medida:                 ['UNIDAD', [Validators.required]],
+    restauranteId:          [null, [Validators.required]],
+    activo:                 [true],
+    visibleEnControlStock:  [false],
   });
 
   ngOnInit(): void {
@@ -65,7 +73,8 @@ export class InsumoRegistrarPageComponent implements OnInit, OnDestroy {
     this.editando = false;
     this.insumoId = undefined;
     const restauranteId = this.esRoot ? null : (this.authService.getRestauranteId() ?? null);
-    this.myForm.reset({ stock: 0, medida: 'UNIDAD', activo: true, restauranteId });
+    this.rolesSeleccionados = new Set<string>();
+    this.myForm.reset({ stock: 0, medida: 'UNIDAD', activo: true, restauranteId, visibleEnControlStock: false });
     this.modalAbierto = true;
     document.body.style.overflow = 'hidden';
   }
@@ -75,13 +84,21 @@ export class InsumoRegistrarPageComponent implements OnInit, OnDestroy {
       next: (i) => {
         this.editando = true;
         this.insumoId = id;
+        // Parsear los roles guardados en DB como JSON string
+        try {
+          const roles: string[] = JSON.parse(i.rolesControlStock ?? '[]');
+          this.rolesSeleccionados = new Set(roles);
+        } catch {
+          this.rolesSeleccionados = new Set();
+        }
         this.myForm.patchValue({
-          codigo:        i.codigo,
-          descripcion:   i.descripcion,
-          stock:         i.stock,
-          medida:        i.medida,
-          restauranteId: i.restaurante?.id ?? null,
-          activo:        i.activo,
+          codigo:                i.codigo,
+          descripcion:           i.descripcion,
+          stock:                 i.stock,
+          medida:                i.medida,
+          restauranteId:         i.restaurante?.id ?? null,
+          activo:                i.activo,
+          visibleEnControlStock: i.visibleEnControlStock ?? false,
         });
         this.modalAbierto = true;
         document.body.style.overflow = 'hidden';
@@ -90,13 +107,22 @@ export class InsumoRegistrarPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  toggleRolControlStock(rol: string): void {
+    if (this.rolesSeleccionados.has(rol)) {
+      this.rolesSeleccionados.delete(rol);
+    } else {
+      this.rolesSeleccionados.add(rol);
+    }
+  }
+
   cerrarModal(): void {
     this.modalAbierto = false;
     document.body.style.overflow = '';
     this.editando = false;
     this.insumoId = undefined;
+    this.rolesSeleccionados = new Set<string>();
     const restauranteId = this.esRoot ? null : (this.authService.getRestauranteId() ?? null);
-    this.myForm.reset({ stock: 0, medida: 'UNIDAD', activo: true, restauranteId });
+    this.myForm.reset({ stock: 0, medida: 'UNIDAD', activo: true, restauranteId, visibleEnControlStock: false });
   }
 
   onSave(): void {
@@ -105,13 +131,16 @@ export class InsumoRegistrarPageComponent implements OnInit, OnDestroy {
       return;
     }
     const v = this.myForm.value;
+    const rolesArr = Array.from(this.rolesSeleccionados);
     const payload: InsumoRequest = {
-      codigo:      v.codigo,
-      descripcion: v.descripcion,
-      stock:       v.stock ?? 0,
-      medida:      v.medida,
-      restaurante: { id: v.restauranteId },
-      activo:      v.activo,
+      codigo:                v.codigo,
+      descripcion:           v.descripcion,
+      stock:                 v.stock ?? 0,
+      medida:                v.medida,
+      restaurante:           { id: v.restauranteId },
+      activo:                v.activo,
+      visibleEnControlStock: v.visibleEnControlStock ?? false,
+      rolesControlStock:     rolesArr.length > 0 ? JSON.stringify(rolesArr) : null,
     };
 
     if (this.editando && this.insumoId) {

@@ -1,0 +1,159 @@
+<div class="spx-cs">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="spx-cs__header no-print">
+    <div class="spx-cs__header-left">
+      <h2 class="spx-cs__title">
+        <i class="fa-solid fa-chart-line"></i> Control Stock
+      </h2>
+      <p class="spx-cs__subtitle">Estado de insumos en la sesión activa</p>
+    </div>
+    <div class="spx-cs__header-actions">
+      <button class="spx-cs__btn-refresh no-print" (click)="cargar()" title="Actualizar">
+        <i class="fa-solid fa-rotate-right"></i> Actualizar
+      </button>
+      <button class="spx-cs__btn-export no-print" (click)="exportar()" title="Exportar / Imprimir">
+        <i class="fa-solid fa-file-export"></i> Exportar
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Encabezado de impresión ─────────────────────────────────────────── -->
+  <div class="spx-cs__print-header print-only">
+    <h2><i class="fa-solid fa-chart-line"></i> Reporte Control Stock</h2>
+    <p>Generado: {{ ahora | date:'dd/MM/yyyy HH:mm' }}</p>
+  </div>
+
+  <!-- ── Cargando ─────────────────────────────────────────────────────────── -->
+  @if (cargando) {
+    <div class="spx-cs__loading">
+      <div class="spx-cs__spinner"></div>
+      <p>Cargando datos...</p>
+    </div>
+  }
+
+  <!-- ── Sin sesión abierta ──────────────────────────────────────────────── -->
+  @if (!cargando && sinSesion) {
+    <div class="spx-cs__empty">
+      <i class="fa-solid fa-lock" style="font-size:2.5rem;color:var(--spx-text-muted)"></i>
+      <p>No hay una sesión de caja abierta.</p>
+      <p style="font-size:0.85rem">Apertura la caja para ver el control de stock.</p>
+    </div>
+  }
+
+  <!-- ── Sin permiso (no debería llegar aquí, pero por si acaso) ─────────── -->
+  @if (!cargando && errorAcceso) {
+    <div class="spx-cs__empty">
+      <i class="fa-solid fa-ban" style="font-size:2.5rem;color:#ef4444"></i>
+      <p>Sin acceso a este reporte.</p>
+      <p style="font-size:0.85rem">Tu rol no tiene permiso para ver el Control Stock.</p>
+    </div>
+  }
+
+  <!-- ── Sin insumos configurados ────────────────────────────────────────── -->
+  @if (!cargando && !sinSesion && !errorAcceso && items.length === 0) {
+    <div class="spx-cs__empty">
+      <i class="fa-solid fa-boxes-stacked" style="font-size:2.5rem;color:var(--spx-text-muted)"></i>
+      <p>No hay insumos configurados para este reporte.</p>
+      <p style="font-size:0.85rem">
+        Ve a <strong>Insumos</strong> y activa la opción
+        <em>"Visible en Control Stock"</em> en los insumos que deseas monitorear.
+      </p>
+    </div>
+  }
+
+  <!-- ── Contenido principal ─────────────────────────────────────────────── -->
+  @if (!cargando && !sinSesion && !errorAcceso && items.length > 0) {
+
+    <!-- Filtro -->
+    <div class="spx-cs__filters no-print">
+      <input
+        type="text"
+        class="spx-cs__search"
+        placeholder="Buscar insumo..."
+        [(ngModel)]="filtroBusqueda"
+      >
+      @if (filtroBusqueda) {
+        <button class="spx-cs__clear" (click)="filtroBusqueda=''">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      }
+    </div>
+
+    <!-- Métricas rápidas -->
+    <div class="spx-cs__metrics no-print">
+      <div class="spx-cs__metric">
+        <i class="fa-solid fa-boxes-stacked" style="color:#3b82f6"></i>
+        <div>
+          <p class="spx-cs__metric-val">{{ items.length }}</p>
+          <p class="spx-cs__metric-lbl">Insumos</p>
+        </div>
+      </div>
+      <div class="spx-cs__metric">
+        <i class="fa-solid fa-circle-xmark" style="color:#ef4444"></i>
+        <div>
+          <p class="spx-cs__metric-val">{{ contSinStock }}</p>
+          <p class="spx-cs__metric-lbl">Sin stock</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="spx-cs__table-wrap">
+      @if (itemsFiltrados.length === 0) {
+        <div class="spx-cs__empty">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <p>Sin resultados para "<strong>{{ filtroBusqueda }}</strong>"</p>
+        </div>
+      } @else {
+        <table class="spx-cs__table">
+          <thead>
+            <tr>
+              <th>Insumo</th>
+              <th class="spx-cs__th-num">Apertura</th>
+              <th class="spx-cs__th-num">Comprado</th>
+              <th class="spx-cs__th-num">Vendido</th>
+              <th class="spx-cs__th-num">Restante</th>
+              <th class="spx-cs__th-medida no-print">Medida</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of itemsFiltrados; track item.insumoId) {
+              <tr>
+                <td class="spx-cs__name">{{ item.insumoDescripcion }}</td>
+                <td class="spx-cs__num">{{ fmtNum(item.stockInicial) }}</td>
+                <td class="spx-cs__num spx-cs__num--bought">
+                  @if ((item.stockComprado ?? 0) > 0) {
+                    <span>+{{ fmtNum(item.stockComprado) }}</span>
+                  } @else {
+                    <span style="color:var(--spx-text-muted)">—</span>
+                  }
+                </td>
+                <td class="spx-cs__num spx-cs__num--sold">
+                  @if ((item.stockVendido ?? 0) > 0) {
+                    <span>-{{ fmtNum(item.stockVendido) }}</span>
+                  } @else {
+                    <span style="color:var(--spx-text-muted)">—</span>
+                  }
+                </td>
+                <td class="spx-cs__num">
+                  <span class="spx-cs__badge" [ngClass]="stockClass(item)">
+                    {{ fmtNum(item.stockFinal) }}
+                  </span>
+                  <small class="spx-cs__medida-inline print-only"> {{ item.medida }}</small>
+                </td>
+                <td class="spx-cs__medida no-print">{{ item.medida }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <!-- Pie de página (solo impresión) -->
+    <div class="spx-cs__print-footer print-only">
+      <p>Total de insumos: {{ items.length }}</p>
+    </div>
+  }
+
+</div>

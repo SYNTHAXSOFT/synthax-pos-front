@@ -1,0 +1,279 @@
+<div class="cki">
+
+  <!-- ══ BOTÓN GLOBAL DE ACTIVACIÓN DE SONIDO ══════════════════════════════
+       Siempre visible — el cocinero debe tocarlo una vez para habilitar
+       las alertas sonoras. iOS/Android no permiten audio sin gesto explícito.
+  ═══════════════════════════════════════════════════════════════════════════ -->
+  <div class="cki__audio-bar" [class.cki__audio-bar--activo]="sonidoActivo">
+    <button class="cki__audio-btn" (click)="activarSonido()">
+      @if (sonidoActivo) {
+        <i class="fa-solid fa-bell"></i>
+        <span>Alertas activas</span>
+      } @else {
+        <i class="fa-solid fa-bell-slash"></i>
+        <span>Toca para activar alertas de sonido</span>
+      }
+    </button>
+  </div>
+
+  <!-- ══ CARGANDO ══════════════════════════════════════════════════════════ -->
+  @if (cargando) {
+    <div class="cki__splash">
+      <div class="cki__spinner"></div>
+      <p class="cki__splash-txt">Cargando órdenes…</p>
+    </div>
+  }
+
+  <!-- ══ SIN ÓRDENES ═══════════════════════════════════════════════════════ -->
+  @if (!cargando && tarjetas.length === 0) {
+    <div class="cki__empty">
+      <div class="cki__empty-icon">
+        <i class="fa-solid fa-utensils"></i>
+      </div>
+      <p class="cki__empty-title">Todo en orden</p>
+      <p class="cki__empty-sub">No hay órdenes activas en este momento</p>
+    </div>
+  }
+
+  <!-- ══ CARRUSEL ══════════════════════════════════════════════════════════ -->
+  @if (!cargando && tarjetas.length > 0) {
+
+    <!-- Barra superior: contadores globales -->
+    <div class="cki__topbar" [class.cki__topbar--nueva-orden]="nuevasOrdenes">
+      <div class="cki__topbar-brand">
+        <i class="fa-solid fa-fire-burner"></i>
+        <span>Cocina</span>
+      </div>
+      <div class="cki__topbar-counters">
+        <div class="cki__counter cki__counter--nuevo">
+          <span class="cki__counter-num">{{ totalPendientes }}</span>
+          <span class="cki__counter-lbl">Pendientes</span>
+        </div>
+        <div class="cki__counter cki__counter--prep">
+          <span class="cki__counter-num">{{ totalEnPreparacion }}</span>
+          <span class="cki__counter-lbl">En cocina</span>
+        </div>
+        <div class="cki__counter cki__counter--listo">
+          <span class="cki__counter-num">{{ totalListos }}</span>
+          <span class="cki__counter-lbl">Listos</span>
+        </div>
+      </div>
+      <div class="cki__topbar-nav-info">
+        <span class="cki__nav-info-txt">{{ indiceActivo + 1 }} / {{ tarjetas.length }}</span>
+        <span class="cki__nav-info-lbl">órdenes</span>
+      </div>
+    </div>
+
+    <!-- Banner: nueva orden recibida -->
+    @if (nuevasOrdenes) {
+      <div class="cki__nueva-orden-banner">
+        <i class="fa-solid fa-bell fa-shake"></i>
+        <span>¡Nueva orden recibida!</span>
+      </div>
+    }
+
+    <!-- Viewport del carrusel -->
+    <div class="cki__carousel">
+
+      <!-- Flecha izquierda -->
+      <button
+        class="cki__arrow cki__arrow--left"
+        [class.cki__arrow--hidden]="indiceActivo === 0"
+        (click)="anterior()"
+        title="Anterior">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
+      <!-- ── TARJETA ACTIVA ──────────────────────────────────────────────── -->
+      @let t = tarjetas[indiceActivo];
+      <div class="cki-card {{ urgenciaClass(t) }}">
+
+        <!-- Acento de urgencia (barra izquierda) -->
+        <div class="cki-card__accent"></div>
+
+        <!-- Cabecera de la tarjeta -->
+        <div class="cki-card__header">
+          <div class="cki-card__header-left">
+            <div class="cki-card__num">
+              <i class="fa-solid fa-hashtag"></i>
+              <span>{{ t.venta.id }}</span>
+            </div>
+            @if (t.venta.tipoPedido) {
+              <div class="cki-card__tipo">
+                <i [class]="tipoIcono(t.venta.tipoPedido?.nombre)"></i>
+                <span>{{ t.venta.tipoPedido?.nombre }}</span>
+              </div>
+            }
+            @if (t.venta.mesa) {
+              <div class="cki-card__mesa">
+                <i class="fa-solid fa-chair"></i>
+                <span>{{ t.venta.mesa?.nombre }}</span>
+              </div>
+            }
+            @if (t.venta.usuarioCreador) {
+              <div class="cki-card__solicitante">
+                <i class="fa-solid fa-user"></i>
+                <span>{{ t.venta.usuarioCreador?.nombre }} {{ t.venta.usuarioCreador?.apellido }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="cki-card__header-right">
+            <!-- Tiempo de espera -->
+            <div class="cki-card__tiempo" [class.cki-card__tiempo--urgente]="t.minutosEspera >= 30"
+                                          [class.cki-card__tiempo--demorado]="t.minutosEspera >= 15 && t.minutosEspera < 30">
+              <i class="fa-regular fa-clock"></i>
+              <span>{{ fmtTiempo(t.minutosEspera) }}</span>
+              @if (urgenciaLabel(t)) {
+                <span class="cki-card__urgencia-pill">{{ urgenciaLabel(t) }}</span>
+              }
+            </div>
+            <!-- Resumen de estados -->
+            <div class="cki-card__resumen">
+              @if (t.devueltos > 0) {
+                <span class="cki-chip cki-chip--devuelto">
+                  <i class="fa-solid fa-rotate-left"></i> {{ t.devueltos }} devuelto{{ t.devueltos !== 1 ? 's' : '' }}
+                </span>
+              }
+              @if (t.pendientes > 0) {
+                <span class="cki-chip cki-chip--nuevo">
+                  <i class="fa-solid fa-hourglass-start"></i> {{ t.pendientes }} pendiente{{ t.pendientes !== 1 ? 's' : '' }}
+                </span>
+              }
+              @if (t.enPreparacion > 0) {
+                <span class="cki-chip cki-chip--prep">
+                  <i class="fa-solid fa-fire"></i> {{ t.enPreparacion }} en cocina
+                </span>
+              }
+              @if (t.listos > 0) {
+                <span class="cki-chip cki-chip--listo">
+                  <i class="fa-solid fa-check"></i> {{ t.listos }} listo{{ t.listos !== 1 ? 's' : '' }}
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Observación de la venta -->
+        @if (t.venta.observacion) {
+          <div class="cki-card__obs-venta">
+            <i class="fa-solid fa-note-sticky"></i>
+            <span>{{ t.venta.observacion }}</span>
+          </div>
+        }
+
+        <!-- ── Lista de pedidos ─────────────────────────────────────────── -->
+        <div class="cki-card__pedidos">
+          @for (pedido of t.pedidos; track pedido.id) {
+            <div class="cki-pedido" [class.cki-pedido--preparando]="pedido.estado === 'PREPARANDO'"
+                                    [class.cki-pedido--listo]="pedido.estado === 'PREPARADO'"
+                                    [class.cki-pedido--devuelto]="pedido.estado === 'DEVUELTO'">
+
+              <!-- Cantidad + Producto -->
+              <div class="cki-pedido__producto">
+                <span class="cki-pedido__cant">{{ pedido.cantidad }}×</span>
+                <span class="cki-pedido__nombre">{{ pedido.producto?.nombre }}</span>
+                <span class="cki-badge {{ badgeClass(pedido.estado) }}">{{ badgeLabel(pedido.estado) }}</span>
+              </div>
+
+              <!-- Observación del pedido -->
+              @if (pedido.observacion) {
+                <div class="cki-pedido__obs">
+                  <i class="fa-solid fa-comment-dots"></i>
+                  <span>{{ pedido.observacion }}</span>
+                </div>
+              }
+
+              <!-- Acciones del pedido -->
+              <div class="cki-pedido__actions">
+                @if (pedido.estado === 'PEDIDO') {
+                  <button class="cki-btn cki-btn--empezar"
+                    [disabled]="cambiandoPedidoId.has(pedido.id!)"
+                    (click)="empezarPedido(pedido, t)">
+                    @if (cambiandoPedidoId.has(pedido.id!)) {
+                      <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    } @else {
+                      <i class="fa-solid fa-fire"></i>
+                    }
+                    Empezar
+                  </button>
+                }
+                @if (pedido.estado === 'PREPARANDO') {
+                  <button class="cki-btn cki-btn--listo"
+                    [disabled]="cambiandoPedidoId.has(pedido.id!)"
+                    (click)="marcarListo(pedido, t)">
+                    @if (cambiandoPedidoId.has(pedido.id!)) {
+                      <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    } @else {
+                      <i class="fa-solid fa-check"></i>
+                    }
+                    Listo
+                  </button>
+                }
+                @if (pedido.estado === 'DEVUELTO') {
+                  <button class="cki-btn cki-btn--retomar"
+                    [disabled]="cambiandoPedidoId.has(pedido.id!)"
+                    (click)="retomarDevuelto(pedido, t)">
+                    @if (cambiandoPedidoId.has(pedido.id!)) {
+                      <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    } @else {
+                      <i class="fa-solid fa-rotate-right"></i>
+                    }
+                    Re-preparar
+                  </button>
+                }
+                @if (pedido.estado === 'PREPARADO') {
+                  <span class="cki-pedido__done">
+                    <i class="fa-solid fa-circle-check"></i> Entregado a sala
+                  </span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- ── Acciones masivas ────────────────────────────────────────── -->
+        <div class="cki-card__bulk">
+          @if (t.pendientes > 1) {
+            <button class="cki-btn cki-btn--bulk cki-btn--bulk-empezar" (click)="empezarTodo(t)">
+              <i class="fa-solid fa-play"></i>
+              Empezar todos ({{ t.pendientes }})
+            </button>
+          }
+          @if (t.enPreparacion > 1) {
+            <button class="cki-btn cki-btn--bulk cki-btn--bulk-listo" (click)="marcarTodoListo(t)">
+              <i class="fa-solid fa-check-double"></i>
+              Marcar todo listo ({{ t.enPreparacion }})
+            </button>
+          }
+        </div>
+
+      </div>
+      <!-- ── FIN TARJETA ─────────────────────────────────────────────────── -->
+
+      <!-- Flecha derecha -->
+      <button
+        class="cki__arrow cki__arrow--right"
+        [class.cki__arrow--hidden]="indiceActivo === tarjetas.length - 1"
+        (click)="siguiente()"
+        title="Siguiente">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+    </div>
+
+    <!-- Puntos de navegación -->
+    <div class="cki__dots">
+      @for (t of tarjetas; track $index) {
+        <button
+          class="cki__dot {{ urgenciaClass(t) }}"
+          [class.cki__dot--active]="$index === indiceActivo"
+          (click)="irA($index)"
+          [title]="'Orden #' + t.venta.id">
+        </button>
+      }
+    </div>
+
+  }
+
+</div>

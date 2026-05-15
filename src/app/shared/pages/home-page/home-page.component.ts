@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -12,22 +12,29 @@ import { LoginRequest } from '../../../auth/interfaces/auth.interface';
   templateUrl: './home-page.component.html',
   styleUrl: './styles.css',
 })
-export class HomePageComponent {
+export class HomePageComponent implements OnInit {
 
   credentials: LoginRequest = {
     cedula: '',
     password: ''
   };
 
-  cargando       = false;
-  errorMessage   = '';
-  showPassword   = false;
-  cajaCerrada    = false;
+  cargando        = false;
+  errorMessage    = '';
+  showPassword    = false;
+  cajaCerrada     = false;
+  sesionExpirada  = false;
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute,
   ) {}
+
+  ngOnInit(): void {
+    // Detectar redirección automática por token expirado
+    this.sesionExpirada = this.route.snapshot.queryParamMap.get('sesionExpirada') === '1';
+  }
 
   onLogin(): void {
   if (!this.credentials.cedula || !this.credentials.password) {

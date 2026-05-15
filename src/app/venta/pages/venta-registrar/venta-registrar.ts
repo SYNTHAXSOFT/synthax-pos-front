@@ -13,12 +13,13 @@ import { ReservaMesaService } from '../../../reserva-mesa/services/reserva-mesa.
 import { Mesa } from '../../../mesa/interfaces/mesa.interface';
 import { TipoPedido } from '../../../tipo-pedido/interfaces/tipo-pedido.interface';
 import { VentaListarPageComponent } from '../venta-listar/venta-listar';
+import { CocineroDashboardComponent } from '../cocinero-dashboard/cocinero-dashboard';
 import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-venta-registrar',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, VentaListarPageComponent],
+  imports: [CommonModule, ReactiveFormsModule, VentaListarPageComponent, CocineroDashboardComponent],
   templateUrl: './venta-registrar.html',
   styleUrls: ['../../../shared/styles/spx-forms.css', './venta-registrar.css'],
 })

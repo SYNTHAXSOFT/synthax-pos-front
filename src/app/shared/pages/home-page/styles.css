@@ -250,6 +250,15 @@
   font-size: 0.8rem; color: #f87171; line-height: 1.4;
 }
 
+.spx-error--sesion {
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.35);
+  color: #fbbf24;
+}
+.spx-error--sesion i {
+  color: #fbbf24;
+}
+
 /* ── Botón ingresar ─────────────────────────── */
 .spx-btn-login {
   width: 100%;

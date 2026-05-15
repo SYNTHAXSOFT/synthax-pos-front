@@ -6,8 +6,8 @@ import { UsuarioService } from '../../services/usuario.service';
 import { Usuario } from '../../interfaces/usuario.interface';
 import { ToastService } from '../../../shared/services/toast.service';
 
-// Roles del POS — sincronizados con el enum Rol.java del backend
-const ROLES_POS = ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO'];
+// Roles del POS — ROOT excluido: no se puede asignar mediante edición
+const ROLES_POS = ['PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO', 'CLIENTE'];
 
 @Component({
   selector: 'app-actualizar-usuario',
@@ -70,7 +70,12 @@ export class ActualizarUsuarioPageComponent implements OnInit {
         this.router.navigate(['/synthax-pos/usuario/listar']);
       },
       error: (err) => {
-        this.toastService.error('Error al actualizar el usuario: ' + (err.error?.error ?? 'Error desconocido'));
+        const msg = err.error?.error
+                 ?? err.error?.message
+                 ?? err.message
+                 ?? `HTTP ${err.status ?? ''}`.trim()
+                 ?? 'Error desconocido';
+        this.toastService.error('Error al actualizar el usuario: ' + msg);
       },
     });
   }
