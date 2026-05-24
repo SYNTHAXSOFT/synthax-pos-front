@@ -205,7 +205,7 @@ export class ReporteCierresComponent implements OnInit {
     const dur = this.duracion(sesion.fechaApertura, sesion.fechaCierre);
 
     const rest      = this.authService.getCurrentRestaurante();
-    const restNombre = rest?.nombre ?? sesion.restaurante?.nombre ?? 'SYNTHAX POS';
+    const restNombre = rest?.nombre ?? sesion.restaurante?.nombre ?? 'MOED';
     const restNit    = rest?.nit    ? `NIT: ${rest.nit}` : '';
 
     /* ── helpers HTML ── */
@@ -441,7 +441,7 @@ export class ReporteCierresComponent implements OnInit {
 
 <div class="footer">
   <span>${restNombre} — Reporte de Cierre #${sesion.id}</span>
-  <span>Generado por SYNTHAX POS</span>
+  <span>Generado por MOED</span>
 </div>
 
 </body></html>`;

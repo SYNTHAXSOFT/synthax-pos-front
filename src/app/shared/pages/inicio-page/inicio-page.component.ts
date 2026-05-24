@@ -59,7 +59,7 @@ export class InicioPageComponent implements OnInit {
   }
 
   get restaurantName(): string {
-    return this.authService.getCurrentRestaurante()?.nombre ?? 'SYNTHAX POS';
+    return this.authService.getCurrentRestaurante()?.nombre ?? 'MOED';
   }
 
   /** Roles que pueden operar la caja (apertura / cierre). */

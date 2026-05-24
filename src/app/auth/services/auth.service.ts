@@ -140,6 +140,24 @@ export class AuthService {
     localStorage.setItem(this.USER_KEY, JSON.stringify(updated));
   }
 
+  // ── Recuperación de contraseña ─────────────────────────────────────────────
+
+  /** Solicita el correo de recuperación. El backend siempre responde 200. */
+  forgotPassword(email: string): Observable<{ mensaje: string }> {
+    return this.http.post<{ mensaje: string }>(
+      `${environment.URL}/${API_ENDPOINTS.AUTH}/forgot-password`,
+      { email }
+    );
+  }
+
+  /** Restablece la contraseña usando el token del correo. */
+  resetPassword(token: string, password: string): Observable<{ mensaje: string }> {
+    return this.http.post<{ mensaje: string }>(
+      `${environment.URL}/${API_ENDPOINTS.AUTH}/reset-password`,
+      { token, password }
+    );
+  }
+
   /** Ruta de inicio según el rol del usuario logueado. */
   getDefaultRouteByRole(): string {
     const user = this.getCurrentUser();

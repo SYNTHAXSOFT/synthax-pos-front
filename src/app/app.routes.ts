@@ -235,5 +235,14 @@ export const routes: Routes = [
     loadChildren: () => import('./auth/auth.routes'),
   },
 
+  {
+    path: 'landing',
+    title: 'MOED — Sistema POS para restaurantes',
+    loadComponent: () =>
+      import('./landing/pages/landing-page/landing-page.component').then(
+        (m) => m.LandingPageComponent
+      ),
+  },
+
   { path: '**', redirectTo: '' },
 ];

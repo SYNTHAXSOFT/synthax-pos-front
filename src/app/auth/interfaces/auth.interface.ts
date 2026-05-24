@@ -11,6 +11,8 @@ export enum Rol {
 export interface LoginRequest {
   cedula: string;
   password: string;
+  /** Token de Google reCAPTCHA v3. Se verifica en el backend antes de autenticar. */
+  recaptchaToken?: string;
 }
 
 /** Restaurante con datos de branding incluidos en el login. */

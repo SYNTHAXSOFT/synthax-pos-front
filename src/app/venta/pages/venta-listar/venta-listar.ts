@@ -794,73 +794,79 @@ export class VentaListarPageComponent implements OnInit {
       return `${dd}/${mm}/${yy} ${hh}:${min}`;
     };
 
+    /*
+     * Helper: fila de 2 columnas usando tabla (NO flex).
+     * En impresoras térmicas flex/grid no son confiables —
+     * las tablas garantizan que el texto largo haga salto de línea
+     * dentro de la celda en lugar de desbordarse fuera del papel.
+     */
+    const fila = (label: string, valor: string, bold = false) => {
+      const w = bold ? 'font-weight:700;' : '';
+      return `<tr>
+        <td style="padding:2px 0;vertical-align:top;white-space:nowrap;${w}">${label}</td>
+        <td style="padding:2px 0;text-align:right;vertical-align:top;word-break:break-word;${w}">${valor}</td>
+      </tr>`;
+    };
+
     /* ── Datos del restaurante ── */
     const rest = this.authService.getCurrentRestaurante();
-    const restNombre    = rest?.nombre    ?? 'SYNTHAX POS';
-    const restTelefono  = rest?.telefono  ? `<p style="font-size:10px;margin:1px 0;">Tel: ${rest.telefono}</p>` : '';
-    const restDireccion = rest?.direccion ? `<p style="font-size:10px;margin:1px 0;">${rest.direccion}</p>` : '';
-    const restNit       = rest?.nit       ? `<p style="font-size:10px;margin:1px 0;">NIT: ${rest.nit}</p>` : '';
+    const restNombre    = rest?.nombre    ?? 'MOED';
+    const restTelefono  = rest?.telefono  ? `<p style="margin:1px 0;">Tel: ${rest.telefono}</p>` : '';
+    const restDireccion = rest?.direccion ? `<p style="margin:1px 0;">${rest.direccion}</p>`      : '';
+    const restNit       = rest?.nit       ? `<p style="margin:1px 0;">NIT: ${rest.nit}</p>`       : '';
 
-    /* ── Bloques de HTML ── */
+    /* ── Productos ── */
     const itemsHtml = this.pedidosParaImprimir.map(p => {
       const precio   = p.producto?.precio ?? 0;
       const cantidad = p.cantidad ?? 1;
       const obsHtml  = p.observacion
-        ? `<br><small style="font-size:9px;color:#555;">↳ ${p.observacion}</small>`
+        ? `<br><span style="font-size:10px;">&#x21B3; ${p.observacion}</span>`
         : '';
       return `<tr>
-        <td style="padding:3px 0;vertical-align:top;">${p.producto?.nombre ?? ''}${obsHtml}</td>
-        <td style="text-align:center;padding:3px 2px;vertical-align:top;">${cantidad}</td>
-        <td style="text-align:right;padding:3px 0;vertical-align:top;">$ ${fmt(precio * cantidad)}</td>
+        <td style="padding:3px 0;vertical-align:top;word-break:break-word;">${p.producto?.nombre ?? ''}${obsHtml}</td>
+        <td style="text-align:center;padding:3px 4px;vertical-align:top;white-space:nowrap;">${cantidad}</td>
+        <td style="text-align:right;padding:3px 0;vertical-align:top;white-space:nowrap;">$ ${fmt(precio * cantidad)}</td>
       </tr>`;
     }).join('');
 
+    /* ── Servicios adicionales ── */
     const serviciosHtml = this.serviciosParaImprimir.length > 0
       ? `<div class="div"></div>
-         <div style="margin:4px 0;">
-           <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;color:#555;">Servicios adicionales</div>
+         <p style="font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:3px 0;">Servicios adicionales</p>
+         <table>
            ${this.serviciosParaImprimir.map(sv =>
-             `<div style="display:flex;justify-content:space-between;font-size:11px;margin:2px 0;">
-               <span>${sv.descripcion}</span>
-               <span>$ ${fmt(sv.valor)}</span>
-             </div>`
+             fila(sv.descripcion, `$ ${fmt(sv.valor)}`)
            ).join('')}
-         </div>`
+         </table>`
       : '';
 
+    /* ── Impuestos ── */
     const impuestosHtml = this.impuestosParaImprimir.map(t =>
-      `<div style="display:flex;justify-content:space-between;font-size:11px;margin:2px 0;">
-        <span>${t.impuesto.descripcion} (${t.impuesto.porcentajeImpuesto}%)</span>
-        <span>+ $ ${fmt(t.valor)}</span>
-      </div>`
+      fila(`${t.impuesto.descripcion} (${t.impuesto.porcentajeImpuesto}%)`, `+ $ ${fmt(t.valor)}`)
     ).join('');
 
+    /* ── Descuento ── */
     const descuentoHtml = this.descuentoValorParaImprimir > 0
-      ? `<div style="display:flex;justify-content:space-between;font-size:11px;margin:2px 0;font-weight:600;">
-           <span>Descuento (${venta.descuento}%)</span>
-           <span>- $ ${fmt(this.descuentoValorParaImprimir)}</span>
-         </div>
-         ${venta.motivoDescuento
-           ? `<div style="font-size:9px;color:#555;font-style:italic;margin:1px 0 4px 8px;">${venta.motivoDescuento}</div>`
-           : ''}`
+      ? fila(`Descuento (${venta.descuento}%)`, `- $ ${fmt(this.descuentoValorParaImprimir)}`, true)
+        + (venta.motivoDescuento
+            ? `<tr><td colspan="2" style="font-size:10px;font-style:italic;padding:1px 0 4px 8px;">${venta.motivoDescuento}</td></tr>`
+            : '')
       : '';
 
+    /* ── Meta de venta (ticket, fecha, atendido, cliente, mesa) ── */
     const mesaHtml    = venta.mesa?.nombre
-      ? `<p style="font-size:11px;margin:2px 0;">Mesa: ${venta.mesa.nombre}</p>` : '';
+      ? fila('Mesa', venta.mesa.nombre) : '';
     const creadorHtml = venta.usuarioCreador
-      ? `<div style="display:flex;justify-content:space-between;font-size:10px;margin:2px 0;">
-           <span>Atendido por</span>
-           <span>${venta.usuarioCreador.nombre} ${venta.usuarioCreador.apellido}</span>
-         </div>` : '';
+      ? fila('Atendido por', `${venta.usuarioCreador.nombre ?? ''} ${venta.usuarioCreador.apellido ?? ''}`.trim())
+      : '';
     const clienteHtml = venta.usuarioCliente
-      ? `<div style="display:flex;justify-content:space-between;font-size:10px;margin:2px 0;">
-           <span>Cliente</span>
-           <span>${venta.usuarioCliente.nombre} ${venta.usuarioCliente.apellido}</span>
-         </div>` : '';
+      ? fila('Cliente', `${venta.usuarioCliente.nombre ?? ''} ${venta.usuarioCliente.apellido ?? ''}`.trim())
+      : '';
     const obsVentaHtml = venta.observacion
-      ? `<div style="font-size:10px;margin:6px 0;padding:4px 0;border-top:1px dashed #000;">
-           <strong>Instrucciones:</strong> ${venta.observacion}
-         </div>` : '';
+      ? `<div class="div"></div>
+         <p style="margin:2px 0;"><strong>Instrucciones:</strong></p>
+         <p style="margin:2px 0;word-break:break-word;">${venta.observacion}</p>`
+      : '';
 
     /* ── HTML completo de la tirilla ── */
     const html = `<!DOCTYPE html>
@@ -870,81 +876,88 @@ export class VentaListarPageComponent implements OnInit {
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      width: 80mm; max-width: 80mm;
-      margin: 0 auto; padding: 8px;
-      font-family: 'Courier New', monospace;
-      font-size: 11px; color: #000; background: #fff;
+      width: 72mm;
+      margin: 0 auto;
+      padding: 4mm 3mm;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 11px;
+      color: #000;
+      background: #fff;
     }
     @media print {
-      body { width: 80mm; margin: 0; padding: 8px; }
-      @page { size: 80mm auto; margin: 0; }
+      html, body { width: 80mm; margin: 0; padding: 4mm 3mm; }
+      @page { size: 80mm auto; margin: 0mm; }
     }
-    table { width: 100%; border-collapse: collapse; }
-    .div  { border-top: 1px dashed #000; margin: 6px 0; }
-    .divB { border-top: 2px solid  #000; margin: 6px 0; }
+    table  { width: 100%; border-collapse: collapse; }
+    td, th { color: #000; }
+    .div   { border-top: 1px dashed #000; margin: 5px 0; }
+    .divB  { border-top: 2px solid  #000; margin: 5px 0; }
+    p      { color: #000; }
   </style>
 </head><body>
 
-  <div style="text-align:center;margin-bottom:8px;">
-    <div style="font-size:24px;margin-bottom:4px;">&#127869;</div>
-    <h2 style="font-size:16px;font-weight:700;margin:0 0 2px 0;text-transform:uppercase;letter-spacing:2px;">${restNombre}</h2>
+  <!-- ── Encabezado ── -->
+  <div style="text-align:center;margin-bottom:6px;">
+    <div style="font-size:22px;margin-bottom:3px;">&#127869;</div>
+    <p style="font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin:0 0 2px 0;">${restNombre}</p>
     ${restNit}
     ${restTelefono}
     ${restDireccion}
-    <p style="font-size:12px;font-weight:600;margin:4px 0 0 0;text-transform:uppercase;">${venta.tipoPedido?.nombre ?? ''}</p>
-    ${mesaHtml}
+    <p style="font-size:12px;font-weight:700;margin:4px 0 0 0;text-transform:uppercase;letter-spacing:1px;">${venta.tipoPedido?.nombre ?? ''}</p>
   </div>
 
   <div class="div"></div>
 
-  <div style="margin:4px 0;">
-    <div style="display:flex;justify-content:space-between;font-size:10px;margin:2px 0;">
-      <span>Ticket #</span><span>${venta.id}</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;font-size:10px;margin:2px 0;">
-      <span>Fecha</span><span>${fmtDate(this.fechaImpresion)}</span>
-    </div>
+  <!-- ── Meta de la venta ── -->
+  <table style="font-size:11px;margin:3px 0;">
+    ${fila('Ticket #', String(venta.id ?? ''))}
+    ${fila('Fecha', fmtDate(this.fechaImpresion))}
+    ${mesaHtml}
     ${creadorHtml}
     ${clienteHtml}
-  </div>
+  </table>
 
   <div class="div"></div>
 
-  <table style="font-size:11px;margin:4px 0;">
+  <!-- ── Productos ── -->
+  <table style="font-size:11px;margin:3px 0;">
     <thead>
       <tr style="border-bottom:1px dashed #000;">
-        <th style="text-align:left;padding:2px 0;">Producto</th>
-        <th style="text-align:center;padding:2px;">Cant.</th>
-        <th style="text-align:right;padding:2px 0;">Total</th>
+        <th style="text-align:left;padding:2px 0;font-weight:700;">Producto</th>
+        <th style="text-align:center;padding:2px 4px;font-weight:700;">Cant.</th>
+        <th style="text-align:right;padding:2px 0;font-weight:700;">Tot</th>
       </tr>
     </thead>
-    <tbody>${itemsHtml}</tbody>
+    <tbody>
+      ${itemsHtml}
+    </tbody>
   </table>
 
   ${serviciosHtml}
 
   <div class="div"></div>
 
-  <div style="margin:4px 0;">
-    <div style="display:flex;justify-content:space-between;font-size:11px;margin:2px 0;">
-      <span>Subtotal</span><span>$ ${fmt(this.subtotalParaImprimir)}</span>
-    </div>
+  <!-- ── Totales ── -->
+  <table style="font-size:11px;margin:3px 0;">
+    ${fila('Subtotal', `$ ${fmt(this.subtotalParaImprimir)}`)}
     ${impuestosHtml}
     ${descuentoHtml}
-  </div>
+  </table>
 
   <div class="divB"></div>
 
-  <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;padding:4px 0;letter-spacing:1px;">
-    <span>TOTAL</span><span>$ ${fmt(this.totalParaImprimir)}</span>
-  </div>
+  <table style="font-size:14px;font-weight:700;margin:3px 0;">
+    ${fila('TOTAL', `$ ${fmt(this.totalParaImprimir)}`, true)}
+  </table>
 
   <div class="divB"></div>
 
+  <!-- ── Instrucciones ── -->
   ${obsVentaHtml}
 
+  <!-- ── Pie ── -->
   <div style="text-align:center;margin-top:10px;font-size:11px;">
-    <p style="margin:2px 0;">¡Gracias por su compra!</p>
+    <p style="margin:2px 0;font-weight:700;">¡Gracias por su compra!</p>
     <p style="margin:2px 0;">${restNombre}</p>
   </div>
 

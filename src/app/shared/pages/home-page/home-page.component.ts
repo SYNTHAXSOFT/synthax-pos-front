@@ -1,14 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../auth/services/auth.service';
 import { LoginRequest } from '../../../auth/interfaces/auth.interface';
+import { RecaptchaService } from '../../services/recaptcha.service';
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './home-page.component.html',
   styleUrl: './styles.css',
 })
@@ -29,6 +30,7 @@ export class HomePageComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
+    private recaptchaService: RecaptchaService,
   ) {}
 
   ngOnInit(): void {
@@ -36,31 +38,34 @@ export class HomePageComponent implements OnInit {
     this.sesionExpirada = this.route.snapshot.queryParamMap.get('sesionExpirada') === '1';
   }
 
-  onLogin(): void {
-  if (!this.credentials.cedula || !this.credentials.password) {
-    this.errorMessage = 'Por favor completa todos los campos';
-    return;
-  }
-
-  this.cargando    = true;
-  this.errorMessage = '';
-  this.cajaCerrada  = false;
-
-  this.authService.login(this.credentials).subscribe({
-    next: (response) => {
-      console.log('Login exitoso:', response);
-      const defaultRoute = this.authService.getDefaultRouteByRole();
-      this.router.navigate([defaultRoute]);
-    },
-    error: (error) => {
-      console.error('Error en login:', error);
-      this.cajaCerrada  = error.error?.codigo === 'CAJA_CERRADA';
-      this.errorMessage = error.error?.mensaje || 'Credenciales incorrectas';
-      this.cargando     = false;
-    },
-    complete: () => {
-      this.cargando = false;
+  async onLogin(): Promise<void> {
+    if (!this.credentials.cedula || !this.credentials.password) {
+      this.errorMessage = 'Por favor completa todos los campos';
+      return;
     }
-  });
-}
+
+    this.cargando     = true;
+    this.errorMessage = '';
+    this.cajaCerrada  = false;
+
+    // Obtener token reCAPTCHA v3 antes de enviar las credenciales
+    this.credentials.recaptchaToken = await this.recaptchaService.execute('login');
+
+    this.authService.login(this.credentials).subscribe({
+      next: (response) => {
+        console.log('Login exitoso:', response);
+        const defaultRoute = this.authService.getDefaultRouteByRole();
+        this.router.navigate([defaultRoute]);
+      },
+      error: (error) => {
+        console.error('Error en login:', error);
+        this.cajaCerrada  = error.error?.codigo === 'CAJA_CERRADA';
+        this.errorMessage = error.error?.mensaje || 'Credenciales incorrectas';
+        this.cargando     = false;
+      },
+      complete: () => {
+        this.cargando = false;
+      }
+    });
+  }
 }

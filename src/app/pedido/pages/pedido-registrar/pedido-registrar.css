@@ -1,5 +1,5 @@
 /* =============================================
-   SYNTHAX POS — Pedido Registrar
+   MOED — Pedido Registrar
    ============================================= */
 
 :host {
@@ -101,6 +101,28 @@
   color: #fbbf24;
   max-width: 28rem;
   line-height: 1.45;
+}
+
+/* Botón imprimir comanda */
+.spx-reg-banner__comanda-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(249, 115, 22, 0.12);
+  border: 1px solid rgba(249, 115, 22, 0.35);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fb923c;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.spx-reg-banner__comanda-btn:hover {
+  background: rgba(249, 115, 22, 0.22);
+  border-color: rgba(249, 115, 22, 0.6);
 }
 
 .spx-reg-banner--pagada {

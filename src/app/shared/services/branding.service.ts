@@ -29,7 +29,7 @@ export class BrandingService {
     colorTexto:      '#ffffff',
     colorFondo:      '#f0fdf4',
     logo:            null,
-    nombre:          'SYNTHAX POS',
+    nombre:          'MOED',
   };
 
   // ── Inicialización ────────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ export class BrandingService {
 
   /** Retorna el nombre del restaurante activo. */
   getNombreRestaurante(): string {
-    return this.getBranding().nombre ?? 'SYNTHAX POS';
+    return this.getBranding().nombre ?? 'MOED';
   }
 
   // ── Aplicación de CSS variables ──────────────────────────────────────────
@@ -112,7 +112,7 @@ export class BrandingService {
     root.style.setProperty('--brand-secundario',   b.colorSecundario);
     root.style.setProperty('--brand-texto',        b.colorTexto);
     root.style.setProperty('--brand-fondo',        b.colorFondo);
-    root.style.setProperty('--brand-nombre',       `"${b.nombre ?? 'SYNTHAX POS'}"`);
+    root.style.setProperty('--brand-nombre',       `"${b.nombre ?? 'MOED'}"`);
 
     // Sombras actualizadas con el color primario
     const hex  = b.colorPrimario.replace('#', '');

@@ -49,7 +49,7 @@ export class VentaTicketComponent implements OnInit {
   ngOnInit(): void {
     this.branding           = this.brandingService.getBranding();
     const rest              = this.authService.getCurrentRestaurante();
-    this.restauranteNombre  = rest?.nombre    ?? this.branding.nombre    ?? 'SYNTHAX POS';
+    this.restauranteNombre  = rest?.nombre    ?? this.branding.nombre    ?? 'MOED';
     this.restauranteTelefono = rest?.telefono  ?? '';
     this.restauranteCorreo   = rest?.correo    ?? '';
   }

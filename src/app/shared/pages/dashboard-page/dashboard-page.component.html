@@ -18,7 +18,7 @@
     <header class="spx-dash-mobile-header">
       <div class="spx-dash-mobile-header__brand">
         <i class="fa-solid fa-cash-register"></i>
-        <span>SYNTHAX POS</span>
+        <span>MOED</span>
       </div>
       <div class="spx-dash-mobile-header__actions">
         <button
@@ -36,46 +36,6 @@
 
     <!-- Top Bar (desktop) -->
     <header class="spx-dash-topbar">
-
-      <!-- ── Search ── -->
-      <div class="spx-dash-topbar__search" (click)="$event.stopPropagation()">
-        <i class="fa-solid fa-magnifying-glass spx-dash-topbar__search-icon"></i>
-        <input
-          type="text"
-          class="spx-dash-topbar__search-input"
-          placeholder="Buscar sección, producto o función..."
-          [(ngModel)]="searchTerm"
-          (ngModelChange)="onSearchInput()"
-          (keydown.escape)="showSearchDropdown = false"
-          autocomplete="off"
-        />
-
-        <!-- Search Dropdown -->
-        @if (showSearchDropdown) {
-          <div class="spx-search-dropdown">
-            @if (searchResults.length > 0) {
-              <div class="spx-search-dropdown__label">Resultados</div>
-              @for (item of searchResults; track item.route) {
-                <button class="spx-search-item" (click)="navigateTo(item.route)">
-                  <div class="spx-search-item__icon">
-                    <i [class]="'fa-solid ' + item.icon"></i>
-                  </div>
-                  <div class="spx-search-item__text">
-                    <span class="spx-search-item__label">{{ item.label }}</span>
-                    <span class="spx-search-item__sub">{{ item.sub }}</span>
-                  </div>
-                  <i class="fa-solid fa-arrow-right spx-search-item__arrow"></i>
-                </button>
-              }
-            } @else {
-              <div class="spx-search-empty">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <span>Sin resultados para "<strong>{{ searchTerm }}</strong>"</span>
-              </div>
-            }
-          </div>
-        }
-      </div>
 
       <!-- ── Right side ── -->
       <div class="spx-dash-topbar__right">
@@ -98,7 +58,7 @@
         <div class="spx-dash-topbar__brand">
           <i class="fa-solid fa-cash-register spx-dash-topbar__brand-icon"></i>
           <div>
-            <p class="spx-dash-topbar__brand-name">SYNTHAX POS</p>
+            <p class="spx-dash-topbar__brand-name">MOED</p>
             <p class="spx-dash-topbar__brand-sub">Sistema POS</p>
           </div>
         </div>

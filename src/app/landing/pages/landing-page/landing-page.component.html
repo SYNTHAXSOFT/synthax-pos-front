@@ -1,0 +1,259 @@
+<div class="lp-wrapper">
+
+  <!-- ══ NAVBAR ══════════════════════════════════════════════════════════ -->
+  <nav class="lp-nav">
+    <div class="lp-nav__inner">
+      <div class="lp-nav__brand">
+        <img src="assets/img/logo.png" alt="MOED" class="lp-nav__logo" />
+        <span class="lp-nav__name">MOED</span>
+      </div>
+      <div class="lp-nav__links">
+        <button (click)="scrollTo('caracteristicas')">Características</button>
+        <button (click)="scrollTo('contacto')">Contacto</button>
+        <a routerLink="/" class="lp-nav__btn">Iniciar sesión</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ══ HERO ════════════════════════════════════════════════════════════ -->
+  <section class="lp-hero">
+    <div class="lp-hero__glow lp-hero__glow--1"></div>
+    <div class="lp-hero__glow lp-hero__glow--2"></div>
+    <div class="lp-hero__content">
+      <span class="lp-hero__badge">
+        <i class="fa-solid fa-bolt"></i> Sistema POS inteligente
+      </span>
+      <h1 class="lp-hero__title">
+        El sistema que tu<br>
+        <span class="lp-hero__accent">negocio necesita</span>
+      </h1>
+      <p class="lp-hero__sub">
+        MOED es el punto de venta digital diseñado para restaurantes y negocios colombianos.
+        Gestiona ventas, pedidos, inventario y reportes desde cualquier dispositivo.
+      </p>
+      <div class="lp-hero__actions">
+        <button class="lp-btn-primary" (click)="scrollTo('contacto')">
+          <i class="fa-solid fa-paper-plane"></i> Quiero una demo
+        </button>
+        <button class="lp-btn-ghost" (click)="scrollTo('caracteristicas')">
+          Ver características <i class="fa-solid fa-arrow-down"></i>
+        </button>
+      </div>
+    </div>
+    <div class="lp-hero__image">
+      <img src="assets/img/logo.png" alt="MOED Sistema POS" class="lp-hero__logo" />
+      <div class="lp-hero__ring lp-hero__ring--1"></div>
+      <div class="lp-hero__ring lp-hero__ring--2"></div>
+    </div>
+  </section>
+
+  <!-- ══ STATS ═══════════════════════════════════════════════════════════ -->
+  <section class="lp-stats">
+    <div class="lp-stats__inner">
+      <div class="lp-stat">
+        <span class="lp-stat__num">100%</span>
+        <span class="lp-stat__label">En la nube</span>
+      </div>
+      <div class="lp-stat">
+        <span class="lp-stat__num">8+</span>
+        <span class="lp-stat__label">Roles de usuario</span>
+      </div>
+      <div class="lp-stat">
+        <span class="lp-stat__num">24/7</span>
+        <span class="lp-stat__label">Disponibilidad</span>
+      </div>
+      <div class="lp-stat">
+        <span class="lp-stat__num">∞</span>
+        <span class="lp-stat__label">Restaurantes por cuenta</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CARACTERÍSTICAS ═════════════════════════════════════════════════ -->
+  <section class="lp-features" id="caracteristicas">
+    <div class="lp-section-header">
+      <span class="lp-section-tag">¿Qué incluye MOED?</span>
+      <h2 class="lp-section-title">Todo lo que necesitas en un solo sistema</h2>
+      <p class="lp-section-sub">
+        Diseñado para restaurantes, cafeterías, tiendas y negocios de comida en Colombia.
+      </p>
+    </div>
+
+    <div class="lp-features__grid">
+      @for (f of features; track f.titulo) {
+        <div class="lp-feature-card">
+          <div class="lp-feature-card__icon">
+            <i class="fa-solid {{ f.icon }}"></i>
+          </div>
+          <h3 class="lp-feature-card__title">{{ f.titulo }}</h3>
+          <p class="lp-feature-card__desc">{{ f.desc }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- ══ POR QUÉ MOED ════════════════════════════════════════════════════ -->
+  <section class="lp-why">
+    <div class="lp-why__inner">
+      <div class="lp-why__text">
+        <span class="lp-section-tag">¿Por qué elegirnos?</span>
+        <h2 class="lp-section-title lp-section-title--light">
+          Simple, rápido y hecho para Colombia
+        </h2>
+        <ul class="lp-why__list">
+          <li><i class="fa-solid fa-check-circle"></i> Sin instalaciones — funciona desde el navegador</li>
+          <li><i class="fa-solid fa-check-circle"></i> Soporte en español, adaptado al mercado colombiano</li>
+          <li><i class="fa-solid fa-check-circle"></i> Preparado para facturación electrónica DIAN</li>
+          <li><i class="fa-solid fa-check-circle"></i> Actualizaciones continuas sin costo adicional</li>
+          <li><i class="fa-solid fa-check-circle"></i> Panel de cocina con alertas en tiempo real</li>
+          <li><i class="fa-solid fa-check-circle"></i> Reportes descargables en PDF</li>
+        </ul>
+        <button class="lp-btn-primary" (click)="scrollTo('contacto')">
+          <i class="fa-solid fa-headset"></i> Hablar con un asesor
+        </button>
+      </div>
+      <div class="lp-why__visual">
+        <div class="lp-why__card lp-why__card--1">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Reportes en tiempo real</span>
+        </div>
+        <div class="lp-why__card lp-why__card--2">
+          <i class="fa-solid fa-bell"></i>
+          <span>Alertas de cocina</span>
+        </div>
+        <div class="lp-why__card lp-why__card--3">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Acceso seguro por roles</span>
+        </div>
+        <div class="lp-why__card lp-why__card--4">
+          <i class="fa-solid fa-cloud"></i>
+          <span>100% en la nube</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FORMULARIO DE CONTACTO ══════════════════════════════════════════ -->
+  <section class="lp-contact" id="contacto">
+    <div class="lp-section-header">
+      <span class="lp-section-tag">¿Te interesa?</span>
+      <h2 class="lp-section-title">Solicita tu demo gratuita</h2>
+      <p class="lp-section-sub">
+        Déjanos tus datos y un asesor de MOED te contactará en menos de 24 horas.
+      </p>
+    </div>
+
+    <div class="lp-contact__card">
+
+      @if (exito) {
+        <div class="lp-contact__exito">
+          <div class="lp-contact__exito-icon">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <h3>¡Mensaje recibido!</h3>
+          <p>Gracias por tu interés en MOED. Un asesor se comunicará contigo muy pronto.</p>
+          <button class="lp-btn-primary" (click)="exito = false">
+            <i class="fa-solid fa-rotate-left"></i> Enviar otro mensaje
+          </button>
+        </div>
+
+      } @else {
+        <form (ngSubmit)="enviar()" autocomplete="off" class="lp-contact__form">
+
+          <div class="lp-contact__row">
+            <div class="lp-contact__field">
+              <label>Nombre completo <span class="lp-req">*</span></label>
+              <div class="lp-input-wrap">
+                <i class="fa fa-user lp-input-icon"></i>
+                <input type="text" [(ngModel)]="form.nombre" name="nombre"
+                       placeholder="Tu nombre" class="lp-input" />
+              </div>
+            </div>
+            <div class="lp-contact__field">
+              <label>Negocio / Empresa</label>
+              <div class="lp-input-wrap">
+                <i class="fa fa-store lp-input-icon"></i>
+                <input type="text" [(ngModel)]="form.negocio" name="negocio"
+                       placeholder="Nombre de tu restaurante o negocio" class="lp-input" />
+              </div>
+            </div>
+          </div>
+
+          <div class="lp-contact__row">
+            <div class="lp-contact__field">
+              <label>Teléfono / WhatsApp <span class="lp-req">*</span></label>
+              <div class="lp-input-wrap">
+                <i class="fa fa-phone lp-input-icon"></i>
+                <input type="tel" [(ngModel)]="form.telefono" name="telefono"
+                       placeholder="3001234567" class="lp-input" />
+              </div>
+            </div>
+            <div class="lp-contact__field">
+              <label>Correo electrónico <span class="lp-req">*</span></label>
+              <div class="lp-input-wrap">
+                <i class="fa fa-envelope lp-input-icon"></i>
+                <input type="email" [(ngModel)]="form.email" name="email"
+                       placeholder="tu&#64;correo.com" class="lp-input" />
+              </div>
+            </div>
+          </div>
+
+          <div class="lp-contact__field">
+            <label>Ciudad</label>
+            <div class="lp-input-wrap">
+              <i class="fa fa-location-dot lp-input-icon"></i>
+              <input type="text" [(ngModel)]="form.ciudad" name="ciudad"
+                     placeholder="¿En qué ciudad está tu negocio?" class="lp-input" />
+            </div>
+          </div>
+
+          <div class="lp-contact__field">
+            <label>Mensaje (opcional)</label>
+            <textarea [(ngModel)]="form.mensaje" name="mensaje" rows="4"
+                      placeholder="Cuéntanos sobre tu negocio o las funciones que más te interesan..."
+                      class="lp-textarea"></textarea>
+          </div>
+
+          @if (error) {
+            <div class="lp-contact__error">
+              <i class="fa fa-circle-exclamation"></i> {{ error }}
+            </div>
+          }
+
+          <button type="submit" class="lp-btn-primary lp-btn-primary--full" [disabled]="cargando">
+            @if (cargando) {
+              <span class="lp-spinner"></span> Enviando...
+            } @else {
+              <i class="fa-solid fa-paper-plane"></i> Enviar solicitud
+            }
+          </button>
+
+        </form>
+      }
+
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ══════════════════════════════════════════════════════════ -->
+  <footer class="lp-footer">
+    <div class="lp-footer__inner">
+      <div class="lp-footer__brand">
+        <img src="assets/img/logo.png" alt="MOED" class="lp-footer__logo" />
+        <div>
+          <p class="lp-footer__name">MOED</p>
+          <p class="lp-footer__tagline">Es el momento de dar Manejo Oportuno, Empresarial y Digital</p>
+        </div>
+      </div>
+      <div class="lp-footer__links">
+        <a href="mailto:moedpos@gmail.com">
+          <i class="fa fa-envelope"></i> moedpos&#64;gmail.com
+        </a>
+      </div>
+    </div>
+    <div class="lp-footer__copy">
+      <p>© 2024 MOED Sistema POS. Todos los derechos reservados.</p>
+      <a routerLink="/">Iniciar sesión</a>
+    </div>
+  </footer>
+
+</div>

@@ -1,131 +1,165 @@
 /* =============================================
-   SYNTHAX POS — Login Page (Dark Theme)
-   Primary: #0d7ff2  |  Background: #101922
+   MOED — Login Page (Split Layout)
+   Primary: #0d7ff2  |  Gradient: #0a5cc7 → #38b6ff
    ============================================= */
 
-/* ── Variables (scoped al componente) ───────── */
+/* ── Variables ──────────────────────────────── */
 :host, .spx-login-wrapper {
-  --spx-primary:      #0d7ff2;
-  --spx-primary-dim:  rgba(13, 127, 242, 0.12);
-  --spx-primary-glow: rgba(13, 127, 242, 0.25);
-  --spx-bg:           #101922;
-  --spx-card:         #1b252f;
-  --spx-input-bg:     #111922;
-  --spx-border:       #1e293b;
-  --spx-text:         #f1f5f9;
-  --spx-text-muted:   #64748b;
-  --spx-text-sub:     #94a3b8;
+  --spx-primary:      #00c8f0;
+  --spx-primary-dark: #07090f;
+  --spx-primary-mid:  #0a1628;
+  --spx-primary-light:#00e5ff;
+  --spx-primary-glow: rgba(0, 200, 240, 0.28);
+  --spx-bg:           #f0f4f8;
+  --spx-card:         #ffffff;
+  --spx-input-bg:     #f4f7fb;
+  --spx-border:       #dde3ed;
+  --spx-text:         #1a2332;
+  --spx-text-muted:   #8896a9;
+  --spx-text-sub:     #5a6a7e;
   --spx-error:        #ef4444;
-  --spx-radius:       0.75rem;
-  --spx-radius-sm:    0.5rem;
+  --spx-radius:       1rem;
+  --spx-radius-sm:    0.6rem;
 }
 
-/* ── Wrapper full-screen ────────────────────── */
+/* ── Wrapper ────────────────────────────────── */
 .spx-login-wrapper {
   font-family: 'Inter', system-ui, sans-serif;
   min-height: 100vh;
-  background-color: var(--spx-bg);
   display: flex;
+  flex-direction: row;
+  background: var(--spx-bg);
+}
+
+/* ══════════════════════════════════════════════
+   PANEL IZQUIERDO — Branding
+   ══════════════════════════════════════════════ */
+.spx-panel-brand {
+  position: relative;
+  width: 45%;
+  min-height: 100vh;
+  background: linear-gradient(160deg, var(--spx-primary-dark) 0%, var(--spx-primary-mid) 60%, #0d1f3c 100%);
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1rem;
-  position: relative;
+  padding: 3rem 2.5rem;
   overflow: hidden;
 }
 
-/* ── Blobs decorativos ──────────────────────── */
-.spx-blob {
-  position: fixed;
+/* Ondas decorativas con brillo cyan */
+.spx-wave {
+  position: absolute;
   border-radius: 50%;
   pointer-events: none;
-  z-index: 0;
-  filter: blur(120px);
 }
-.spx-blob--tl {
-  width: 45vw;
-  height: 45vw;
-  top: -15%;
-  left: -15%;
-  background: var(--spx-primary-dim);
+.spx-wave--1 {
+  width: 520px;
+  height: 520px;
+  bottom: -180px;
+  left: -180px;
+  background: radial-gradient(circle, rgba(0, 200, 240, 0.12) 0%, transparent 70%);
 }
-.spx-blob--br {
-  width: 45vw;
-  height: 45vw;
-  bottom: -15%;
-  right: -15%;
-  background: rgba(13, 127, 242, 0.08);
+.spx-wave--2 {
+  width: 380px;
+  height: 380px;
+  top: -120px;
+  right: -130px;
+  background: radial-gradient(circle, rgba(0, 229, 255, 0.08) 0%, transparent 70%);
 }
 
-/* ── Contenedor principal ───────────────────── */
-.spx-login-container {
+/* Branding content */
+.spx-branding {
   position: relative;
   z-index: 1;
-  width: 100%;
-  max-width: 440px;
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-/* ── Branding ───────────────────────────────── */
-.spx-branding {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.spx-logo-box {
-  background: var(--spx-primary-dim);
-  border: 1px solid rgba(13, 127, 242, 0.25);
-  border-radius: var(--spx-radius);
-  padding: 1rem;
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  flex: 1;
   justify-content: center;
 }
 
-.spx-logo-icon {
-  width: 3rem;
-  height: 3rem;
-  color: var(--spx-primary);
+.spx-logo-box {
+  margin-bottom: 0.5rem;
+}
+
+.spx-logo-img {
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 32px rgba(0, 200, 240, 0.45)) drop-shadow(0 8px 20px rgba(0,0,0,0.40));
+  border-radius: 1.5rem;
 }
 
 .spx-brand-name {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: var(--spx-text);
-  letter-spacing: -0.02em;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--spx-primary-light);
+  letter-spacing: 0.06em;
   margin: 0;
-}
-.spx-brand-name span {
-  color: var(--spx-primary);
+  text-shadow: 0 0 20px rgba(0, 229, 255, 0.60), 0 2px 8px rgba(0,0,0,0.30);
 }
 
 .spx-brand-sub {
-  color: var(--spx-text-sub);
-  font-size: 0.9rem;
-  margin: 0.35rem 0 0;
+  color: rgba(180, 220, 240, 0.85);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  margin: 0;
+  max-width: 270px;
+}
+
+/* Footer del panel */
+.spx-brand-footer {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding-top: 2rem;
+}
+.spx-brand-footer p {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.50);
+  margin: 0;
   text-align: center;
+}
+
+/* ══════════════════════════════════════════════
+   PANEL DERECHO — Formulario
+   ══════════════════════════════════════════════ */
+.spx-panel-form {
+  width: 55%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  background: var(--spx-bg);
 }
 
 /* ── Tarjeta ────────────────────────────────── */
 .spx-card {
   width: 100%;
+  max-width: 420px;
   background: var(--spx-card);
-  border: 1px solid var(--spx-border);
   border-radius: var(--spx-radius);
-  padding: 2rem;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(13, 127, 242, 0.04);
+  padding: 2.5rem 2rem;
+  box-shadow: 0 8px 40px rgba(13, 50, 100, 0.10), 0 1px 3px rgba(0,0,0,0.06);
 }
 
 .spx-card-title {
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: var(--spx-text);
   text-align: center;
-  margin: 0 0 1.75rem;
+  margin: 0 0 0.4rem;
+}
+
+.spx-card-sub {
+  font-size: 0.875rem;
+  color: var(--spx-text-muted);
+  text-align: center;
+  margin: 0 0 2rem;
 }
 
 /* ── Campos ─────────────────────────────────── */
@@ -135,21 +169,19 @@
 
 .spx-field label {
   display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--spx-text-sub);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.45rem;
 }
 
 .spx-field-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.45rem;
 }
-.spx-field-header label {
-  margin-bottom: 0;
-}
+.spx-field-header label { margin-bottom: 0; }
 
 .spx-forgot {
   font-size: 0.78rem;
@@ -158,9 +190,9 @@
   text-decoration: none;
   transition: opacity 0.2s;
 }
-.spx-forgot:hover { opacity: 0.8; text-decoration: underline; }
+.spx-forgot:hover { opacity: 0.75; text-decoration: underline; }
 
-/* ── Input wrapper ──────────────────────────── */
+/* ── Input ──────────────────────────────────── */
 .spx-input-wrapper {
   position: relative;
   display: flex;
@@ -169,7 +201,7 @@
 
 .spx-input-icon {
   position: absolute;
-  left: 0.875rem;
+  left: 0.9rem;
   color: var(--spx-text-muted);
   font-size: 0.9rem;
   pointer-events: none;
@@ -179,12 +211,12 @@
 .spx-input {
   width: 100%;
   background: var(--spx-input-bg);
-  border: 1px solid var(--spx-border);
+  border: 1.5px solid var(--spx-border);
   border-radius: var(--spx-radius-sm);
   color: var(--spx-text);
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 0.9375rem;
-  padding: 0.875rem 1rem 0.875rem 2.75rem;
+  padding: 0.85rem 1rem 0.85rem 2.75rem;
   transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
 }
@@ -192,6 +224,7 @@
 .spx-input:focus {
   border-color: var(--spx-primary);
   box-shadow: 0 0 0 3px var(--spx-primary-glow);
+  background: #fff;
 }
 .spx-input--padded-right { padding-right: 3rem; }
 
@@ -211,21 +244,24 @@
 }
 .spx-toggle-password:hover { color: var(--spx-text-sub); }
 
-/* ── Error ──────────────────────────────────── */
+/* ── Errores ─────────────────────────────────── */
 .spx-error {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
   border-radius: var(--spx-radius-sm);
-  color: #fca5a5;
+  color: #dc2626;
   font-size: 0.85rem;
   padding: 0.6rem 0.875rem;
   margin-bottom: 1rem;
 }
-
-/* Error especial: caja cerrada */
+.spx-error--sesion {
+  background: rgba(251, 191, 36, 0.08);
+  border-color: rgba(251, 191, 36, 0.3);
+  color: #b45309;
+}
 .spx-error--caja {
   flex-direction: column;
   align-items: flex-start;
@@ -235,34 +271,19 @@
 .spx-error--caja__icon {
   width: 2rem; height: 2rem;
   border-radius: 50%;
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.12);
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.85rem; color: #f87171;
+  font-size: 0.85rem; color: #dc2626;
   flex-shrink: 0;
 }
-.spx-error--caja > div {
-  display: flex; flex-direction: column; gap: 0.2rem;
-}
-.spx-error--caja strong {
-  font-weight: 700; font-size: 0.875rem; color: #fca5a5;
-}
-.spx-error--caja span {
-  font-size: 0.8rem; color: #f87171; line-height: 1.4;
-}
-
-.spx-error--sesion {
-  background: rgba(251, 191, 36, 0.1);
-  border-color: rgba(251, 191, 36, 0.35);
-  color: #fbbf24;
-}
-.spx-error--sesion i {
-  color: #fbbf24;
-}
+.spx-error--caja > div { display: flex; flex-direction: column; gap: 0.2rem; }
+.spx-error--caja strong { font-weight: 700; font-size: 0.875rem; color: #dc2626; }
+.spx-error--caja span   { font-size: 0.8rem; color: #b91c1c; line-height: 1.4; }
 
 /* ── Botón ingresar ─────────────────────────── */
 .spx-btn-login {
   width: 100%;
-  background: var(--spx-primary);
+  background: linear-gradient(90deg, #0088cc, var(--spx-primary));
   border: none;
   border-radius: var(--spx-radius-sm);
   color: #fff;
@@ -276,26 +297,22 @@
   justify-content: center;
   gap: 0.5rem;
   margin-top: 0.5rem;
-  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-  box-shadow: 0 4px 14px var(--spx-primary-glow);
+  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 18px var(--spx-primary-glow);
   letter-spacing: 0.01em;
 }
 .spx-btn-login:hover:not(:disabled) {
-  background: #0a6fd8;
+  opacity: 0.9;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(13, 127, 242, 0.4);
+  box-shadow: 0 8px 24px rgba(13, 127, 242, 0.40);
 }
 .spx-btn-login:active:not(:disabled) { transform: translateY(0); }
-.spx-btn-login:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
+.spx-btn-login:disabled { opacity: 0.55; cursor: not-allowed; }
 
 /* ── Spinner ────────────────────────────────── */
 .spx-spinner {
   display: inline-block;
-  width: 1rem;
-  height: 1rem;
+  width: 1rem; height: 1rem;
   border: 2px solid rgba(255,255,255,0.3);
   border-top-color: #fff;
   border-radius: 50%;
@@ -312,7 +329,7 @@
 }
 .spx-card-footer p {
   font-size: 0.875rem;
-  color: var(--spx-text-sub);
+  color: var(--spx-text-muted);
   margin: 0;
 }
 .spx-card-footer a {
@@ -322,26 +339,53 @@
 }
 .spx-card-footer a:hover { text-decoration: underline; }
 
-/* ── Copyright ──────────────────────────────── */
-.spx-copyright {
-  margin-top: 2rem;
-  text-align: center;
+/* ══════════════════════════════════════════════
+   RESPONSIVE — Móvil
+   ══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .spx-login-wrapper {
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Panel branding: header compacto en móvil */
+  .spx-panel-brand {
+    width: 100%;
+    min-height: auto;
+    padding: 2.5rem 1.5rem 3rem;
+    border-radius: 0 0 2rem 2rem;
+  }
+
+  .spx-logo-img {
+    width: 150px;
+    height: 150px;
+  }
+
+  .spx-brand-name {
+    font-size: 2rem;
+  }
+
+  .spx-brand-sub {
+    font-size: 0.875rem;
+    max-width: 260px;
+  }
+
+  .spx-brand-footer {
+    display: none; /* copyright en móvil se oculta */
+  }
+
+  /* Panel formulario: ocupa el resto */
+  .spx-panel-form {
+    width: 100%;
+    min-height: auto;
+    padding: 2rem 1rem 2.5rem;
+    align-items: flex-start;
+  }
+
+  .spx-card {
+    max-width: 100%;
+    padding: 1.75rem 1.25rem;
+    box-shadow: none;
+    background: transparent;
+  }
 }
-.spx-copyright p {
-  font-size: 0.75rem;
-  color: #475569;
-  margin: 0 0 0.5rem;
-}
-.spx-copyright-links {
-  display: flex;
-  gap: 1.25rem;
-  justify-content: center;
-}
-.spx-copyright-links a {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #475569;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.spx-copyright-links a:hover { color: var(--spx-primary); }
