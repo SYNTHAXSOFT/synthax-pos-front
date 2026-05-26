@@ -1,7 +1,7 @@
 /* Bootstrap ya se carga desde angular.json */
 
 /* ── Imports: deben ir antes que cualquier regla CSS ─────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Inter se carga desde index.html con <link> para evitar errores de red en build */
 /* Tema claro — overrides globales activados con [data-theme="light"] */
 @import 'app/shared/styles/spx-light-theme.css';
 

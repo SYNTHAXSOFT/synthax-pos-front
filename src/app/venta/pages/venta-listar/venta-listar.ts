@@ -781,186 +781,224 @@ export class VentaListarPageComponent implements OnInit {
     const venta = this.ventaParaImprimir;
     if (!venta) return;
 
-    /* ── Helpers de formato ── */
+    /* ── Helpers numéricos ── */
     const fmt = (n: number) =>
       new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 
     const fmtDate = (d: Date) => {
       const dd  = String(d.getDate()).padStart(2, '0');
       const mm  = String(d.getMonth() + 1).padStart(2, '0');
-      const yy  = d.getFullYear();
+      const yy  = String(d.getFullYear()).slice(2); // 2 dígitos
       const hh  = String(d.getHours()).padStart(2, '0');
       const min = String(d.getMinutes()).padStart(2, '0');
-      return `${dd}/${mm}/${yy} ${hh}:${min}`;
+      return `${dd}/${mm}/${yy} ${hh}:${min}`;    // "24/05/26 21:30"
     };
 
     /*
-     * Helper: fila de 2 columnas usando tabla (NO flex).
-     * En impresoras térmicas flex/grid no son confiables —
-     * las tablas garantizan que el texto largo haga salto de línea
-     * dentro de la celda en lugar de desbordarse fuera del papel.
+     * ── ENFOQUE PRE/MONOSPACE ────────────────────────────────────────────────
+     * Razón: table-layout:fixed en HTML no garantiza el ancho en impresoras
+     * térmicas porque cada driver maneja los márgenes de forma diferente.
+     * Con <pre> + fuente monoespaciada, cada línea tiene EXACTAMENTE W chars
+     * → imposible que se desborde.
      */
-    const fila = (label: string, valor: string, bold = false) => {
-      const w = bold ? 'font-weight:700;' : '';
-      return `<tr>
-        <td style="padding:2px 0;vertical-align:top;white-space:nowrap;${w}">${label}</td>
-        <td style="padding:2px 0;text-align:right;vertical-align:top;word-break:break-word;${w}">${valor}</td>
-      </tr>`;
+    const W = 28; // chars por línea (bold Courier 10pt en papel 80mm ≈ 28 chars seguros con margen)
+
+    /* Normaliza texto: sin saltos de línea, máximo `max` chars */
+    const trunc = (s: unknown, max: number): string =>
+      String(s ?? '').replace(/[\n\r]/g, ' ').trim().slice(0, max);
+
+    /* Abrevia nombre completo para que quepa en `max` chars */
+    const abrevNombre = (nombre: string, max: number): string => {
+      if (nombre.length <= max) return nombre;
+      const partes = nombre.split(/\s+/).filter(Boolean);
+      if (partes.length <= 1) return nombre.slice(0, max);
+      let r = partes[0];
+      for (let i = 1; i < partes.length; i++) {
+        const init = ` ${partes[i][0]}.`;
+        if (r.length + init.length <= max) r += init; else break;
+      }
+      return r.slice(0, max);
     };
 
-    /* ── Datos del restaurante ── */
-    const rest = this.authService.getCurrentRestaurante();
-    const restNombre    = rest?.nombre    ?? 'MOED';
-    const restTelefono  = rest?.telefono  ? `<p style="margin:1px 0;">Tel: ${rest.telefono}</p>` : '';
-    const restDireccion = rest?.direccion ? `<p style="margin:1px 0;">${rest.direccion}</p>`      : '';
-    const restNit       = rest?.nit       ? `<p style="margin:1px 0;">NIT: ${rest.nit}</p>`       : '';
+    /* Centra texto en W chars */
+    const center = (s: string): string => {
+      const t = trunc(s, W);
+      const pad = Math.floor((W - t.length) / 2);
+      return ' '.repeat(pad) + t;
+    };
 
-    /* ── Productos ── */
-    const itemsHtml = this.pedidosParaImprimir.map(p => {
+    /*
+     * Fila de 2 columnas: etiqueta (izq 13 chars) + valor (der 15 chars) = 28
+     * El valor se abrevia si es demasiado largo.
+     */
+    const lr = (label: string, value: string): string => {
+      const MAX_R = 15;
+      const MAX_L = W - MAX_R; // 13
+      const l = trunc(label, MAX_L).padEnd(MAX_L);
+      const r = trunc(value, MAX_R).padStart(MAX_R);
+      return l + r;
+    };
+
+    /*
+     * Fila de producto: nombre (14) | cant (4) | total (10) = 28
+     */
+    const prodLine = (nombre: string, cant: number, totalStr: string): string => {
+      const N = 14, C = 4, T = 10;
+      return trunc(nombre, N).padEnd(N) +
+             String(cant).padStart(C) +
+             trunc(totalStr, T).padStart(T);
+    };
+
+    const DIV  = '-'.repeat(W);
+    const DIVB = '='.repeat(W);
+
+    /* ── Datos del restaurante ── */
+    const rest        = this.authService.getCurrentRestaurante();
+    const restNombre  = trunc(rest?.nombre ?? 'MOED', W);
+
+    /* ── Construir array de líneas ── */
+    const lines: string[] = [];
+
+    // Encabezado
+    lines.push(center(restNombre.toUpperCase()));
+    if (rest?.nit)       lines.push(center(`NIT: ${rest.nit}`));
+    if (rest?.telefono)  lines.push(center(`Tel: ${rest.telefono}`));
+    if (rest?.direccion) {
+      // Wrap dirección larga en varias líneas centradas
+      const dir = rest.direccion.replace(/[\n\r]/g, ' ').trim();
+      for (let i = 0; i < dir.length; i += W) {
+        lines.push(center(dir.slice(i, i + W).trim()));
+      }
+    }
+    if (venta.tipoPedido?.nombre) {
+      lines.push(center(venta.tipoPedido.nombre.toUpperCase()));
+    }
+    lines.push(DIV);
+
+    // Meta de la venta
+    lines.push(lr('Ticket #', String(venta.id ?? '')));
+    lines.push(lr('Fecha', fmtDate(this.fechaImpresion)));
+    if (venta.mesa?.nombre) {
+      lines.push(lr('Mesa', trunc(venta.mesa.nombre, 17)));
+    }
+    if (venta.usuarioCreador) {
+      const nom = `${venta.usuarioCreador.nombre ?? ''} ${venta.usuarioCreador.apellido ?? ''}`.trim();
+      lines.push(lr('Atendido', abrevNombre(nom, 17)));
+    }
+    if (venta.usuarioCliente) {
+      const nom = `${venta.usuarioCliente.nombre ?? ''} ${venta.usuarioCliente.apellido ?? ''}`.trim();
+      lines.push(lr('Cliente', abrevNombre(nom, 17)));
+    }
+    lines.push(DIV);
+
+    // Cabecera de productos
+    lines.push('Producto'.padEnd(14) + 'Cant'.padStart(4) + 'Total'.padStart(10));
+    lines.push(DIVB);
+
+    // Productos
+    for (const p of this.pedidosParaImprimir) {
       const precio   = p.producto?.precio ?? 0;
       const cantidad = p.cantidad ?? 1;
-      const obsHtml  = p.observacion
-        ? `<br><span style="font-size:10px;">&#x21B3; ${p.observacion}</span>`
-        : '';
-      return `<tr>
-        <td style="padding:3px 0;vertical-align:top;word-break:break-word;">${p.producto?.nombre ?? ''}${obsHtml}</td>
-        <td style="text-align:center;padding:3px 4px;vertical-align:top;white-space:nowrap;">${cantidad}</td>
-        <td style="text-align:right;padding:3px 0;vertical-align:top;white-space:nowrap;">$ ${fmt(precio * cantidad)}</td>
-      </tr>`;
-    }).join('');
+      const totalStr = `$${fmt(precio * cantidad)}`;
+      lines.push(prodLine(p.producto?.nombre ?? '', cantidad, totalStr));
+      if (p.observacion) {
+        lines.push(' > ' + trunc(p.observacion, W - 3));
+      }
+    }
 
-    /* ── Servicios adicionales ── */
-    const serviciosHtml = this.serviciosParaImprimir.length > 0
-      ? `<div class="div"></div>
-         <p style="font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:3px 0;">Servicios adicionales</p>
-         <table>
-           ${this.serviciosParaImprimir.map(sv =>
-             fila(sv.descripcion, `$ ${fmt(sv.valor)}`)
-           ).join('')}
-         </table>`
+    // Servicios adicionales
+    if (this.serviciosParaImprimir.length > 0) {
+      lines.push(DIV);
+      lines.push(center('SERV. ADICIONALES'));
+      for (const sv of this.serviciosParaImprimir) {
+        lines.push(lr(trunc(sv.descripcion, 13), `$${fmt(sv.valor)}`));  // label max=13
+      }
+    }
+
+    lines.push(DIV);
+
+    // Totales
+    lines.push(lr('Subtotal', `$${fmt(this.subtotalParaImprimir)}`));
+    for (const t of this.impuestosParaImprimir) {
+      const desc = trunc(`${t.impuesto.descripcion} ${t.impuesto.porcentajeImpuesto}%`, 13);
+      lines.push(lr(desc, `+$${fmt(t.valor)}`));
+    }
+    if (this.descuentoValorParaImprimir > 0) {
+      lines.push(lr(`Desc. ${venta.descuento}%`, `-$${fmt(this.descuentoValorParaImprimir)}`));
+      if (venta.motivoDescuento) {
+        lines.push(' > ' + trunc(venta.motivoDescuento, W - 3));
+      }
+    }
+
+    lines.push(DIVB);
+
+    // TOTAL (negrita visual: mayúsculas + valor derecho)
+    const totalStr2 = `$${fmt(this.totalParaImprimir)}`;
+    lines.push('TOTAL'.padEnd(W - totalStr2.length) + totalStr2);
+
+    lines.push(DIVB);
+
+    // Observaciones de la venta
+    if (venta.observacion) {
+      lines.push(center('-- INSTRUCCIONES --'));
+      const obs = venta.observacion.replace(/[\n\r]/g, ' ').trim();
+      for (let i = 0; i < obs.length; i += W) {
+        lines.push(obs.slice(i, i + W));
+      }
+      lines.push(DIV);
+    }
+
+    // Pie de página
+    lines.push(center('¡Gracias por su compra!'));
+    lines.push(center(restNombre));
+
+    /* ── Escapar caracteres especiales HTML para el <pre> ── */
+    const safe = (s: string) =>
+      s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    const preContent = lines.map(safe).join('\n');
+
+    /* ── HTML completo ── */
+    const logoTag = rest?.logo
+      ? `<img src="${rest.logo}" alt="${restNombre}" style="display:block;margin:0 auto 4mm;max-height:18mm;max-width:50mm;object-fit:contain;">`
       : '';
 
-    /* ── Impuestos ── */
-    const impuestosHtml = this.impuestosParaImprimir.map(t =>
-      fila(`${t.impuesto.descripcion} (${t.impuesto.porcentajeImpuesto}%)`, `+ $ ${fmt(t.valor)}`)
-    ).join('');
-
-    /* ── Descuento ── */
-    const descuentoHtml = this.descuentoValorParaImprimir > 0
-      ? fila(`Descuento (${venta.descuento}%)`, `- $ ${fmt(this.descuentoValorParaImprimir)}`, true)
-        + (venta.motivoDescuento
-            ? `<tr><td colspan="2" style="font-size:10px;font-style:italic;padding:1px 0 4px 8px;">${venta.motivoDescuento}</td></tr>`
-            : '')
-      : '';
-
-    /* ── Meta de venta (ticket, fecha, atendido, cliente, mesa) ── */
-    const mesaHtml    = venta.mesa?.nombre
-      ? fila('Mesa', venta.mesa.nombre) : '';
-    const creadorHtml = venta.usuarioCreador
-      ? fila('Atendido por', `${venta.usuarioCreador.nombre ?? ''} ${venta.usuarioCreador.apellido ?? ''}`.trim())
-      : '';
-    const clienteHtml = venta.usuarioCliente
-      ? fila('Cliente', `${venta.usuarioCliente.nombre ?? ''} ${venta.usuarioCliente.apellido ?? ''}`.trim())
-      : '';
-    const obsVentaHtml = venta.observacion
-      ? `<div class="div"></div>
-         <p style="margin:2px 0;"><strong>Instrucciones:</strong></p>
-         <p style="margin:2px 0;word-break:break-word;">${venta.observacion}</p>`
-      : '';
-
-    /* ── HTML completo de la tirilla ── */
     const html = `<!DOCTYPE html>
 <html lang="es"><head>
   <meta charset="UTF-8">
   <title>Tirilla #${venta.id}</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing:border-box; margin:0; padding:0; }
     body {
-      width: 72mm;
-      margin: 0 auto;
-      padding: 4mm 3mm;
       font-family: 'Courier New', Courier, monospace;
-      font-size: 11px;
+      font-size: 10pt;
+      font-weight: bold;
       color: #000;
       background: #fff;
+      width: 80mm;
+      padding: 3mm 4mm;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    pre {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 10pt;
+      font-weight: bold;
+      color: #000;
+      white-space: pre;
+      line-height: 1.45;
+      margin: 0;
+      width: 100%;
+      overflow: hidden;
     }
     @media print {
-      html, body { width: 80mm; margin: 0; padding: 4mm 3mm; }
-      @page { size: 80mm auto; margin: 0mm; }
+      @page { size: 80mm auto; margin: 0; }
+      body { width: 100%; padding: 3mm 4mm; }
     }
-    table  { width: 100%; border-collapse: collapse; }
-    td, th { color: #000; }
-    .div   { border-top: 1px dashed #000; margin: 5px 0; }
-    .divB  { border-top: 2px solid  #000; margin: 5px 0; }
-    p      { color: #000; }
   </style>
 </head><body>
-
-  <!-- ── Encabezado ── -->
-  <div style="text-align:center;margin-bottom:6px;">
-    <div style="font-size:22px;margin-bottom:3px;">&#127869;</div>
-    <p style="font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin:0 0 2px 0;">${restNombre}</p>
-    ${restNit}
-    ${restTelefono}
-    ${restDireccion}
-    <p style="font-size:12px;font-weight:700;margin:4px 0 0 0;text-transform:uppercase;letter-spacing:1px;">${venta.tipoPedido?.nombre ?? ''}</p>
-  </div>
-
-  <div class="div"></div>
-
-  <!-- ── Meta de la venta ── -->
-  <table style="font-size:11px;margin:3px 0;">
-    ${fila('Ticket #', String(venta.id ?? ''))}
-    ${fila('Fecha', fmtDate(this.fechaImpresion))}
-    ${mesaHtml}
-    ${creadorHtml}
-    ${clienteHtml}
-  </table>
-
-  <div class="div"></div>
-
-  <!-- ── Productos ── -->
-  <table style="font-size:11px;margin:3px 0;">
-    <thead>
-      <tr style="border-bottom:1px dashed #000;">
-        <th style="text-align:left;padding:2px 0;font-weight:700;">Producto</th>
-        <th style="text-align:center;padding:2px 4px;font-weight:700;">Cant.</th>
-        <th style="text-align:right;padding:2px 0;font-weight:700;">Tot</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${itemsHtml}
-    </tbody>
-  </table>
-
-  ${serviciosHtml}
-
-  <div class="div"></div>
-
-  <!-- ── Totales ── -->
-  <table style="font-size:11px;margin:3px 0;">
-    ${fila('Subtotal', `$ ${fmt(this.subtotalParaImprimir)}`)}
-    ${impuestosHtml}
-    ${descuentoHtml}
-  </table>
-
-  <div class="divB"></div>
-
-  <table style="font-size:14px;font-weight:700;margin:3px 0;">
-    ${fila('TOTAL', `$ ${fmt(this.totalParaImprimir)}`, true)}
-  </table>
-
-  <div class="divB"></div>
-
-  <!-- ── Instrucciones ── -->
-  ${obsVentaHtml}
-
-  <!-- ── Pie ── -->
-  <div style="text-align:center;margin-top:10px;font-size:11px;">
-    <p style="margin:2px 0;font-weight:700;">¡Gracias por su compra!</p>
-    <p style="margin:2px 0;">${restNombre}</p>
-  </div>
-
+  ${logoTag}
+  <pre>${preContent}</pre>
 </body></html>`;
 
     /* ── Abrir ventana emergente y lanzar impresión ── */

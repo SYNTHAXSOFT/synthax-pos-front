@@ -189,44 +189,92 @@ export class PedidoRegistrarPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const rest = this.authService.getCurrentRestaurante();
+    const rest  = this.authService.getCurrentRestaurante();
     const ahora = new Date();
-    const hora  = ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
-    const fecha = ahora.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const dd    = String(ahora.getDate()).padStart(2, '0');
+    const mm    = String(ahora.getMonth() + 1).padStart(2, '0');
+    const yy    = String(ahora.getFullYear()).slice(2);
+    const hh    = String(ahora.getHours()).padStart(2, '0');
+    const min   = String(ahora.getMinutes()).padStart(2, '0');
+    const fechaHora = `${dd}/${mm}/${yy} ${hh}:${min}`;
 
-    const estadoBadge = (estado: string) => {
-      const etiquetas: Record<string, string> = {
-        CREADO:   '● NUEVO',
-        PEDIDO:   '▶ EN ESPERA',
-        PREPARANDO: '🔥 PREPARANDO',
-        PREPARADO: '✓ LISTO',
-        DEVUELTO: '↩ DEVUELTO',
-      };
-      return etiquetas[estado] ?? estado;
+    /* ── Mismo enfoque PRE/monospace que la tirilla ── */
+    const W = 28;
+
+    const trunc = (s: unknown, max: number): string =>
+      String(s ?? '').replace(/[\n\r]/g, ' ').trim().slice(0, max);
+
+    const center = (s: string): string => {
+      const t = trunc(s, W);
+      const pad = Math.floor((W - t.length) / 2);
+      return ' '.repeat(pad) + t;
     };
 
-    const itemsHtml = activos.map((p, i) => {
-      const obs = p.observacion
-        ? `<tr><td colspan="2" style="padding:2px 0 5px 12px;font-size:11px;font-style:italic;">↳ ${p.observacion}</td></tr>`
-        : '';
-      return `
-        <tr style="border-top:1px dashed #000;">
-          <td style="padding:5px 0;font-size:13px;font-weight:700;vertical-align:top;">
-            ${i + 1}. ${p.producto?.nombre ?? '—'}
-          </td>
-          <td style="text-align:right;padding:5px 0;font-size:15px;font-weight:900;vertical-align:top;white-space:nowrap;">
-            x${p.cantidad ?? 1}
-          </td>
-        </tr>
-        ${obs}`;
-    }).join('');
+    /* Fila etiqueta (13) | valor (15) = 28 */
+    const lr = (label: string, value: string): string => {
+      const MAX_R = 15, MAX_L = W - MAX_R; // 13
+      return trunc(label, MAX_L).padEnd(MAX_L) +
+             trunc(value, MAX_R).padStart(MAX_R);
+    };
 
-    const mesaHtml = venta?.mesa?.nombre
-      ? `<p style="font-size:13px;font-weight:700;margin:2px 0;">Mesa: ${venta.mesa.nombre}</p>` : '';
-    const obsVentaHtml = venta?.observacion
-      ? `<div style="border:2px solid #000;padding:5px 6px;margin:6px 0;font-size:11px;">
-           <strong>INSTRUCCIONES:</strong> ${venta.observacion}
-         </div>` : '';
+    const DIV  = '-'.repeat(W);
+    const DIVB = '='.repeat(W);
+
+    const restNombre = trunc(rest?.nombre ?? 'MOED', W);
+
+    /* ── Construir líneas ── */
+    const lines: string[] = [];
+
+    lines.push(center('* COMANDA DE COCINA *'));
+    lines.push(center(restNombre.toUpperCase()));
+    lines.push(DIVB);
+
+    // Meta
+    lines.push(lr('Pedido #', String(venta?.id ?? '')));
+    lines.push(lr('Tipo', trunc(venta?.tipoPedido?.nombre ?? '—', 15)));
+    lines.push(lr('Hora', fechaHora));
+    if (venta?.mesa?.nombre) lines.push(lr('Mesa', trunc(venta.mesa.nombre, 15)));
+
+    // Instrucciones de la venta
+    if (venta?.observacion) {
+      lines.push(DIV);
+      lines.push(center('INSTRUCCIONES:'));
+      const obs = venta.observacion.replace(/[\n\r]/g, ' ').trim();
+      for (let i = 0; i < obs.length; i += W) {
+        lines.push(obs.slice(i, i + W));
+      }
+    }
+
+    lines.push(DIVB);
+
+    // Cabecera productos: nombre (22) | cant (6) = 28
+    lines.push('Producto'.padEnd(22) + 'Cant'.padStart(6));
+    lines.push(DIV);
+
+    // Productos
+    activos.forEach((p, i) => {
+      const num     = String(i + 1) + '. ';
+      const maxNom  = 22 - num.length;           // espacio para el nombre
+      const nombre  = trunc(p.producto?.nombre ?? '—', maxNom);
+      const cant    = `x${p.cantidad ?? 1}`;
+      lines.push((num + nombre).padEnd(22) + cant.padStart(6));
+      if (p.observacion) {
+        lines.push('  > ' + trunc(p.observacion, W - 4));
+      }
+    });
+
+    lines.push(DIVB);
+
+    // Totales
+    const totalUnd = activos.reduce((s, p) => s + (p.cantidad ?? 1), 0);
+    lines.push(center(`${activos.length} producto(s) / ${totalUnd} und.`));
+    lines.push(center('-- USO INTERNO / COCINA --'));
+
+    /* Escapar HTML */
+    const safe = (s: string) =>
+      s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    const preContent = lines.map(safe).join('\n');
 
     const html = `<!DOCTYPE html>
 <html lang="es"><head>
@@ -235,83 +283,34 @@ export class PedidoRegistrarPageComponent implements OnInit, OnDestroy {
   <style>
     * { box-sizing:border-box; margin:0; padding:0; }
     body {
-      width: 72mm;
-      margin: 0 auto;
-      padding: 4mm 3mm;
       font-family: 'Courier New', Courier, monospace;
-      font-size: 12px;
+      font-size: 10pt;
+      font-weight: bold;
       color: #000;
       background: #fff;
+      width: 80mm;
+      padding: 3mm 4mm;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    pre {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 10pt;
+      font-weight: bold;
+      color: #000;
+      white-space: pre;
+      line-height: 1.5;
+      margin: 0;
+      width: 100%;
+      overflow: hidden;
     }
     @media print {
-      html, body { width: 80mm; margin: 0; padding: 4mm 3mm; }
-      @page { size: 80mm auto; margin: 0mm; }
+      @page { size: 80mm auto; margin: 0; }
+      body { width: 100%; padding: 3mm 4mm; }
     }
-    table { width: 100%; border-collapse: collapse; }
-    td    { color: #000; word-break: break-word; }
-    .div  { border-top: 1px dashed #000; margin: 5px 0; }
-    .divB { border-top: 3px solid  #000; margin: 6px 0; }
   </style>
 </head><body>
-
-  <!-- Encabezado -->
-  <div style="text-align:center;margin-bottom:6px;">
-    <p style="font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:2px;">
-      ✦ COMANDA DE COCINA ✦
-    </p>
-    <p style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">
-      ${rest?.nombre ?? 'MOED'}
-    </p>
-  </div>
-
-  <div class="divB"></div>
-
-  <!-- Info de la venta -->
-  <div style="margin:4px 0;">
-    <table style="font-size:12px;">
-      <tr>
-        <td style="white-space:nowrap;padding:2px 0;"><strong>Pedido #</strong></td>
-        <td style="text-align:right;padding:2px 0;">${venta?.id ?? '—'}</td>
-      </tr>
-      <tr>
-        <td style="white-space:nowrap;padding:2px 0;"><strong>Tipo</strong></td>
-        <td style="text-align:right;padding:2px 0;">${venta?.tipoPedido?.nombre ?? '—'}</td>
-      </tr>
-      <tr>
-        <td style="white-space:nowrap;padding:2px 0;"><strong>Hora</strong></td>
-        <td style="text-align:right;padding:2px 0;">${fecha} ${hora}</td>
-      </tr>
-    </table>
-    ${mesaHtml}
-  </div>
-
-  ${obsVentaHtml}
-
-  <div class="divB"></div>
-
-  <!-- Productos -->
-  <table style="font-size:12px;margin:4px 0;">
-    <thead>
-      <tr>
-        <th style="text-align:left;padding:2px 0;font-size:10px;letter-spacing:1px;text-transform:uppercase;">Producto</th>
-        <th style="text-align:right;padding:2px 0;font-size:10px;letter-spacing:1px;text-transform:uppercase;">Cant.</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${itemsHtml}
-    </tbody>
-  </table>
-
-  <div class="divB"></div>
-
-  <!-- Total de items -->
-  <div style="text-align:center;margin-top:6px;">
-    <p style="font-size:11px;font-weight:700;">
-      Total: ${activos.length} producto(s) — ${activos.reduce((s, p) => s + (p.cantidad ?? 1), 0)} unidad(es)
-    </p>
-    <p style="font-size:10px;margin-top:4px;letter-spacing:1px;">— USO INTERNO / COCINA —</p>
-  </div>
-
+  <pre>${preContent}</pre>
 </body></html>`;
 
     const win = window.open('', '_blank', 'width=420,height=600,scrollbars=yes');
