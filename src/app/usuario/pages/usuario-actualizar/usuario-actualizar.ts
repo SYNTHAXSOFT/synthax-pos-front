@@ -54,7 +54,7 @@ export class ActualizarUsuarioPageComponent implements OnInit {
       },
       error: () => {
         this.toastService.error('Error al cargar el usuario');
-        this.router.navigate(['/synthax-pos/usuario/listar']);
+        this.router.navigate(['/moed/usuario/listar']);
       },
     });
   }
@@ -67,7 +67,7 @@ export class ActualizarUsuarioPageComponent implements OnInit {
     this.usuarioService.actualizar(this.usuarioId, this.usuario).subscribe({
       next: () => {
         this.toastService.success('Usuario actualizado exitosamente');
-        this.router.navigate(['/synthax-pos/usuario/listar']);
+        this.router.navigate(['/moed/usuario/listar']);
       },
       error: (err) => {
         const msg = err.error?.error
@@ -81,6 +81,6 @@ export class ActualizarUsuarioPageComponent implements OnInit {
   }
 
   cancelar(): void {
-    this.router.navigate(['/synthax-pos/usuario/listar']);
+    this.router.navigate(['/moed/usuario/listar']);
   }
 }

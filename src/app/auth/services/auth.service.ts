@@ -162,9 +162,9 @@ export class AuthService {
   getDefaultRouteByRole(): string {
     const user = this.getCurrentUser();
     if (!user) return '/';
-    if (user.rol === 'ROOT')         return '/synthax-pos/restaurante/listar';
-    if (user.rol === 'COCINERO')     return '/synthax-pos/venta/registrar';
-    if (user.rol === 'DOMICILIARIO') return '/synthax-pos/venta/listar';
-    return '/synthax-pos/inicio';
+    if (user.rol === 'ROOT')         return '/moed/restaurante/listar';
+    if (user.rol === 'COCINERO')     return '/moed/venta/registrar';
+    if (user.rol === 'DOMICILIARIO') return '/moed/venta/listar';
+    return '/moed/inicio';
   }
 }

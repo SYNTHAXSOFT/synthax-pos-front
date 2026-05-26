@@ -54,7 +54,7 @@ export class RestauranteListarPageComponent implements OnInit {
 
   configurarBranding(id?: number): void {
     if (!id) return;
-    this.router.navigate(['/synthax-pos/restaurante/branding'], { queryParams: { id } });
+    this.router.navigate(['/moed/restaurante/branding'], { queryParams: { id } });
   }
 
   async desactivar(id?: number): Promise<void> {

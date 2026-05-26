@@ -132,7 +132,7 @@ export class ListarPage implements OnInit {
 
   editar(id: number): void {
     if (!this.modoModal) {
-      this.router.navigate(['/synthax-pos/usuario/actualizar', id]);
+      this.router.navigate(['/moed/usuario/actualizar', id]);
       return;
     }
     this.editarUsuario.emit(id);
@@ -140,7 +140,7 @@ export class ListarPage implements OnInit {
 
   nuevoUsuarioAction(): void {
     if (!this.modoModal) {
-      this.router.navigate(['/synthax-pos/usuario/registrar']);
+      this.router.navigate(['/moed/usuario/registrar']);
       return;
     }
     this.nuevoUsuario.emit();

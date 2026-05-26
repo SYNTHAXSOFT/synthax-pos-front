@@ -182,7 +182,7 @@ export class VentaRegistrarPageComponent implements OnInit {
           this.reservaService.cumplir(this.reservaDesdeId).subscribe();
         }
         this.cerrarModalNuevaVenta();
-        this.router.navigate(['/synthax-pos/pedido/registrar'], { queryParams: { ventaId: ventaCreada.id } });
+        this.router.navigate(['/moed/pedido/registrar'], { queryParams: { ventaId: ventaCreada.id } });
       },
       error: (err) => {
         console.error('Error:', err);

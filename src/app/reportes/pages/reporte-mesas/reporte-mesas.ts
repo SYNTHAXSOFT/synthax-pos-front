@@ -315,7 +315,7 @@ export class ReporteMesasComponent implements OnInit {
 
   /** Navega a /venta con la mesa pre-seleccionada y marca la reserva como cumplida al crear la venta. */
   abrirVentaDesdeReserva(item: MesaConEstado): void {
-    this.router.navigate(['/synthax-pos/venta'], {
+    this.router.navigate(['/moed/venta'], {
       queryParams: {
         mesaId:    item.mesa.id,
         reservaId: item.reserva?.id ?? null,

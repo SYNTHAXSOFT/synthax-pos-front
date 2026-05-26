@@ -29,7 +29,7 @@ export const routes: Routes = [
   { path: '', component: HomePageComponent },
 
   {
-    path: 'synthax-pos',
+    path: 'moed',
     loadComponent: () =>
       import('./shared/pages/dashboard-page/dashboard-page.component'),
     canActivate: [AuthGuard],

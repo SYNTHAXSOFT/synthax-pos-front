@@ -7,7 +7,7 @@ import { CajaService } from '../services/caja.service';
 
 /**
  * Bloquea el acceso a cualquier ruta operativa mientras la caja esté cerrada.
- * Solo permite navegar a /synthax-pos/inicio (donde está el botón de apertura).
+ * Solo permite navegar a /moed/inicio (donde está el botón de apertura).
  *
  * ROOT nunca es bloqueado (no está ligado a un restaurante con caja).
  */
@@ -37,7 +37,7 @@ export class CajaGuard implements CanActivate {
       map(res => this.evaluarEstado(res.abierta)),
       catchError(() => {
         // En caso de error de red, redirigir a inicio como precaución
-        this.router.navigate(['/synthax-pos/inicio']);
+        this.router.navigate(['/moed/inicio']);
         return of(false);
       })
     );
@@ -47,8 +47,8 @@ export class CajaGuard implements CanActivate {
     if (abierta) return true;
     // COCINERO no tiene página de inicio — redirigir a ventas donde verá el aviso
     const rutaFallback = this.authService.hasRole(['COCINERO'])
-      ? '/synthax-pos/venta/listar'
-      : '/synthax-pos/inicio';
+      ? '/moed/venta/listar'
+      : '/moed/inicio';
     this.router.navigate([rutaFallback]);
     return false;
   }

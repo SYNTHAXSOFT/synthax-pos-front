@@ -20,7 +20,7 @@ export class SideMenuHeaderComponent implements OnInit, OnDestroy {
   private brandingService = inject(BrandingService);
 
   currentUser: any              = null;
-  homeRoute: string             = '/synthax-pos/inicio';
+  homeRoute: string             = '/moed/inicio';
   restauranteNombre             = '';
   restauranteLogo: string | null = null;
   restaurantes: RestauranteLogin[] = [];
@@ -65,8 +65,8 @@ export class SideMenuHeaderComponent implements OnInit, OnDestroy {
     this.authService.setRestauranteActivo(seleccionado);
     this.actualizarDesde(seleccionado);
     // Forzar recarga completa para que todos los servicios se reinicialicen con el nuevo restaurante.
-    // Si ya estamos en /#/synthax-pos/inicio, href a la misma URL no recarga → usar reload().
-    const targetHash = '#/synthax-pos/inicio';
+    // Si ya estamos en /#/moed/inicio, href a la misma URL no recarga → usar reload().
+    const targetHash = '#/moed/inicio';
     if (window.location.hash === targetHash) {
       window.location.reload();
     } else {

@@ -386,7 +386,7 @@ export class VentaListarPageComponent implements OnInit {
 
   verPedidos(ventaId?: number): void {
     if (!ventaId) return;
-    this.router.navigate(['/synthax-pos/pedido/registrar'], { queryParams: { ventaId } });
+    this.router.navigate(['/moed/pedido/registrar'], { queryParams: { ventaId } });
   }
 
   async anular(id?: number): Promise<void> {

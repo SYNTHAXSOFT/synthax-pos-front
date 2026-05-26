@@ -18,7 +18,7 @@ interface MenuItem {
   roles?: string[];
 }
 
-// Lee las rutas hijas del dashboard (índice 1 = 'synthax-pos')
+// Lee las rutas hijas del dashboard (índice 1 = 'moed')
 const reactiveItems = routes[1].children ?? [];
 
 @Component({
@@ -42,7 +42,7 @@ export class SideMenuOptionsComponent {
       return !this.authService.hasRole(hideForRoles);
     })
     .map((item) => ({
-      route: `synthax-pos/${item.path}`,
+      route: `moed/${item.path}`,
       title: `${item.title}`,
       roles: item.data?.['roles'] as string[],
     }));
