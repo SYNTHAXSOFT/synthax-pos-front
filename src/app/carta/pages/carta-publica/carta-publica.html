@@ -1,0 +1,175 @@
+<!-- ── Loading ─────────────────────────────────────────────────────────────── -->
+@if (cargando) {
+  <div class="carta-loading">
+    <div class="carta-loading__spinner"></div>
+    <p>Cargando carta…</p>
+  </div>
+}
+
+<!-- ── Error ────────────────────────────────────────────────────────────────── -->
+@else if (error) {
+  <div class="carta-error">
+    <i class="fa-solid fa-triangle-exclamation carta-error__icon"></i>
+    <h2 class="carta-error__title">¡Ups!</h2>
+    <p class="carta-error__msg">{{ error }}</p>
+  </div>
+}
+
+<!-- ── Carta ────────────────────────────────────────────────────────────────── -->
+@else if (carta) {
+  <div class="carta-page">
+
+    <!-- Header del restaurante -->
+    <header class="carta-header">
+      @if (carta.logo) {
+        <img [src]="carta.logo" [alt]="carta.nombre" class="carta-header__logo" />
+      } @else {
+        <div class="carta-header__logo-placeholder">
+          <i class="fa-solid fa-utensils"></i>
+        </div>
+      }
+      <div class="carta-header__info">
+        <h1 class="carta-header__name">{{ carta.nombre }}</h1>
+        @if (carta.descripcion) {
+          <p class="carta-header__desc">{{ carta.descripcion }}</p>
+        }
+        <div class="carta-header__contact">
+          @if (carta.telefono) {
+            <span><i class="fa-solid fa-phone"></i> {{ carta.telefono }}</span>
+          }
+          @if (carta.correo) {
+            <span><i class="fa-solid fa-envelope"></i> {{ carta.correo }}</span>
+          }
+        </div>
+
+        <!-- Redes sociales -->
+        @if (carta.instagram || carta.facebook || carta.whatsapp || carta.tiktok || carta.sitioWeb) {
+          <div class="carta-header__redes">
+            @if (carta.whatsapp) {
+              <a [href]="whatsappUrl(carta.whatsapp)" target="_blank" rel="noopener"
+                 class="carta-red carta-red--whatsapp" title="WhatsApp">
+                <i class="fa-brands fa-whatsapp"></i>
+              </a>
+            }
+            @if (carta.instagram) {
+              <a [href]="normalizeUrl(carta.instagram)" target="_blank" rel="noopener"
+                 class="carta-red carta-red--instagram" title="Instagram">
+                <i class="fa-brands fa-instagram"></i>
+              </a>
+            }
+            @if (carta.facebook) {
+              <a [href]="normalizeUrl(carta.facebook)" target="_blank" rel="noopener"
+                 class="carta-red carta-red--facebook" title="Facebook">
+                <i class="fa-brands fa-facebook-f"></i>
+              </a>
+            }
+            @if (carta.tiktok) {
+              <a [href]="normalizeUrl(carta.tiktok)" target="_blank" rel="noopener"
+                 class="carta-red carta-red--tiktok" title="TikTok">
+                <i class="fa-brands fa-tiktok"></i>
+              </a>
+            }
+            @if (carta.sitioWeb) {
+              <a [href]="normalizeUrl(carta.sitioWeb)" target="_blank" rel="noopener"
+                 class="carta-red carta-red--web" title="Sitio Web">
+                <i class="fa-solid fa-globe"></i>
+              </a>
+            }
+          </div>
+        }
+      </div>
+    </header>
+
+    <!-- Navegación de categorías (tabs horizontales) -->
+    @if (carta.categorias.length > 0) {
+      <nav class="carta-cats">
+        <div class="carta-cats__scroll">
+          @for (cat of carta.categorias; track cat.id) {
+            <button
+              class="carta-cats__tab"
+              [class.carta-cats__tab--active]="categoriaActiva === cat.id"
+              (click)="seleccionarCategoria(cat.id)">
+              {{ cat.nombre }}
+            </button>
+          }
+        </div>
+      </nav>
+
+      <!-- Nombre y descripción de la categoría activa -->
+      @for (cat of carta.categorias; track cat.id) {
+        @if (categoriaActiva === cat.id) {
+          <div class="carta-section-header">
+            <h2 class="carta-section-header__title">{{ cat.nombre }}</h2>
+            @if (cat.descripcion) {
+              <p class="carta-section-header__desc">{{ cat.descripcion }}</p>
+            }
+          </div>
+        }
+      }
+
+      <!-- Grid de productos -->
+      <div class="carta-products">
+        @for (producto of categoriaActualProductos; track producto.id) {
+          <div class="carta-card">
+            @if (producto.imagen) {
+              <div class="carta-card__img-wrap">
+                <img [src]="producto.imagen" [alt]="producto.nombre" class="carta-card__img" />
+              </div>
+            } @else {
+              <div class="carta-card__img-wrap carta-card__img-wrap--placeholder">
+                <i class="fa-solid fa-image"></i>
+              </div>
+            }
+            <div class="carta-card__body">
+              <h3 class="carta-card__name">{{ producto.nombre }}</h3>
+              @if (producto.descripcion) {
+                <p class="carta-card__desc">{{ producto.descripcion }}</p>
+              }
+              <p class="carta-card__price">{{ formatPrecio(producto.precio) }}</p>
+            </div>
+          </div>
+        }
+
+        @if (categoriaActualProductos.length === 0) {
+          <div class="carta-empty">
+            <i class="fa-solid fa-plate-wheat"></i>
+            <p>No hay productos en esta categoría por el momento.</p>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="carta-empty">
+        <i class="fa-solid fa-book-open carta-empty__icon"></i>
+        <p>La carta estará disponible próximamente.</p>
+      </div>
+    }
+
+    <!-- Footer -->
+    <footer class="carta-footer">
+      <div class="carta-footer__inner">
+
+        <!-- Logo izquierdo -->
+        <div class="carta-footer__left">
+          <img src="assets/img/logo.png" alt="MOED" class="carta-footer__logo-img" />
+        </div>
+
+        <!-- Contenido central / derecho -->
+        <div class="carta-footer__right">
+          <div class="carta-footer__brand">
+            <span class="carta-footer__logo-text">MOED</span>
+            <span class="carta-footer__tagline">Manejo Oportuno Empresarial Digital</span>
+          </div>
+          <p class="carta-footer__copy">Carta digital creada por <strong>MOED</strong></p>
+          <a href="/#/landing#contacto" target="_blank" rel="noopener" class="carta-footer__btn">
+            <i class="fa-solid fa-envelope"></i> Quiero MOED para mi negocio
+          </a>
+          <p class="carta-footer__legal">
+            © {{ currentYear }} MOED · <a href="/#/landing" target="_blank" rel="noopener">moedpos.com</a>
+          </p>
+        </div>
+
+      </div>
+    </footer>
+
+  </div>
+}

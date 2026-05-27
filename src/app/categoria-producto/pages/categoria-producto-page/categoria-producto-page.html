@@ -1,0 +1,232 @@
+<div class="spx-page">
+
+  <!-- ── Header ─────────────────────────────────────────────────────────────── -->
+  <div class="spx-page__header">
+    <div>
+      <h2 class="spx-page__title"><i class="fa-solid fa-layer-group"></i> Categorías de Producto</h2>
+      <p class="spx-page__subtitle">Organiza tu carta digital por secciones (Entradas, Platos Fuertes, Bebidas…)</p>
+    </div>
+    <button class="spx-btn spx-btn--primary" (click)="abrirModalNueva()">
+      <i class="fa-solid fa-plus"></i> Nueva Categoría
+    </button>
+  </div>
+
+  <!-- ── Lista ──────────────────────────────────────────────────────────────── -->
+  <div class="spx-table-wrap">
+
+    @if (cargando) {
+      <div class="spx-empty"><i class="fa-solid fa-spinner fa-spin"></i> Cargando categorías…</div>
+    } @else if (categorias.length === 0) {
+      <div class="spx-empty">
+        <i class="fa-solid fa-layer-group spx-empty__icon"></i>
+        <p>No hay categorías registradas.</p>
+        <button class="spx-btn spx-btn--primary" (click)="abrirModalNueva()">Crear primera categoría</button>
+      </div>
+    } @else {
+      <table class="spx-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th class="text-center">Orden</th>
+            <th class="text-center">Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cat of categorias; track cat.id) {
+            <tr [class.spx-row--inactive]="!cat.activo">
+              <td><strong>{{ cat.nombre }}</strong></td>
+              <td class="spx-text-muted">{{ cat.descripcion || '—' }}</td>
+              <td class="text-center">{{ cat.orden ?? 0 }}</td>
+              <td class="text-center">
+                <span class="spx-badge" [class.spx-badge--success]="cat.activo" [class.spx-badge--danger]="!cat.activo">
+                  {{ cat.activo ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+              <td class="text-center spx-actions">
+                <button class="spx-btn-icon spx-btn-icon--edit" title="Editar" (click)="abrirModalEditar(cat)">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                @if (cat.activo) {
+                  <button class="spx-btn-icon spx-btn-icon--warn" title="Desactivar" (click)="desactivar(cat)">
+                    <i class="fa-solid fa-toggle-on"></i>
+                  </button>
+                } @else {
+                  <button class="spx-btn-icon spx-btn-icon--success" title="Activar" (click)="activar(cat)">
+                    <i class="fa-solid fa-toggle-off"></i>
+                  </button>
+                }
+                <button class="spx-btn-icon spx-btn-icon--danger" title="Eliminar" (click)="eliminar(cat)">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+</div>
+
+<!-- ── Modal ────────────────────────────────────────────────────────────────── -->
+@if (modalAbierto) {
+  <div class="spx-modal-overlay" (click)="cerrarModal()">
+    <div class="spx-modal" (click)="$event.stopPropagation()">
+
+      <div class="spx-modal__header">
+        <h3 class="spx-modal__title">
+          <i class="fa-solid fa-layer-group"></i>
+          {{ editando ? 'Editar Categoría' : 'Nueva Categoría' }}
+        </h3>
+        <button class="spx-modal__close" (click)="cerrarModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSave()" class="spx-modal__body">
+
+        <!-- Nombre -->
+        <div class="spx-field">
+          <label class="spx-label">Nombre <span class="spx-required">*</span></label>
+          <input class="spx-input" [class.is-invalid]="isValidField('nombre')"
+                 formControlName="nombre" placeholder="Ej: Platos Fuertes" />
+          @if (isValidField('nombre')) {
+            <span class="spx-error">{{ getFieldError('nombre') }}</span>
+          }
+        </div>
+
+        <!-- Descripción -->
+        <div class="spx-field">
+          <label class="spx-label">Descripción</label>
+          <textarea class="spx-input spx-textarea" formControlName="descripcion" rows="2"
+                    placeholder="Descripción opcional de la categoría"></textarea>
+        </div>
+
+        <!-- Orden -->
+        <div class="spx-field spx-field--half">
+          <label class="spx-label">Orden de visualización <span class="spx-required">*</span></label>
+          <input class="spx-input" type="number" min="0" formControlName="orden"
+                 [class.is-invalid]="isValidField('orden')" />
+          <span class="spx-hint">Número menor = aparece primero en la carta</span>
+          @if (isValidField('orden')) {
+            <span class="spx-error">{{ getFieldError('orden') }}</span>
+          }
+        </div>
+
+        <!-- Activo (solo en edición) -->
+        @if (editando) {
+          <div class="spx-field spx-field--check">
+            <label class="spx-check-label">
+              <input type="checkbox" formControlName="activo" />
+              <span>Categoría activa</span>
+            </label>
+          </div>
+        }
+
+        <div class="spx-modal__footer">
+          <button type="button" class="spx-btn spx-btn--ghost" (click)="cerrarModal()">Cancelar</button>
+          <button type="submit" class="spx-btn spx-btn--primary" [disabled]="guardando">
+            @if (guardando) { <i class="fa-solid fa-spinner fa-spin"></i> }
+            {{ editando ? 'Actualizar' : 'Crear Categoría' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}
+
+<style>
+:host {
+  --spx-bg:         #101922;
+  --spx-surface:    #1a242f;
+  --spx-border:     #283543;
+  --spx-primary:    #0d7ff2;
+  --spx-text:       #f1f5f9;
+  --spx-text-muted: #64748b;
+  --spx-radius:     0.75rem;
+  display: block;
+}
+
+.spx-page { padding: 2rem; min-height: 100%; background: var(--spx-bg); color: var(--spx-text); font-family: 'Inter', system-ui, sans-serif; }
+
+.spx-page__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
+.spx-page__title  { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.25rem; display: flex; align-items: center; gap: 0.5rem; }
+.spx-page__title i { color: var(--spx-primary); }
+.spx-page__subtitle { font-size: 0.82rem; color: var(--spx-text-muted); margin: 0; }
+
+/* Table */
+.spx-table-wrap { background: var(--spx-surface); border-radius: var(--spx-radius); border: 1px solid var(--spx-border); overflow: auto; }
+.spx-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.spx-table th { padding: 0.875rem 1rem; text-align: left; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--spx-text-muted); border-bottom: 1px solid var(--spx-border); white-space: nowrap; }
+.spx-table td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--spx-border); color: var(--spx-text); vertical-align: middle; }
+.spx-table tbody tr:last-child td { border-bottom: none; }
+.spx-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+.spx-row--inactive td { opacity: 0.5; }
+.spx-text-muted { color: var(--spx-text-muted); font-size: 0.82rem; }
+.text-center { text-align: center; }
+
+/* Badges */
+.spx-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; }
+.spx-badge--success { background: rgba(34,197,94,0.15); color: #22c55e; }
+.spx-badge--danger  { background: rgba(244,63,94,0.15);  color: #f43f5e; }
+
+/* Action buttons */
+.spx-actions { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.spx-btn-icon { width: 32px; height: 32px; border-radius: 0.4rem; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background 0.15s; }
+.spx-btn-icon--edit    { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.spx-btn-icon--edit:hover    { background: rgba(59,130,246,0.3); }
+.spx-btn-icon--warn    { background: rgba(245,158,11,0.15); color: #f59e0b; }
+.spx-btn-icon--warn:hover    { background: rgba(245,158,11,0.3); }
+.spx-btn-icon--success { background: rgba(34,197,94,0.15); color: #22c55e; }
+.spx-btn-icon--success:hover { background: rgba(34,197,94,0.3); }
+.spx-btn-icon--danger  { background: rgba(244,63,94,0.15);  color: #f43f5e; }
+.spx-btn-icon--danger:hover  { background: rgba(244,63,94,0.3); }
+
+/* Buttons */
+.spx-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1.1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 600; border: none; cursor: pointer; transition: background 0.15s; text-decoration: none; }
+.spx-btn--primary { background: var(--spx-primary); color: #fff; }
+.spx-btn--primary:hover { background: #0a6fd8; }
+.spx-btn--ghost   { background: transparent; color: var(--spx-text-muted); border: 1px solid var(--spx-border); }
+.spx-btn--ghost:hover { background: rgba(255,255,255,0.05); }
+.spx-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* Empty */
+.spx-empty { padding: 3rem 2rem; text-align: center; color: var(--spx-text-muted); display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+.spx-empty__icon { font-size: 2.5rem; opacity: 0.3; }
+
+/* Modal overlay */
+.spx-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.spx-modal { background: var(--spx-surface); border: 1px solid var(--spx-border); border-radius: var(--spx-radius); width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,0.5); }
+
+.spx-modal__header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--spx-border); }
+.spx-modal__title  { font-size: 1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem; }
+.spx-modal__title i { color: var(--spx-primary); }
+.spx-modal__close  { background: none; border: none; cursor: pointer; color: var(--spx-text-muted); font-size: 1.1rem; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 0.4rem; }
+.spx-modal__close:hover { background: rgba(255,255,255,0.08); }
+.spx-modal__body   { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+.spx-modal__footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding-top: 0.5rem; }
+
+/* Form fields */
+.spx-field { display: flex; flex-direction: column; gap: 0.35rem; }
+.spx-field--half { max-width: 200px; }
+.spx-field--check { flex-direction: row; align-items: center; }
+.spx-label  { font-size: 0.8rem; font-weight: 600; color: var(--spx-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.spx-required { color: #f43f5e; }
+.spx-input  { background: #0d1821; border: 1px solid var(--spx-border); border-radius: 0.5rem; color: var(--spx-text); padding: 0.55rem 0.75rem; font-size: 0.875rem; width: 100%; outline: none; box-sizing: border-box; transition: border-color 0.15s; }
+.spx-input:focus { border-color: var(--spx-primary); }
+.spx-textarea { resize: vertical; min-height: 70px; }
+.spx-input.is-invalid { border-color: #f43f5e; }
+.spx-error { font-size: 0.75rem; color: #f43f5e; }
+.spx-hint  { font-size: 0.72rem; color: var(--spx-text-muted); }
+.spx-check-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem; color: var(--spx-text); }
+.spx-check-label input { width: 16px; height: 16px; cursor: pointer; accent-color: var(--spx-primary); }
+
+@media (max-width: 640px) {
+  .spx-page { padding: 1.25rem; }
+  .spx-page__header { flex-direction: column; }
+  .spx-field--half { max-width: 100%; }
+}
+</style>

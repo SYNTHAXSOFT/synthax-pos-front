@@ -205,6 +205,16 @@ export const routes: Routes = [
         data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO'], hideForRoles: ['ROOT'] },
       },
 
+      // ── Carta Digital ────────────────────────────────────────────────────────
+      {
+        path: 'categoria-producto',
+        title: 'Categorías de Producto',
+        loadChildren: () =>
+          import('./categoria-producto/categoria-producto.routes').then((m) => m.categoriaProductoRoutes),
+        canActivate: [RoleGuard, CajaGuard],
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideFromMenu: true },
+      },
+
       // ── Operación POS ────────────────────────────────────────────────────────
       {
         path: 'venta',
@@ -241,6 +251,16 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./landing/pages/landing-page/landing-page.component').then(
         (m) => m.LandingPageComponent
+      ),
+  },
+
+  // ── Carta Digital pública (sin autenticación) ─────────────────────────────
+  {
+    path: 'carta/:slug',
+    title: 'Carta Digital',
+    loadComponent: () =>
+      import('./carta/pages/carta-publica/carta-publica').then(
+        (m) => m.CartaPublicaComponent
       ),
   },
 

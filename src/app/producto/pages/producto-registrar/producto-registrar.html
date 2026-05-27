@@ -123,6 +123,42 @@
                 </label>
               </div>
 
+              <!-- ¿Producto para la carta? -->
+              <div class="spx-form-group spx-form-col-span-4">
+                <div class="spx-carta-section">
+                  <label class="spx-form-check">
+                    <input type="checkbox" class="spx-form-check__input" formControlName="esCarta" id="esCartaProducto">
+                    <span class="spx-form-check__label">
+                      <i class="fa-solid fa-book-open" style="color:#a855f7;margin-right:0.35rem"></i>
+                      ¿Producto para la carta digital?
+                    </span>
+                  </label>
+                  @if (esCartaActivo) {
+                    <div class="spx-carta-categoria" style="margin-top:0.75rem">
+                      <label class="spx-form-label">
+                        Categoría en la carta <span class="spx-form-required">*</span>
+                      </label>
+                      <select class="spx-form-input" formControlName="categoriaProducto"
+                              [class.is-invalid]="isValidField('categoriaProducto')">
+                        <option [ngValue]="null" disabled>— Selecciona una categoría —</option>
+                        @for (cat of categorias; track cat.id) {
+                          <option [ngValue]="cat.id">{{ cat.nombre }}</option>
+                        }
+                      </select>
+                      @if (isValidField('categoriaProducto')) {
+                        <span class="spx-form-error"><i class="fa-solid fa-circle-exclamation"></i> Selecciona una categoría</span>
+                      }
+                      @if (categorias.length === 0) {
+                        <span class="spx-form-hint">
+                          <i class="fa-solid fa-triangle-exclamation" style="color:#f59e0b"></i>
+                          No hay categorías activas. <a routerLink="/moed/categoria-producto" style="color:#a855f7">Crear categorías</a>
+                        </span>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+
             </div>
 
             <!-- Receta -->

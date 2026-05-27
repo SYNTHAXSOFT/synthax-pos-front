@@ -28,6 +28,16 @@ export interface Restaurante {
   colorSecundario?: string;   // HEX, p.ej. "#fbbc04"
   colorTexto?:      string;   // HEX para texto sobre fondo primario
   colorFondo?:      string;   // HEX para fondo general de la app
+
+  // ── Carta Digital ─────────────────────────────────────────────────────────
+  slug?:            string;   // URL-friendly slug para la carta pública
+
+  // ── Redes Sociales ────────────────────────────────────────────────────────
+  instagram?:       string;
+  facebook?:        string;
+  whatsapp?:        string;
+  tiktok?:          string;
+  sitioWeb?:        string;
 }
 
 export interface RestauranteRequest {
@@ -52,9 +62,15 @@ export interface RestauranteRequest {
 
 /** DTO para actualizar únicamente la identidad visual. */
 export interface BrandingRequest {
-  logo?:           string | null;
-  colorPrimario?:  string;
+  logo?:            string | null;
+  colorPrimario?:   string;
   colorSecundario?: string;
-  colorTexto?:     string;
-  colorFondo?:     string;
+  colorTexto?:      string;
+  colorFondo?:      string;
+  // Redes sociales ('' = borrar)
+  instagram?:       string;
+  facebook?:        string;
+  whatsapp?:        string;
+  tiktok?:          string;
+  sitioWeb?:        string;
 }

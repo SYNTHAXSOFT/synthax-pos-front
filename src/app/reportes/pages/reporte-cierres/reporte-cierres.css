@@ -395,3 +395,46 @@
   align-items: center;
   gap: 0.4rem;
 }
+
+/* ── Insumos consumidos por venta (sub-fila) ──────────────────────────────── */
+.spx-cierre-insumos-row td {
+  padding: 0.3rem 0.75rem 0.5rem;
+  background: rgba(245, 158, 11, 0.04);
+  border-top: 1px dashed rgba(245,158,11,0.2);
+}
+
+.spx-cierre-insumos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.spx-cierre-insumos__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-right: 0.25rem;
+  white-space: nowrap;
+}
+
+.spx-cierre-insumos__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 9999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.72rem;
+  color: #78350f;
+}
+.spx-cierre-insumos__chip strong {
+  font-weight: 700;
+  color: #92400e;
+}

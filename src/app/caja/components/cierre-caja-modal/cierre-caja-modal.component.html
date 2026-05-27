@@ -92,6 +92,24 @@
                     <td class="caja-productos-cell">{{ v.productos?.join(', ') || '—' }}</td>
                     <td class="r txt-green"><strong>$ {{ fmt(v.valor) }}</strong></td>
                   </tr>
+                  @if (v.insumosConsumidos?.length) {
+                    <tr class="caja-insumos-row">
+                      <td colspan="6">
+                        <div class="caja-insumos">
+                          <span class="caja-insumos__label">
+                            <i class="fa-solid fa-boxes-stacked"></i> Insumos:
+                          </span>
+                          @for (ins of v.insumosConsumidos; track ins.insumoId) {
+                            <span class="caja-insumos__chip">
+                              {{ ins.insumoDescripcion }}
+                              <strong>{{ ins.cantidad % 1 === 0 ? (ins.cantidad | number:'1.0-0') : (ins.cantidad | number:'1.0-3') }}</strong>
+                              {{ ins.medida }}
+                            </span>
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
                 }
               </tbody>
               <tfoot>

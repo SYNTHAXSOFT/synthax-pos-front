@@ -168,6 +168,122 @@
           </div>
         </div>
 
+        <!-- Redes Sociales -->
+        <div class="spx-brand-card" [formGroup]="redesForm">
+          <div class="spx-brand-card__header">
+            <i class="fa-solid fa-share-nodes" style="color:#0d7ff2"></i>
+            Redes Sociales
+          </div>
+          <div class="spx-brand-card__body">
+            <p style="font-size:0.82rem;color:#94a3b8;margin:0 0 1rem">
+              Estos enlaces aparecerán en tu carta digital. Puedes poner la URL completa o solo el usuario.
+            </p>
+
+            <div class="spx-redes-grid">
+
+              <!-- WhatsApp -->
+              <div class="spx-redes-field">
+                <label class="spx-redes-label">
+                  <span class="spx-redes-icon spx-redes-icon--wa"><i class="fa-brands fa-whatsapp"></i></span>
+                  WhatsApp
+                </label>
+                <input class="spx-brand-color-hex" style="flex:1" type="text"
+                       formControlName="whatsapp" placeholder="573137799693">
+              </div>
+
+              <!-- Instagram -->
+              <div class="spx-redes-field">
+                <label class="spx-redes-label">
+                  <span class="spx-redes-icon spx-redes-icon--ig"><i class="fa-brands fa-instagram"></i></span>
+                  Instagram
+                </label>
+                <input class="spx-brand-color-hex" style="flex:1" type="text"
+                       formControlName="instagram" placeholder="instagram.com/tu-usuario">
+              </div>
+
+              <!-- Facebook -->
+              <div class="spx-redes-field">
+                <label class="spx-redes-label">
+                  <span class="spx-redes-icon spx-redes-icon--fb"><i class="fa-brands fa-facebook-f"></i></span>
+                  Facebook
+                </label>
+                <input class="spx-brand-color-hex" style="flex:1" type="text"
+                       formControlName="facebook" placeholder="facebook.com/tu-pagina">
+              </div>
+
+              <!-- TikTok -->
+              <div class="spx-redes-field">
+                <label class="spx-redes-label">
+                  <span class="spx-redes-icon spx-redes-icon--tt"><i class="fa-brands fa-tiktok"></i></span>
+                  TikTok
+                </label>
+                <input class="spx-brand-color-hex" style="flex:1" type="text"
+                       formControlName="tiktok" placeholder="tiktok.com/@tu-usuario">
+              </div>
+
+              <!-- Sitio Web -->
+              <div class="spx-redes-field spx-redes-field--full">
+                <label class="spx-redes-label">
+                  <span class="spx-redes-icon spx-redes-icon--web"><i class="fa-solid fa-globe"></i></span>
+                  Sitio Web
+                </label>
+                <input class="spx-brand-color-hex" style="flex:1" type="text"
+                       formControlName="sitioWeb" placeholder="www.tu-restaurante.com">
+              </div>
+
+            </div>
+            <p style="font-size:0.72rem;color:#64748b;margin:0.75rem 0 0">
+              <i class="fa-solid fa-circle-info"></i>
+              Los cambios se guardan al hacer clic en <strong>Guardar Configuración</strong>.
+            </p>
+          </div>
+        </div>
+
+        <!-- Carta Digital (slug) -->
+        <div class="spx-brand-card" [formGroup]="slugForm">
+          <div class="spx-brand-card__header">
+            <i class="fa-solid fa-book-open" style="color:#a855f7"></i>
+            Carta Digital
+          </div>
+          <div class="spx-brand-card__body">
+            <p style="font-size:0.82rem;color:#94a3b8;margin:0 0 0.75rem">
+              Define el slug (URL amigable) para que tus clientes accedan a la carta en línea del restaurante.
+            </p>
+            <div style="display:flex;gap:0.5rem;align-items:flex-start;flex-wrap:wrap">
+              <div style="flex:1;min-width:160px">
+                <label style="font-size:0.75rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:0.35rem">
+                  Slug
+                </label>
+                <div style="display:flex;align-items:center;background:#0d1821;border:1px solid #283543;border-radius:0.5rem;overflow:hidden">
+                  <span style="padding:0.55rem 0.6rem;font-size:0.8rem;color:#64748b;border-right:1px solid #283543;white-space:nowrap">carta/</span>
+                  <input type="text" formControlName="slug"
+                         style="flex:1;background:transparent;border:none;outline:none;color:#f1f5f9;padding:0.55rem 0.6rem;font-size:0.875rem"
+                         placeholder="nombre-del-restaurante"
+                         (input)="normalizarSlug()">
+                </div>
+                @if (cartaUrl) {
+                  <p style="font-size:0.72rem;color:#a855f7;margin:0.35rem 0 0">
+                    <i class="fa-solid fa-link"></i> {{ cartaUrl }}
+                  </p>
+                }
+              </div>
+              <div style="padding-top:1.45rem;flex-shrink:0">
+                <button type="button"
+                        style="background:#a855f7;color:#fff;border:none;border-radius:0.5rem;padding:0.55rem 1rem;font-size:0.875rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:0.4rem"
+                        (click)="guardarSlug()" [disabled]="guardandoSlug">
+                  @if (guardandoSlug) { <i class="fa-solid fa-spinner fa-spin"></i> }
+                  Guardar slug
+                </button>
+              </div>
+            </div>
+            @if (exitoSlug) {
+              <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;color:#22c55e;margin-top:0.5rem">
+                <i class="fa-solid fa-circle-check"></i> Slug actualizado correctamente
+              </div>
+            }
+          </div>
+        </div>
+
         <!-- Guardar -->
         <div class="spx-brand-save-row">
           <button class="spx-brand-btn-save"

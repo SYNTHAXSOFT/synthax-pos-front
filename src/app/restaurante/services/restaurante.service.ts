@@ -67,4 +67,9 @@ export class RestauranteService {
   eliminarLogo(id: number): Observable<Restaurante> {
     return this.http.delete<Restaurante>(`${this.base}/${id}/logo`);
   }
+
+  /** Establece el slug de la Carta Digital del restaurante. */
+  actualizarSlug(id: number, slug: string): Observable<Restaurante> {
+    return this.http.patch<Restaurante>(`${this.base}/${id}/slug`, { slug });
+  }
 }

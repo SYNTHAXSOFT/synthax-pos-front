@@ -1,3 +1,10 @@
+export interface CategoriaProductoRef {
+  id?: number;
+  nombre?: string;
+  descripcion?: string;
+  orden?: number;
+}
+
 export interface Producto {
   id?: number;
   codigo: string;
@@ -7,4 +14,6 @@ export interface Producto {
   imagen?: string;
   activo?: boolean;
   fechaCreacion?: string;
+  esCarta?: boolean;
+  categoriaProducto?: CategoriaProductoRef | null;
 }

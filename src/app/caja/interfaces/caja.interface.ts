@@ -51,14 +51,22 @@ export interface InsumoReporteItem {
   stockFinal:        number;
 }
 
+export interface InsumoConsumoItem {
+  insumoId:          number;
+  insumoDescripcion: string;
+  medida:            string;
+  cantidad:          number;
+}
+
 export interface VentaReporteItem {
-  ventaId:    number;
-  codigo:     string;
-  tipoVenta:  string;
-  cliente:    string;
-  valor:      number;
-  metodoPago: string;
-  productos:  string[];
+  ventaId:            number;
+  codigo:             string;
+  tipoVenta:          string;
+  cliente:            string;
+  valor:              number;
+  metodoPago:         string;
+  productos:          string[];
+  insumosConsumidos:  InsumoConsumoItem[];
 }
 
 export interface CierreReporteDTO {

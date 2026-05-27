@@ -266,6 +266,24 @@
                               <td class="spx-cierre-detail__productos">{{ v.productos?.join(', ') || '—' }}</td>
                               <td class="text-right spx-rpt__money">$ {{ fmt(v.valor) }}</td>
                             </tr>
+                            @if (v.insumosConsumidos?.length) {
+                              <tr class="spx-cierre-insumos-row">
+                                <td colspan="6">
+                                  <div class="spx-cierre-insumos">
+                                    <span class="spx-cierre-insumos__label">
+                                      <i class="fa-solid fa-boxes-stacked"></i> Insumos:
+                                    </span>
+                                    @for (ins of v.insumosConsumidos; track ins.insumoId) {
+                                      <span class="spx-cierre-insumos__chip">
+                                        {{ ins.insumoDescripcion }}
+                                        <strong>{{ ins.cantidad % 1 === 0 ? (ins.cantidad | number:'1.0-0') : (ins.cantidad | number:'1.0-3') }}</strong>
+                                        {{ ins.medida }}
+                                      </span>
+                                    }
+                                  </div>
+                                </td>
+                              </tr>
+                            }
                           }
                         </tbody>
                       </table>

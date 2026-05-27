@@ -27,6 +27,10 @@ export const API_ENDPOINTS = {
   // Clientes
   CLIENTES:       'clientes',
 
+  // Carta Digital
+  CATEGORIA_PRODUCTO: 'categoria-producto',
+  CARTA:              'carta',
+
   // Multi-tenancy
   RESTAURANTES:   'restaurantes',
   INSUMOS:        'insumos',

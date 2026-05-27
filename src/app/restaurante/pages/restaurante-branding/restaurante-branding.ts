@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { RestauranteService } from '../../services/restaurante.service';
 import { BrandingService } from '../../../shared/services/branding.service';
@@ -25,9 +25,11 @@ export class RestauranteBrandingComponent implements OnInit {
   private readonly toastService       = inject(ToastService);
 
   restaurante: Restaurante | null = null;
-  cargando     = false;
-  guardando    = false;
-  exito        = false;
+  cargando       = false;
+  guardando      = false;
+  guardandoSlug  = false;
+  exito          = false;
+  exitoSlug      = false;
   logoPreview: string | null = null;
 
   brandingForm: FormGroup = this.fb.group({
@@ -35,6 +37,18 @@ export class RestauranteBrandingComponent implements OnInit {
     colorSecundario: ['#f97316'],
     colorTexto:      ['#ffffff'],
     colorFondo:      ['#f0fdf4'],
+  });
+
+  slugForm: FormGroup = this.fb.group({
+    slug: ['', [Validators.required, Validators.pattern(/^[a-z0-9\-]+$/)]],
+  });
+
+  redesForm: FormGroup = this.fb.group({
+    instagram: [''],
+    facebook:  [''],
+    whatsapp:  [''],
+    tiktok:    [''],
+    sitioWeb:  [''],
   });
 
   ngOnInit(): void {
@@ -65,6 +79,14 @@ export class RestauranteBrandingComponent implements OnInit {
           colorSecundario: r.colorSecundario ?? '#f97316',
           colorTexto:      r.colorTexto      ?? '#ffffff',
           colorFondo:      r.colorFondo      ?? '#f0fdf4',
+        });
+        this.slugForm.patchValue({ slug: r.slug ?? '' });
+        this.redesForm.patchValue({
+          instagram: r.instagram ?? '',
+          facebook:  r.facebook  ?? '',
+          whatsapp:  r.whatsapp  ?? '',
+          tiktok:    r.tiktok    ?? '',
+          sitioWeb:  r.sitioWeb  ?? '',
         });
         this.cargando = false;
       },
@@ -120,6 +142,7 @@ export class RestauranteBrandingComponent implements OnInit {
     this.exito     = false;
 
     const { colorPrimario, colorSecundario, colorTexto, colorFondo } = this.brandingForm.value;
+    const { instagram, facebook, whatsapp, tiktok, sitioWeb } = this.redesForm.value;
 
     this.restauranteService.actualizarBranding(this.restaurante.id, {
       logo:            this.logoPreview,
@@ -127,9 +150,21 @@ export class RestauranteBrandingComponent implements OnInit {
       colorSecundario,
       colorTexto,
       colorFondo,
+      instagram:  instagram  ?? '',
+      facebook:   facebook   ?? '',
+      whatsapp:   whatsapp   ?? '',
+      tiktok:     tiktok     ?? '',
+      sitioWeb:   sitioWeb   ?? '',
     }).subscribe({
       next: (r) => {
         this.restaurante = r;
+        this.redesForm.patchValue({
+          instagram: r.instagram ?? '',
+          facebook:  r.facebook  ?? '',
+          whatsapp:  r.whatsapp  ?? '',
+          tiktok:    r.tiktok    ?? '',
+          sitioWeb:  r.sitioWeb  ?? '',
+        });
         // Persistir branding en localStorage y aplicarlo
         this.brandingService.setBranding({
           colorPrimario,
@@ -148,6 +183,42 @@ export class RestauranteBrandingComponent implements OnInit {
         this.guardando = false;
       },
     });
+  }
+
+  // ── Slug (Carta Digital) ─────────────────────────────────────────────────
+
+  guardarSlug(): void {
+    if (!this.restaurante?.id || this.slugForm.invalid) {
+      this.slugForm.markAllAsTouched();
+      return;
+    }
+    this.guardandoSlug = true;
+    this.exitoSlug = false;
+    const rawSlug: string = this.slugForm.value.slug ?? '';
+    const slug = rawSlug.trim().toLowerCase().replace(/[^a-z0-9\-]/g, '');
+    this.restauranteService.actualizarSlug(this.restaurante.id, slug).subscribe({
+      next: (r) => {
+        this.restaurante = r;
+        this.slugForm.patchValue({ slug: r.slug ?? '' });
+        this.guardandoSlug = false;
+        this.exitoSlug = true;
+        setTimeout(() => this.exitoSlug = false, 3000);
+      },
+      error: (err) => {
+        this.toastService.error(err.error?.error ?? 'Error al guardar el slug');
+        this.guardandoSlug = false;
+      },
+    });
+  }
+
+  normalizarSlug(): void {
+    const val: string = this.slugForm.get('slug')?.value ?? '';
+    this.slugForm.get('slug')!.setValue(val.toLowerCase().replace(/[^a-z0-9\-]/g, ''), { emitEvent: false });
+  }
+
+  get cartaUrl(): string {
+    const slug = this.slugForm.value.slug ?? this.restaurante?.slug ?? '';
+    return slug ? `moedpos.com/#/carta/${slug}` : '';
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────

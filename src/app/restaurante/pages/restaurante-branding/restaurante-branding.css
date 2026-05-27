@@ -448,3 +448,60 @@
   .spx-brand { padding: 1rem; }
   .spx-brand-color-row { flex-direction: column; align-items: flex-start; }
 }
+
+/* ── Redes Sociales ──────────────────────────────────────────────────────── */
+.spx-redes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+.spx-redes-field {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #0d1821;
+  border: 1px solid #283543;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+}
+.spx-redes-field--full { grid-column: 1 / -1; }
+.spx-redes-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  min-width: 90px;
+}
+.spx-redes-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+.spx-redes-icon--wa  { background: #25D366; }
+.spx-redes-icon--ig  { background: linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); }
+.spx-redes-icon--fb  { background: #1877F2; }
+.spx-redes-icon--tt  { background: #010101; }
+.spx-redes-icon--web { background: #0d7ff2; }
+
+.spx-redes-field input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f1f5f9;
+  font-size: 0.82rem;
+  width: 100%;
+}
+.spx-redes-field input::placeholder { color: #475569; }
+
+@media (max-width: 640px) {
+  .spx-redes-grid { grid-template-columns: 1fr; }
+  .spx-redes-field--full { grid-column: 1; }
+}

@@ -213,15 +213,30 @@ export class ReporteCierresComponent implements OnInit {
     const tdr = (v: string, cls = '') => `<td class="r ${cls}">${v}</td>`;
 
     /* ── Sección de ventas ── */
+    const fmtCant = (n: number) =>
+      Number.isInteger(n) ? String(n) : n.toFixed(3).replace(/\.?0+$/, '');
+
     const ventasBody = reporte.listaVentas?.length
-      ? reporte.listaVentas.map(v => `<tr>
-          ${td(v.codigo || '—', 'mono')}
-          ${td(`<span class="badge">${v.tipoVenta || '—'}</span>`)}
-          ${td(v.cliente || '—')}
-          ${td(v.metodoPago || '—')}
-          ${td((v.productos?.join(', ')) || '—', 'prod')}
-          ${tdr('$ ' + fmt(v.valor), 'money')}
-        </tr>`).join('')
+      ? reporte.listaVentas.map(v => {
+          const insumosRow = v.insumosConsumidos?.length
+            ? `<tr class="insumos-row">
+                <td colspan="6">
+                  <span class="ins-label">Insumos:</span>
+                  ${v.insumosConsumidos.map(i =>
+                    `<span class="ins-chip">${i.insumoDescripcion} <strong>${fmtCant(i.cantidad)}</strong> ${i.medida}</span>`
+                  ).join(' ')}
+                </td>
+              </tr>`
+            : '';
+          return `<tr>
+              ${td(v.codigo || '—', 'mono')}
+              ${td(`<span class="badge">${v.tipoVenta || '—'}</span>`)}
+              ${td(v.cliente || '—')}
+              ${td(v.metodoPago || '—')}
+              ${td((v.productos?.join(', ')) || '—', 'prod')}
+              ${tdr('$ ' + fmt(v.valor), 'money')}
+            </tr>${insumosRow}`;
+        }).join('')
       : `<tr><td colspan="6" class="empty">Sin ventas registradas en esta sesión.</td></tr>`;
 
     /* ── Sección de compras ── */
@@ -321,6 +336,10 @@ export class ReporteCierresComponent implements OnInit {
   .prod  { color: #475569; font-size: 9px; }
   .badge { background: #e2e8f0; border-radius: 3px; padding: 1px 5px; font-size: 9px; font-weight: 700; color: #334155; }
   .empty { text-align: center; color: #94a3b8; font-style: italic; padding: 10px; }
+  .insumos-row td { background: #fffbeb; border-top: 1px dashed #fcd34d; padding: 4px 8px; }
+  .ins-label { font-size: 8px; font-weight: 700; color: #92400e; text-transform: uppercase; margin-right: 6px; }
+  .ins-chip { display: inline-block; background: #fef3c7; border: 1px solid #fde68a; border-radius: 9999px; padding: 1px 7px; font-size: 8.5px; color: #78350f; margin: 1px 2px; }
+  .ins-chip strong { font-weight: 700; color: #92400e; }
 
   /* Botón imprimir (solo pantalla) */
   .btn-print { display: inline-block; margin-bottom: 18px; background: #0d7ff2; color: #fff; border: none; border-radius: 5px; padding: 8px 18px; font-size: 12px; font-weight: 600; cursor: pointer; }

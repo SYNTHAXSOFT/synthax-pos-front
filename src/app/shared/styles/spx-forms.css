@@ -1531,3 +1531,14 @@
   align-items: flex-start;
   gap: 0.35rem;
 }
+
+/* ── Carta Digital section (producto-registrar) ──────────────────────────── */
+.spx-carta-section {
+  background: rgba(168, 85, 247, 0.06);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 0.625rem;
+  padding: 1rem 1.25rem;
+}
+.spx-carta-categoria {
+  padding-top: 0.25rem;
+}

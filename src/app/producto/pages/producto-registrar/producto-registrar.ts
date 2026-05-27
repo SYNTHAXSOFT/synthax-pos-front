@@ -1,11 +1,14 @@
 import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 
 import { ProductoService } from '../../services/producto.service';
 import { DetalleProductoService } from '../../services/detalle-producto.service';
 import { InsumoService } from '../../../insumo/services/insumo.service';
+import { CategoriaProductoService } from '../../../categoria-producto/services/categoria-producto.service';
+import { CategoriaProducto } from '../../../categoria-producto/interfaces/categoria-producto.interface';
 import { Producto } from '../../interfaces/producto.interface';
 import { LineaReceta } from '../../interfaces/detalle-producto.interface';
 import { Insumo } from '../../../insumo/interfaces/insumo.interface';
@@ -15,16 +18,19 @@ import { ToastService } from '../../../shared/services/toast.service';
 @Component({
   selector: 'app-producto-registrar',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, ProductoListarPageComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, ProductoListarPageComponent],
   templateUrl: './producto-registrar.html',
   styleUrls: ['../../../shared/styles/spx-forms.css'],
 })
 export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
-  private readonly fb                     = inject(FormBuilder);
-  private readonly productoService        = inject(ProductoService);
-  private readonly detalleProductoService = inject(DetalleProductoService);
-  private readonly insumoService          = inject(InsumoService);
-  private readonly toastService           = inject(ToastService);
+  private readonly fb                       = inject(FormBuilder);
+  private readonly productoService          = inject(ProductoService);
+  private readonly detalleProductoService   = inject(DetalleProductoService);
+  private readonly insumoService            = inject(InsumoService);
+  private readonly categoriaService         = inject(CategoriaProductoService);
+  private readonly toastService             = inject(ToastService);
+
+  public categorias: CategoriaProducto[] = [];
 
   @ViewChild(ProductoListarPageComponent) listarComponent?: ProductoListarPageComponent;
 
@@ -47,18 +53,34 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
   public insumoAutocompletado:  Insumo|null  = null;
 
   public myForm: FormGroup = this.fb.group({
-    codigo:      ['', [Validators.required, Validators.minLength(2)]],
-    nombre:      ['', [Validators.required, Validators.minLength(3)]],
-    descripcion: ['', [Validators.required]],
-    precio:      [null, [Validators.required, Validators.min(0)]],
-    imagen:      [''],
-    activo:      [true],
+    codigo:             ['', [Validators.required, Validators.minLength(2)]],
+    nombre:             ['', [Validators.required, Validators.minLength(3)]],
+    descripcion:        ['', [Validators.required]],
+    precio:             [null, [Validators.required, Validators.min(0)]],
+    imagen:             [''],
+    activo:             [true],
+    esCarta:            [false],
+    categoriaProducto:  [null],
   });
 
   ngOnInit(): void {
     this.insumoService.obtenerActivos().subscribe({
       next: (data) => (this.insumos = data),
       error: (err) => console.error('Error al cargar insumos:', err),
+    });
+    this.categoriaService.listarActivas().subscribe({
+      next: (data) => (this.categorias = data),
+      error: (err) => console.error('Error al cargar categorías:', err),
+    });
+    // Cuando esCarta cambia a false, limpiar la categoría
+    this.myForm.get('esCarta')!.valueChanges.subscribe((val: boolean) => {
+      if (!val) {
+        this.myForm.get('categoriaProducto')!.setValue(null);
+        this.myForm.get('categoriaProducto')!.removeValidators(Validators.required);
+      } else {
+        this.myForm.get('categoriaProducto')!.addValidators(Validators.required);
+      }
+      this.myForm.get('categoriaProducto')!.updateValueAndValidity();
     });
   }
 
@@ -75,7 +97,7 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
     this.insumoSeleccionadoId = null;
     this.cantidadInsumo = 1;
     this._resetAutocomplete();
-    this.myForm.reset({ activo: true });
+    this.myForm.reset({ activo: true, esCarta: false, categoriaProducto: null });
     this.modalAbierto = true;
     document.body.style.overflow = 'hidden';
   }
@@ -91,7 +113,10 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
         this.insumoSeleccionadoId = null;
         this.cantidadInsumo = 1;
         this._resetAutocomplete();
-        this.myForm.patchValue(p);
+        this.myForm.patchValue({
+          ...p,
+          categoriaProducto: p.categoriaProducto?.id ?? null,
+        });
 
         this.detalleProductoService.obtenerPorProducto(id).subscribe({
           next: (detalles) => {
@@ -122,12 +147,14 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
 
         // Pre-llenar el formulario con todos los datos del original
         this.myForm.reset({
-          codigo:      '',          // código vacío — debe ser único, el usuario lo ingresa
-          nombre:      producto.nombre,
-          descripcion: producto.descripcion,
-          precio:      producto.precio,
-          imagen:      producto.imagen ?? '',
-          activo:      producto.activo ?? true,
+          codigo:            '',          // código vacío — debe ser único, el usuario lo ingresa
+          nombre:            producto.nombre,
+          descripcion:       producto.descripcion,
+          precio:            producto.precio,
+          imagen:            producto.imagen ?? '',
+          activo:            producto.activo ?? true,
+          esCarta:           producto.esCarta ?? false,
+          categoriaProducto: producto.categoriaProducto?.id ?? null,
         });
         this.imagenPreview        = producto.imagen ?? null;
         this.insumoSeleccionadoId = null;
@@ -157,7 +184,13 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
     this.insumoSeleccionadoId = null;
     this.cantidadInsumo = 1;
     this._resetAutocomplete();
-    this.myForm.reset({ activo: true });
+    this.myForm.reset({ activo: true, esCarta: false, categoriaProducto: null });
+  }
+
+  // ── Helpers carta ─────────────────────────────────────────────────────────
+
+  get esCartaActivo(): boolean {
+    return !!this.myForm.get('esCarta')?.value;
   }
 
   // ── Imagen ────────────────────────────────────────────────────────────────
@@ -262,7 +295,12 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
   onSave(): void {
     if (this.myForm.invalid) { this.myForm.markAllAsTouched(); return; }
 
-    const producto: Producto = this.myForm.value;
+    const formVal = this.myForm.value;
+    // Si esCarta, enviar categoriaProducto como objeto con solo id; si no, null
+    const categoriaProducto = formVal.esCarta && formVal.categoriaProducto
+      ? { id: Number(formVal.categoriaProducto) }
+      : null;
+    const producto: Producto = { ...formVal, categoriaProducto };
 
     if (this.editando && this.productoId) {
       this.productoService.actualizar(this.productoId, producto).subscribe({
