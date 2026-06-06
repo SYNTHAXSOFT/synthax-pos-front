@@ -14,6 +14,8 @@ import { LineaReceta } from '../../interfaces/detalle-producto.interface';
 import { Insumo } from '../../../insumo/interfaces/insumo.interface';
 import { ProductoListarPageComponent } from '../producto-listar/producto-listar';
 import { ToastService } from '../../../shared/services/toast.service';
+import { ModulosService } from '../../../shared/services/modulos.service';
+import { MODULOS } from '../../../shared/constants/modulos.constants';
 
 @Component({
   selector: 'app-producto-registrar',
@@ -29,6 +31,8 @@ export class ProductoRegistrarPageComponent implements OnInit, OnDestroy {
   private readonly insumoService            = inject(InsumoService);
   private readonly categoriaService         = inject(CategoriaProductoService);
   private readonly toastService             = inject(ToastService);
+  readonly modulosService                   = inject(ModulosService);
+  readonly MODULOS                          = MODULOS;
 
   public categorias: CategoriaProducto[] = [];
 

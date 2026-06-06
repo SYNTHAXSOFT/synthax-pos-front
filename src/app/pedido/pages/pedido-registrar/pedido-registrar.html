@@ -17,11 +17,13 @@
           }
         </div>
       </div>
-      <!-- Botón imprimir comanda -->
-      <button class="spx-reg-banner__comanda-btn" (click)="imprimirComanda()" title="Imprimir comanda de cocina">
-        <i class="fa-solid fa-print"></i>
-        <span>Comanda</span>
-      </button>
+      <!-- Botón imprimir comanda — solo si módulo COCINA habilitado -->
+      @if (modulosService.tieneModulo(MODULOS.COCINA)) {
+        <button class="spx-reg-banner__comanda-btn" (click)="imprimirComanda()" title="Imprimir comanda de cocina">
+          <i class="fa-solid fa-print"></i>
+          <span>Comanda</span>
+        </button>
+      }
 
       @if (ventaPagada) {
         <div class="spx-reg-banner__pagada">

@@ -7,6 +7,8 @@ import { BrandingService } from '../../../shared/services/branding.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Restaurante } from '../../interfaces/restaurante.interface';
 import { ToastService } from '../../../shared/services/toast.service';
+import { ModulosService } from '../../../shared/services/modulos.service';
+import { MODULOS } from '../../../shared/constants/modulos.constants';
 
 @Component({
   selector: 'app-restaurante-branding',
@@ -23,6 +25,8 @@ export class RestauranteBrandingComponent implements OnInit {
   private readonly authService        = inject(AuthService);
   private readonly route              = inject(ActivatedRoute);
   private readonly toastService       = inject(ToastService);
+  readonly modulosService             = inject(ModulosService);
+  readonly MODULOS                    = MODULOS;
 
   restaurante: Restaurante | null = null;
   cargando       = false;

@@ -2,7 +2,7 @@
 
   <p class="spx-nav__label">Navegación</p>
 
-  @for (item of menuOptions; track item.route) {
+  @for (item of menuOptions(); track item.route) {
     <a
       [routerLink]="item.route"
       routerLinkActive="spx-nav__item--active"

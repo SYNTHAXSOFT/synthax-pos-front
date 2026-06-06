@@ -24,10 +24,12 @@ export class CajaService {
   readonly cajaAbierta = signal<boolean | null>(null);
 
   private headers(): HttpHeaders {
-    const userId = this.authService.getUserId();
-    return userId
-      ? new HttpHeaders({ 'Usuario-Id': String(userId) })
-      : new HttpHeaders();
+    const userId        = this.authService.getUserId();
+    const restauranteId = this.authService.getRestauranteId();
+    const h: Record<string, string> = {};
+    if (userId        != null) h['Usuario-Id']    = String(userId);
+    if (restauranteId != null) h['Restaurante-Id'] = String(restauranteId);
+    return new HttpHeaders(h);
   }
 
   obtenerEstado(): Observable<CajaEstadoResponse> {

@@ -29,15 +29,19 @@ const TTL_MAP: { pattern: RegExp; ttl: number }[] = [
 
 // Cuando se muta un recurso, se invalidan las entradas de caché relacionadas
 const INVALIDATION_MAP: { pattern: RegExp; clears: RegExp[] }[] = [
-  { pattern: /\/api\/ventas/,    clears: [/\/api\/ventas/, /\/api\/pedidos/] },
-  { pattern: /\/api\/pedidos/,   clears: [/\/api\/pedidos/, /\/api\/ventas/] },
-  { pattern: /\/api\/compras/,   clears: [/\/api\/compras/, /\/api\/insumo/] },
-  { pattern: /\/api\/productos/, clears: [/\/api\/productos/] },
-  { pattern: /\/api\/mesas/,     clears: [/\/api\/mesas/] },
-  { pattern: /\/api\/clientes/,  clears: [/\/api\/clientes/] },
-  { pattern: /\/api\/usuarios/,  clears: [/\/api\/usuarios/] },
-  { pattern: /\/api\/insumo/,    clears: [/\/api\/insumo/] },
-  { pattern: /\/api\/caja/,      clears: [/\/api\/caja/] },
+  { pattern: /\/api\/ventas/,       clears: [/\/api\/ventas/, /\/api\/pedidos/] },
+  { pattern: /\/api\/pedidos/,      clears: [/\/api\/pedidos/, /\/api\/ventas/] },
+  { pattern: /\/api\/compras/,      clears: [/\/api\/compras/, /\/api\/insumo/, /\/api\/caja/] },
+  { pattern: /\/api\/productos/,    clears: [/\/api\/productos/] },
+  { pattern: /\/api\/mesas/,        clears: [/\/api\/mesas/] },
+  { pattern: /\/api\/clientes/,     clears: [/\/api\/clientes/] },
+  { pattern: /\/api\/usuarios/,     clears: [/\/api\/usuarios/] },
+  { pattern: /\/api\/insumo/,       clears: [/\/api\/insumo/, /\/api\/caja/] },
+  { pattern: /\/api\/caja/,         clears: [/\/api\/caja/] },
+  { pattern: /\/api\/impuesto/,     clears: [/\/api\/impuesto/] },
+  { pattern: /\/api\/tipo-pedido/,  clears: [/\/api\/tipo-pedido/] },
+  { pattern: /\/api\/forma-pago/,   clears: [/\/api\/forma-pago/] },
+  { pattern: /\/api\/restaurante/,  clears: [/\/api\/restaurante/] },
 ];
 
 function getTtl(url: string): number | null {

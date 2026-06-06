@@ -16,6 +16,8 @@ import { Pedido } from '../../../pedido/interfaces/pedido.interface';
 import { CajaSesion, CierreReporteDTO } from '../../../caja/interfaces/caja.interface';
 import { AperturaCajaModalComponent } from '../../../caja/components/apertura-caja-modal/apertura-caja-modal.component';
 import { CierreCajaModalComponent } from '../../../caja/components/cierre-caja-modal/cierre-caja-modal.component';
+import { ModulosService } from '../../services/modulos.service';
+import { MODULOS } from '../../constants/modulos.constants';
 
 @Component({
   selector: 'app-inicio-page',
@@ -26,6 +28,8 @@ import { CierreCajaModalComponent } from '../../../caja/components/cierre-caja-m
 })
 export class InicioPageComponent implements OnInit {
   private authService       = inject(AuthService);
+  readonly modulosService   = inject(ModulosService);
+  readonly MODULOS          = MODULOS;
   private ventaService      = inject(VentaService);
   private compraService     = inject(CompraService);
   private formaPagoService  = inject(FormaPagoService);

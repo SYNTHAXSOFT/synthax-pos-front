@@ -21,6 +21,8 @@ import { TipoPedidoService } from '../../../tipo-pedido/services/tipo-pedido.ser
 import { TipoPedido } from '../../../tipo-pedido/interfaces/tipo-pedido.interface';
 import { MesaService } from '../../../mesa/services/mesa.service';
 import { Mesa } from '../../../mesa/interfaces/mesa.interface';
+import { ModulosService } from '../../../shared/services/modulos.service';
+import { MODULOS } from '../../../shared/constants/modulos.constants';
 
 @Component({
   selector: 'app-venta-listar',
@@ -41,6 +43,8 @@ export class VentaListarPageComponent implements OnInit {
   private readonly authService       = inject(AuthService);
   private readonly toastService      = inject(ToastService);
   private readonly confirmService    = inject(ConfirmService);
+  readonly modulosService            = inject(ModulosService);
+  readonly MODULOS                   = MODULOS;
 
   public ventas: Venta[]       = [];
   public cargando: boolean     = false;

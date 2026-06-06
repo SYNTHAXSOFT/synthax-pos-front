@@ -58,6 +58,9 @@ export class AuthService {
     import('../../caja/services/caja.service').then(({ CajaService }) => {
       this.injector.get(CajaService).invalidarEstado();
     });
+    import('../../shared/services/modulos.service').then(({ ModulosService }) => {
+      this.injector.get(ModulosService).limpiar();
+    });
     this.router.navigate(['/']);
   }
 

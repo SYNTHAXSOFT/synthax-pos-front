@@ -15,6 +15,8 @@ import { TipoPedido } from '../../../tipo-pedido/interfaces/tipo-pedido.interfac
 import { VentaListarPageComponent } from '../venta-listar/venta-listar';
 import { CocineroDashboardComponent } from '../cocinero-dashboard/cocinero-dashboard';
 import { ToastService } from '../../../shared/services/toast.service';
+import { ModulosService } from '../../../shared/services/modulos.service';
+import { MODULOS } from '../../../shared/constants/modulos.constants';
 
 @Component({
   selector: 'app-venta-registrar',
@@ -31,6 +33,7 @@ export class VentaRegistrarPageComponent implements OnInit {
   private readonly authService       = inject(AuthService);
   private readonly reservaService    = inject(ReservaMesaService);
   private readonly toastService      = inject(ToastService);
+  private readonly modulosService    = inject(ModulosService);
   private readonly router            = inject(Router);
   private readonly route             = inject(ActivatedRoute);
 
@@ -89,6 +92,10 @@ export class VentaRegistrarPageComponent implements OnInit {
   }
 
   get ocultarMesa(): boolean {
+    // Si el módulo MESAS está deshabilitado, nunca mostrar el campo de mesa
+    if (!this.modulosService.tieneModulo(MODULOS.MESAS)) return true;
+
+    // Si el tipo de pedido es domicilio o llevar, tampoco mostrar mesa
     const id = this.myForm.get('tipoPedidoId')?.value;
     if (!id) return false;
     const tipo = this.tiposPedido.find(t => t.id === +id);

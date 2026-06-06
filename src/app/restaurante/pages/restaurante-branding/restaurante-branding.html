@@ -239,7 +239,8 @@
           </div>
         </div>
 
-        <!-- Carta Digital (slug) -->
+        <!-- Carta Digital (slug) — solo si módulo habilitado -->
+        @if (modulosService.tieneModulo(MODULOS.CARTA_DIGITAL)) {
         <div class="spx-brand-card" [formGroup]="slugForm">
           <div class="spx-brand-card__header">
             <i class="fa-solid fa-book-open" style="color:#a855f7"></i>
@@ -283,6 +284,7 @@
             }
           </div>
         </div>
+        } <!-- fin @if CARTA_DIGITAL -->
 
         <!-- Guardar -->
         <div class="spx-brand-save-row">

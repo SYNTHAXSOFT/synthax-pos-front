@@ -123,7 +123,8 @@
                 </label>
               </div>
 
-              <!-- ¿Producto para la carta? -->
+              <!-- ¿Producto para la carta? — solo si módulo CARTA_DIGITAL habilitado -->
+              @if (modulosService.tieneModulo(MODULOS.CARTA_DIGITAL)) {
               <div class="spx-form-group spx-form-col-span-4">
                 <div class="spx-carta-section">
                   <label class="spx-form-check">
@@ -158,10 +159,12 @@
                   }
                 </div>
               </div>
+              } <!-- fin @if CARTA_DIGITAL -->
 
             </div>
 
-            <!-- Receta -->
+            <!-- Receta — solo visible si el módulo INVENTARIO está habilitado -->
+            @if (modulosService.tieneModulo(MODULOS.INVENTARIO)) {
             <div class="spx-receta">
               <div class="spx-receta__header">
                 <div class="spx-receta__header-icon"><i class="fa-solid fa-flask-vial"></i></div>
@@ -266,6 +269,7 @@
                 <p class="spx-receta__empty">Sin insumos configurados — el stock no se descuentará al vender este producto</p>
               }
             </div>
+            } <!-- fin @if INVENTARIO -->
 
             <!-- Acciones -->
             <div class="spx-modal-actions">

@@ -11,6 +11,8 @@ import { Producto } from '../../../producto/interfaces/producto.interface';
 import { PedidoListarPageComponent } from '../pedido-listar/pedido-listar';
 import { ToastService } from '../../../shared/services/toast.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { ModulosService } from '../../../shared/services/modulos.service';
+import { MODULOS } from '../../../shared/constants/modulos.constants';
 
 @Component({
   selector: 'app-pedido-registrar',
@@ -27,6 +29,8 @@ export class PedidoRegistrarPageComponent implements OnInit, OnDestroy {
   private readonly route          = inject(ActivatedRoute);
   private readonly toastService   = inject(ToastService);
   private readonly authService    = inject(AuthService);
+  readonly modulosService         = inject(ModulosService);
+  readonly MODULOS                = MODULOS;
 
   @ViewChild(PedidoListarPageComponent) listarComponent?: PedidoListarPageComponent;
 

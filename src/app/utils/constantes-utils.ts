@@ -38,6 +38,9 @@ export const API_ENDPOINTS = {
   FORMAS_PAGO:    'formas-pago',
   CAJA:           'caja',
   RESERVAS:       'reservas',
+
+  // Módulos / Feature-flags
+  MODULOS:        'modulos',
 };
 
 // Roles del sistema POS (sincronizados con Rol.java del backend)

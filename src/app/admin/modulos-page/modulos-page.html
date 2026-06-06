@@ -1,0 +1,104 @@
+<div class="spx-modulos">
+
+  <!-- Header -->
+  <div class="spx-modulos__header">
+    <div>
+      <h2 class="spx-modulos__title">
+        <i class="fa-solid fa-toggle-on"></i>
+        @if (restauranteSeleccionado) {
+          Módulos — {{ restauranteSeleccionado.nombre }}
+        } @else {
+          Gestión de Módulos
+        }
+      </h2>
+      <p class="spx-modulos__subtitle">
+        @if (restauranteSeleccionado) {
+          Activa o desactiva las funcionalidades disponibles para este restaurante
+        } @else {
+          Selecciona un restaurante para gestionar sus módulos
+        }
+      </p>
+    </div>
+    @if (restauranteSeleccionado) {
+      <button class="spx-btn spx-btn--ghost" (click)="volver()">
+        <i class="fa-solid fa-arrow-left"></i> Volver
+      </button>
+    }
+  </div>
+
+  <!-- Lista de restaurantes -->
+  @if (!restauranteSeleccionado) {
+    @if (cargandoRestaurantes) {
+      <div class="spx-modulos__loader">
+        <i class="fa-solid fa-spinner fa-spin"></i> Cargando restaurantes...
+      </div>
+    } @else {
+      <div class="spx-modulos__grid">
+        @for (rest of restaurantes; track rest.id) {
+          <button
+            class="spx-rest-card"
+            (click)="seleccionarRestaurante(rest)"
+          >
+            <div class="spx-rest-card__icon">
+              <i class="fa-solid fa-store"></i>
+            </div>
+            <div class="spx-rest-card__info">
+              <p class="spx-rest-card__name">{{ rest.nombre }}</p>
+              <p class="spx-rest-card__code">{{ rest.codigo }}</p>
+            </div>
+            <span class="spx-rest-card__badge" [class.spx-rest-card__badge--inactive]="!rest.activo">
+              {{ rest.activo ? 'Activo' : 'Inactivo' }}
+            </span>
+            <i class="fa-solid fa-chevron-right spx-rest-card__arrow"></i>
+          </button>
+        }
+        @if (restaurantes.length === 0) {
+          <p class="spx-modulos__empty">No hay restaurantes registrados.</p>
+        }
+      </div>
+    }
+  }
+
+  <!-- Módulos del restaurante seleccionado -->
+  @if (restauranteSeleccionado) {
+    @if (cargandoModulos) {
+      <div class="spx-modulos__loader">
+        <i class="fa-solid fa-spinner fa-spin"></i> Cargando módulos...
+      </div>
+    } @else {
+      <div class="spx-modulos__list">
+        @for (modulo of modulos; track modulo.modulo) {
+          <div class="spx-modulo-row" [class.spx-modulo-row--disabled]="!modulo.habilitado">
+            <div class="spx-modulo-row__info">
+              <p class="spx-modulo-row__name">{{ modulo.modulo }}</p>
+              <p class="spx-modulo-row__desc">{{ modulo.descripcion }}</p>
+            </div>
+            <button
+              class="spx-toggle"
+              [class.spx-toggle--on]="modulo.habilitado"
+              (click)="toggleModulo(modulo)"
+              [attr.aria-label]="modulo.habilitado ? 'Deshabilitar ' + modulo.modulo : 'Habilitar ' + modulo.modulo"
+            >
+              <span class="spx-toggle__thumb"></span>
+            </button>
+          </div>
+        }
+      </div>
+
+      <div class="spx-modulos__actions">
+        <button
+          class="spx-btn spx-btn--primary"
+          (click)="guardar()"
+          [disabled]="guardando"
+        >
+          @if (guardando) {
+            <i class="fa-solid fa-spinner fa-spin"></i> Guardando...
+          } @else {
+            <i class="fa-solid fa-floppy-disk"></i> Guardar cambios
+          }
+        </button>
+      </div>
+    }
+  }
+
+</div>

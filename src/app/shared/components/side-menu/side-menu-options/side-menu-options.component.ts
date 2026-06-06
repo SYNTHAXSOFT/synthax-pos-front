@@ -1,8 +1,9 @@
-import { Component, EventEmitter, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Output, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { routes } from '../../../../app.routes';
 import { AuthService } from '../../../../auth/services/auth.service';
 import { ConfirmService } from '../../../../shared/services/confirm.service';
+import { ModulosService } from '../../../../shared/services/modulos.service';
 
 interface MenuOption {
   icon: string;
@@ -12,14 +13,8 @@ interface MenuOption {
   roles?: string[];
 }
 
-interface MenuItem {
-  title: string;
-  route: string;
-  roles?: string[];
-}
-
-// Lee las rutas hijas del dashboard (índice 1 = 'moed')
-const reactiveItems = routes[1].children ?? [];
+// Lee las rutas hijas del dashboard (índice 1 = 'moed') — solo una vez, es estático
+const allRouteItems = routes[1].children ?? [];
 
 @Component({
   selector: 'app-side-menu-options',
@@ -29,46 +24,64 @@ const reactiveItems = routes[1].children ?? [];
 export class SideMenuOptionsComponent {
   @Output() optionSelected = new EventEmitter<void>();
 
-  private authService = inject(AuthService);
-  private readonly confirmService = inject(ConfirmService);
+  private authService     = inject(AuthService);
+  private modulosService  = inject(ModulosService);
+  private confirmService  = inject(ConfirmService);
 
-  // Genera los ítems del menú desde las rutas, excluyendo comodines, redirects,
-  // los marcados con hideFromMenu y los que no aplican para el rol actual (hideForRoles)
-  reactiveMenu: MenuItem[] = reactiveItems
-    .filter((item) => item.path && item.path !== '**' && !item.redirectTo && !item.data?.['hideFromMenu'])
-    .filter((item) => {
-      const hideForRoles = item.data?.['hideForRoles'] as string[] | undefined;
-      if (!hideForRoles) return true;
-      return !this.authService.hasRole(hideForRoles);
-    })
-    .map((item) => ({
-      route: `moed/${item.path}`,
-      title: `${item.title}`,
-      roles: item.data?.['roles'] as string[],
-    }));
-
-  // Filtra además según qué roles tienen permiso de ver cada ítem
-  menuOptions: MenuOption[] = this.reactiveMenu
-    .filter((item) => {
-      if (!item.roles) return true;
-      return this.authService.hasRole(item.roles);
-    })
-    .map((item) => ({
-      icon:     this.getIconForRoute(item.title),
-      label:    item.title,
-      subLabel: '',
-      route:    `/${item.route}`,
-      roles:    item.roles,
-    }));
+  /**
+   * Opciones del menú como computed() — se recalcula automáticamente cada vez
+   * que cambia el signal modulosHabilitados en ModulosService.
+   * Esto resuelve el problema de que los módulos se cargan asincrónicamente
+   * después de que el componente ya se inicializó.
+   */
+  menuOptions = computed<MenuOption[]>(() => {
+    return allRouteItems
+      // Excluir comodines, redirects y rutas ocultas del menú
+      .filter(item =>
+        item.path &&
+        item.path !== '**' &&
+        !item.redirectTo &&
+        !item.data?.['hideFromMenu']
+      )
+      // Filtrar por rol: excluir ítems donde el rol actual está en hideForRoles
+      .filter(item => {
+        const hideForRoles = item.data?.['hideForRoles'] as string[] | undefined;
+        if (!hideForRoles) return true;
+        return !this.authService.hasRole(hideForRoles);
+      })
+      // Filtrar por rol: solo mostrar ítems donde el rol actual está en roles
+      .filter(item => {
+        const roles = item.data?.['roles'] as string[] | undefined;
+        if (!roles) return true;
+        return this.authService.hasRole(roles);
+      })
+      // Filtrar por módulo habilitado — usa el signal, por eso es reactivo
+      .filter(item => {
+        const requiereModulo = item.data?.['requiereModulo'] as string | undefined;
+        if (!requiereModulo) return true;
+        return this.modulosService.tieneModulo(requiereModulo);
+      })
+      // Construir el objeto final de opción de menú
+      .map(item => ({
+        icon:     this.getIconForRoute(String(item.title ?? '')),
+        label:    String(item.title ?? ''),
+        subLabel: '',
+        route:    `/moed/${item.path}`,
+        roles:    item.data?.['roles'] as string[] | undefined,
+      }));
+  });
 
   async logout(): Promise<void> {
-    const ok = await this.confirmService.confirm({ message: '¿Estás seguro de cerrar sesión?', type: 'danger' });
+    const ok = await this.confirmService.confirm({
+      message: '¿Estás seguro de cerrar sesión?',
+      type: 'danger',
+    });
     if (ok) {
       this.authService.logout();
     }
   }
 
-  onSelect() {
+  onSelect(): void {
     this.optionSelected.emit();
   }
 
@@ -95,6 +108,8 @@ export class SideMenuOptionsComponent {
     if (n.includes('forma'))             return 'fa-solid fa-wallet';
     if (n.includes('pago'))              return 'fa-solid fa-wallet';
     if (n.includes('administr'))         return 'fa-solid fa-screwdriver-wrench';
+    if (n.includes('módulo'))            return 'fa-solid fa-toggle-on';
+    if (n.includes('modulo'))            return 'fa-solid fa-toggle-on';
     return 'fa-solid fa-circle-dot';
   }
 }

@@ -477,17 +477,19 @@
                   <i class="fa-solid fa-xmark"></i>
                 </button>
               </div>
-              <!-- Factura electrónica -->
-              <label class="spx-modal__factura-toggle">
-                <input type="checkbox" [(ngModel)]="solicitaFacturaElectronica" />
-                <span class="spx-modal__factura-toggle__box">
-                  <i class="fa-solid fa-check"></i>
-                </span>
-                <span class="spx-modal__factura-toggle__label">
-                  <i class="fa-solid fa-file-invoice spx-modal__factura-icon"></i>
-                  Solicita factura electrónica DIAN
-                </span>
-              </label>
+              <!-- Factura electrónica — solo si módulo habilitado -->
+              @if (modulosService.tieneModulo(MODULOS.FACTURACION_ELECTRONICA)) {
+                <label class="spx-modal__factura-toggle">
+                  <input type="checkbox" [(ngModel)]="solicitaFacturaElectronica" />
+                  <span class="spx-modal__factura-toggle__box">
+                    <i class="fa-solid fa-check"></i>
+                  </span>
+                  <span class="spx-modal__factura-toggle__label">
+                    <i class="fa-solid fa-file-invoice spx-modal__factura-icon"></i>
+                    Solicita factura electrónica DIAN
+                  </span>
+                </label>
+              }
 
             } @else if (mostrarFormNuevoCliente) {
               <!-- Mini-form crear cliente -->

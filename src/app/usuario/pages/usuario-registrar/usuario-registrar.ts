@@ -11,6 +11,8 @@ import { Departamento } from '../../../departamento/interfaces/departamento.inte
 import { Municipio } from '../../../municipio/interfaces/municipio.interface';
 import { ListarPage } from '../usuario-listar/usuario-listar';
 import { ToastService } from '../../../shared/services/toast.service';
+import { ModulosService } from '../../../shared/services/modulos.service';
+import { MODULOS } from '../../../shared/constants/modulos.constants';
 
 const ROLES_POR_ROL: Record<string, string[]> = {
   ROOT:          ['ROOT', 'PROPIETARIO'],
@@ -32,6 +34,7 @@ export class RegistrarPage implements OnInit, OnDestroy {
   private readonly departamentoSvc = inject(DepartamentoService);
   private readonly municipioSvc    = inject(MunicipioService);
   private readonly toastService    = inject(ToastService);
+  private readonly modulosService  = inject(ModulosService);
 
   formUtils = Formutils;
 
@@ -68,7 +71,15 @@ export class RegistrarPage implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const rol = this.authService.getUserRole() ?? '';
-    this.rolesDisponibles = ROLES_POR_ROL[rol] ?? [];
+    const todosRoles = ROLES_POR_ROL[rol] ?? [];
+
+    // Filtrar roles según módulos habilitados
+    this.rolesDisponibles = todosRoles.filter(r => {
+      if (r === 'COCINERO')     return this.modulosService.tieneModulo(MODULOS.COCINA);
+      if (r === 'MESERO')       return this.modulosService.tieneModulo(MODULOS.MESERO);
+      if (r === 'DOMICILIARIO') return this.modulosService.tieneModulo(MODULOS.DOMICILIOS);
+      return true; // ADMINISTRADOR, CAJERO y demás siempre visibles
+    });
     this.departamentoSvc.obtenerTodos().subscribe({ next: (d) => this.departamentos = d });
     this.municipioSvc.obtenerTodos().subscribe({ next: (d) => this.municipios = d });
   }

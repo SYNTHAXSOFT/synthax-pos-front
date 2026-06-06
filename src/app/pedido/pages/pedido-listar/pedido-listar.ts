@@ -6,6 +6,8 @@ import { CambioEstadoRequest, Pedido, PedidoEstado } from '../../interfaces/pedi
 import { ToastService } from '../../../shared/services/toast.service';
 import { ConfirmService } from '../../../shared/services/confirm.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { ModulosService } from '../../../shared/services/modulos.service';
+import { MODULOS } from '../../../shared/constants/modulos.constants';
 
 @Component({
   selector: 'app-pedido-listar',
@@ -19,6 +21,7 @@ export class PedidoListarPageComponent implements OnInit, OnChanges {
   private readonly toastService   = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
   private readonly authService    = inject(AuthService);
+  private readonly modulosService = inject(ModulosService);
 
   @Input() ventaId?: number;
   /** Cuando la venta está PAGADA, todos los ítems son solo lectura */
@@ -91,6 +94,7 @@ export class PedidoListarPageComponent implements OnInit, OnChanges {
   // ── FIX #4: Enviar todos los ítems CREADO a cocina ───────────────────────────
   get hayPedidosParaCocina(): boolean {
     if (this.ventaPagada) return false;
+    if (!this.modulosService.tieneModulo(MODULOS.COCINA)) return false;
     return this.pedidos.some(p => this.estadoEfectivo(p) === 'CREADO')
       && ['PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO'].includes(this.rol);
   }
@@ -127,22 +131,25 @@ export class PedidoListarPageComponent implements OnInit, OnChanges {
 
   // ── Visibilidad de botones por rol y estado ──────────────────────────────────
 
-  /** CREADO → PEDIDO (Enviar a cocina) */
+  /** CREADO → PEDIDO (Enviar a cocina) — oculto si módulo COCINA deshabilitado */
   puedeEnviarCocina(p: Pedido): boolean {
     if (this.ventaPagada) return false;
+    if (!this.modulosService.tieneModulo(MODULOS.COCINA)) return false;
     return this.estadoEfectivo(p) === 'CREADO'
       && ['PROPIETARIO','ADMINISTRADOR','CAJERO','MESERO'].includes(this.rol);
   }
 
-  /** PEDIDO → PREPARANDO */
+  /** PEDIDO → PREPARANDO — solo con módulo COCINA */
   puedeIniciarPreparacion(p: Pedido): boolean {
     if (this.ventaPagada) return false;
+    if (!this.modulosService.tieneModulo(MODULOS.COCINA)) return false;
     return this.estadoEfectivo(p) === 'PEDIDO' && this.rol === 'COCINERO';
   }
 
-  /** PREPARANDO → PREPARADO  |  DEVUELTO → PREPARADO (re-preparación) */
+  /** PREPARANDO → PREPARADO  |  DEVUELTO → PREPARADO — solo con módulo COCINA */
   puedeMarcarPreparado(p: Pedido): boolean {
     if (this.ventaPagada) return false;
+    if (!this.modulosService.tieneModulo(MODULOS.COCINA)) return false;
     const est = this.estadoEfectivo(p);
     return (est === 'PREPARANDO' || est === 'DEVUELTO') && this.rol === 'COCINERO';
   }

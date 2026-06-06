@@ -99,42 +99,49 @@
         <p class="spx-metric__sub">{{ ventasHoyAbiertas.length }} abiertas · {{ ventasHoyAnuladas.length }} anuladas</p>
       </div>
 
-      <!-- Compras del día / sesión -->
-      <div class="spx-metric spx-metric--amber">
-        <div class="spx-metric__header">
-          <div class="spx-metric__icon spx-metric__icon--amber"><i class="fa-solid fa-cart-flatbed"></i></div>
-          <span class="spx-badge spx-badge--amber">{{ cajaAbierta ? 'Sesión' : 'Hoy' }}</span>
+      <!-- Compras del día / sesión — solo si módulo COMPRAS habilitado -->
+      @if (modulosService.tieneModulo(MODULOS.COMPRAS)) {
+        <div class="spx-metric spx-metric--amber">
+          <div class="spx-metric__header">
+            <div class="spx-metric__icon spx-metric__icon--amber"><i class="fa-solid fa-cart-flatbed"></i></div>
+            <span class="spx-badge spx-badge--amber">{{ cajaAbierta ? 'Sesión' : 'Hoy' }}</span>
+          </div>
+          <p class="spx-metric__label">{{ cajaAbierta ? 'Compras de la Sesión' : 'Compras del Día' }}</p>
+          <p class="spx-metric__value">{{ comprasHoy.length }}</p>
+          <p class="spx-metric__sub">$ {{ fmt(totalComprasHoy) }}</p>
         </div>
-        <p class="spx-metric__label">{{ cajaAbierta ? 'Compras de la Sesión' : 'Compras del Día' }}</p>
-        <p class="spx-metric__value">{{ comprasHoy.length }}</p>
-        <p class="spx-metric__sub">$ {{ fmt(totalComprasHoy) }}</p>
-      </div>
+      }
 
-      <!-- Pedidos devueltos del día / sesión -->
-      <div class="spx-metric spx-metric--rose">
-        <div class="spx-metric__header">
-          <div class="spx-metric__icon spx-metric__icon--rose"><i class="fa-solid fa-rotate-left"></i></div>
-          <span class="spx-badge spx-badge--rose">{{ cajaAbierta ? 'Sesión' : 'Hoy' }}</span>
+      <!-- Pedidos devueltos del día / sesión — solo si módulo COCINA habilitado -->
+      @if (modulosService.tieneModulo(MODULOS.COCINA)) {
+        <div class="spx-metric spx-metric--rose">
+          <div class="spx-metric__header">
+            <div class="spx-metric__icon spx-metric__icon--rose"><i class="fa-solid fa-rotate-left"></i></div>
+            <span class="spx-badge spx-badge--rose">{{ cajaAbierta ? 'Sesión' : 'Hoy' }}</span>
+          </div>
+          <p class="spx-metric__label">Pedidos Devueltos</p>
+          <p class="spx-metric__value">{{ pedidosDevueltosHoy }}</p>
+          <p class="spx-metric__sub">ítems marcados como devueltos</p>
         </div>
-        <p class="spx-metric__label">Pedidos Devueltos</p>
-        <p class="spx-metric__value">{{ pedidosDevueltosHoy }}</p>
-        <p class="spx-metric__sub">ítems marcados como devueltos</p>
-      </div>
+      }
 
     </div>
     }<!-- /!esMesero métricas -->
 
     <!-- ── Reportes del Sistema ─────────────────────────────── -->
+    @if (modulosService.tieneModulo(MODULOS.REPORTES) || modulosService.tieneModulo(MODULOS.MESAS)) {
     <div class="spx-reports">
-      <div class="spx-reports__header">
-        <h3 class="spx-reports__title">
-          <i class="fa-solid fa-chart-bar"></i> Reportes del Sistema
-        </h3>
-        <p class="spx-reports__subtitle">Accede a análisis detallados con filtros avanzados</p>
-      </div>
+      @if (modulosService.tieneModulo(MODULOS.REPORTES)) {
+        <div class="spx-reports__header">
+          <h3 class="spx-reports__title">
+            <i class="fa-solid fa-chart-bar"></i> Reportes del Sistema
+          </h3>
+          <p class="spx-reports__subtitle">Accede a análisis detallados con filtros avanzados</p>
+        </div>
+      }
       <div class="spx-reports__grid">
 
-        @if (!esSoloReporteMesas) {
+        @if (!esSoloReporteMesas && modulosService.tieneModulo(MODULOS.REPORTES)) {
 
           <a routerLink="/moed/reporte/ventas" class="spx-report-card spx-report-card--green">
             <div class="spx-report-card__icon">
@@ -149,18 +156,20 @@
             <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
           </a>
 
-          <a routerLink="/moed/reporte/compras" class="spx-report-card spx-report-card--amber">
-            <div class="spx-report-card__icon">
-              <i class="fa-solid fa-cart-flatbed"></i>
-            </div>
-            <div class="spx-report-card__info">
-              <p class="spx-report-card__name">Compras</p>
-              <p class="spx-report-card__desc">
-                Filtros por insumo, rango de precios, fechas y estado
-              </p>
-            </div>
-            <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
-          </a>
+          @if (modulosService.tieneModulo(MODULOS.COMPRAS)) {
+            <a routerLink="/moed/reporte/compras" class="spx-report-card spx-report-card--amber">
+              <div class="spx-report-card__icon">
+                <i class="fa-solid fa-cart-flatbed"></i>
+              </div>
+              <div class="spx-report-card__info">
+                <p class="spx-report-card__name">Compras</p>
+                <p class="spx-report-card__desc">
+                  Filtros por insumo, rango de precios, fechas y estado
+                </p>
+              </div>
+              <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
+            </a>
+          }
 
           <a routerLink="/moed/reporte/cierres" class="spx-report-card spx-report-card--blue">
             <div class="spx-report-card__icon">
@@ -188,36 +197,41 @@
             <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
           </a>
 
-          <a routerLink="/moed/reporte/inventario" class="spx-report-card spx-report-card--rose">
+          @if (modulosService.tieneModulo(MODULOS.INVENTARIO)) {
+            <a routerLink="/moed/reporte/inventario" class="spx-report-card spx-report-card--rose">
+              <div class="spx-report-card__icon">
+                <i class="fa-solid fa-warehouse"></i>
+              </div>
+              <div class="spx-report-card__info">
+                <p class="spx-report-card__name">Inventario</p>
+                <p class="spx-report-card__desc">
+                  Stock actual de insumos con alertas de nivel bajo y sin existencias
+                </p>
+              </div>
+              <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
+            </a>
+          }
+
+        }
+
+        @if (modulosService.tieneModulo(MODULOS.MESAS)) {
+          <a routerLink="/moed/reporte/mesas" class="spx-report-card spx-report-card--purple">
             <div class="spx-report-card__icon">
-              <i class="fa-solid fa-warehouse"></i>
+              <i class="fa-solid fa-chair"></i>
             </div>
             <div class="spx-report-card__info">
-              <p class="spx-report-card__name">Inventario</p>
+              <p class="spx-report-card__name">Mesas</p>
               <p class="spx-report-card__desc">
-                Stock actual de insumos con alertas de nivel bajo y sin existencias
+                Estado de ocupación en tiempo real — mesas libres y con venta abierta
               </p>
             </div>
             <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
           </a>
-
         }
-
-        <a routerLink="/moed/reporte/mesas" class="spx-report-card spx-report-card--purple">
-          <div class="spx-report-card__icon">
-            <i class="fa-solid fa-chair"></i>
-          </div>
-          <div class="spx-report-card__info">
-            <p class="spx-report-card__name">Mesas</p>
-            <p class="spx-report-card__desc">
-              Estado de ocupación en tiempo real — mesas libres y con venta abierta
-            </p>
-          </div>
-          <i class="fa-solid fa-arrow-right spx-report-card__arrow"></i>
-        </a>
 
       </div>
     </div>
+    } <!-- fin @if reportes/mesas -->
 
     <!-- ── Métodos de Pago (no visibles para MESERO) ─────────────── -->
     @if (!esMesero && formasPago.length > 0) {

@@ -18,14 +18,16 @@
       <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
     </a>
 
-    <a routerLink="/moed/insumo/registrar" class="spx-admin-card spx-admin-card--amber">
-      <div class="spx-admin-card__icon"><i class="fa-solid fa-warehouse"></i></div>
-      <div class="spx-admin-card__info">
-        <p class="spx-admin-card__name">Insumos / Inventario</p>
-        <p class="spx-admin-card__desc">Insumos y stock del almacén</p>
-      </div>
-      <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
-    </a>
+    @if (tieneModulo(MODULOS.INVENTARIO)) {
+      <a routerLink="/moed/insumo/registrar" class="spx-admin-card spx-admin-card--amber">
+        <div class="spx-admin-card__icon"><i class="fa-solid fa-warehouse"></i></div>
+        <div class="spx-admin-card__info">
+          <p class="spx-admin-card__name">Insumos / Inventario</p>
+          <p class="spx-admin-card__desc">Insumos y stock del almacén</p>
+        </div>
+        <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
+      </a>
+    }
 
     <a routerLink="/moed/cliente/listar" class="spx-admin-card spx-admin-card--green">
       <div class="spx-admin-card__icon"><i class="fa-solid fa-user-tie"></i></div>
@@ -36,14 +38,16 @@
       <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
     </a>
 
-    <a routerLink="/moed/mesa/registrar" class="spx-admin-card spx-admin-card--purple">
-      <div class="spx-admin-card__icon"><i class="fa-solid fa-chair"></i></div>
-      <div class="spx-admin-card__info">
-        <p class="spx-admin-card__name">Mesas</p>
-        <p class="spx-admin-card__desc">Configurar mesas del salón</p>
-      </div>
-      <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
-    </a>
+    @if (tieneModulo(MODULOS.MESAS)) {
+      <a routerLink="/moed/mesa/registrar" class="spx-admin-card spx-admin-card--purple">
+        <div class="spx-admin-card__icon"><i class="fa-solid fa-chair"></i></div>
+        <div class="spx-admin-card__info">
+          <p class="spx-admin-card__name">Mesas</p>
+          <p class="spx-admin-card__desc">Configurar mesas del salón</p>
+        </div>
+        <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
+      </a>
+    }
 
     <a routerLink="/moed/forma-pago/listar" class="spx-admin-card spx-admin-card--green">
       <div class="spx-admin-card__icon"><i class="fa-solid fa-wallet"></i></div>
@@ -90,14 +94,16 @@
       <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
     </a>
 
-    <a routerLink="/moed/categoria-producto" class="spx-admin-card spx-admin-card--purple">
-      <div class="spx-admin-card__icon"><i class="fa-solid fa-layer-group"></i></div>
-      <div class="spx-admin-card__info">
-        <p class="spx-admin-card__name">Carta Digital</p>
-        <p class="spx-admin-card__desc">Categorías para la carta en línea</p>
-      </div>
-      <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
-    </a>
+    @if (tieneModulo(MODULOS.CARTA_DIGITAL)) {
+      <a routerLink="/moed/categoria-producto" class="spx-admin-card spx-admin-card--purple">
+        <div class="spx-admin-card__icon"><i class="fa-solid fa-layer-group"></i></div>
+        <div class="spx-admin-card__info">
+          <p class="spx-admin-card__name">Carta Digital</p>
+          <p class="spx-admin-card__desc">Categorías para la carta en línea</p>
+        </div>
+        <i class="fa-solid fa-arrow-right spx-admin-card__arrow"></i>
+      </a>
+    }
 
   </div>
 

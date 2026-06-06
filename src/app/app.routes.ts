@@ -4,6 +4,7 @@ import { DefaultRedirectComponent } from './shared/pages/default-redirect/defaul
 import { AuthGuard } from './auth/guards/auth.guard';
 import { RoleGuard } from './auth/guards/role.guard';
 import { CajaGuard } from './caja/guards/caja.guard';
+import { moduloGuard } from './shared/guards/modulo.guard';
 
 /**
  * Rutas del sistema POS (alineadas con SecurityConfig.java):
@@ -102,6 +103,15 @@ export const routes: Routes = [
         data: { roles: ['ROOT'] },
       },
       {
+        // ROOT gestiona los módulos habilitados por restaurante
+        path: 'modulos',
+        title: 'Módulos',
+        loadComponent: () =>
+          import('./admin/modulos-page/modulos-page').then((m) => m.ModulosPageComponent),
+        canActivate: [RoleGuard, CajaGuard],
+        data: { roles: ['ROOT'], requiereModulo: undefined },
+      },
+      {
         // Acceso directo a la identidad visual (logo + colores).
         // PROPIETARIO entra SOLO por esta ruta — no ve el listado de restaurantes.
         path: 'identidad-visual',
@@ -118,16 +128,16 @@ export const routes: Routes = [
         title: 'Insumos',
         loadChildren: () =>
           import('./insumo/insumo.routes').then((m) => m.insumoRoutes),
-        canActivate: [RoleGuard, CajaGuard],
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideForRoles: ['ROOT'] },
+        canActivate: [RoleGuard, CajaGuard, moduloGuard('INVENTARIO')],
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideForRoles: ['ROOT'], requiereModulo: 'INVENTARIO' },
       },
       {
         path: 'compra',
         title: 'Compras',
         loadChildren: () =>
           import('./compra/compra.routes').then((m) => m.compraRoutes),
-        canActivate: [RoleGuard, CajaGuard],
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO'], hideForRoles: ['ROOT'] },
+        canActivate: [RoleGuard, CajaGuard, moduloGuard('COMPRAS')],
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO'], hideForRoles: ['ROOT'], requiereModulo: 'COMPRAS' },
       },
       {
         path: 'forma-pago',
@@ -153,8 +163,8 @@ export const routes: Routes = [
         title: 'Mesas',
         loadChildren: () =>
           import('./mesa/mesa.routes').then((m) => m.mesaRoutes),
-        canActivate: [RoleGuard, CajaGuard],
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideFromMenu: true },
+        canActivate: [RoleGuard, CajaGuard, moduloGuard('MESAS')],
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideFromMenu: true, requiereModulo: 'MESAS' },
       },
       {
         path: 'tipo-pedido',
@@ -179,9 +189,9 @@ export const routes: Routes = [
         title: 'Reportes',
         loadChildren: () =>
           import('./reportes/reportes.routes').then((m) => m.reportesRoutes),
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, moduloGuard('REPORTES')],
         // CAJERO y MESERO solo pueden acceder al reporte de mesas (sub-ruta protegida)
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO'], hideFromMenu: true },
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO'], hideFromMenu: true, requiereModulo: 'REPORTES' },
       },
       {
         path: 'control-stock',
@@ -190,9 +200,9 @@ export const routes: Routes = [
           import('./reportes/pages/control-stock/control-stock').then(
             (m) => m.ControlStockComponent
           ),
-        canActivate: [RoleGuard, CajaGuard],
+        canActivate: [RoleGuard, CajaGuard, moduloGuard('INVENTARIO')],
         // Visible para todos los roles operativos (el backend filtra por rol e insumo)
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO'], hideForRoles: ['ROOT'] },
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO'], hideForRoles: ['ROOT'], requiereModulo: 'INVENTARIO' },
       },
 
       // ── Clientes ─────────────────────────────────────────────────────────────
@@ -211,8 +221,8 @@ export const routes: Routes = [
         title: 'Categorías de Producto',
         loadChildren: () =>
           import('./categoria-producto/categoria-producto.routes').then((m) => m.categoriaProductoRoutes),
-        canActivate: [RoleGuard, CajaGuard],
-        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideFromMenu: true },
+        canActivate: [RoleGuard, CajaGuard, moduloGuard('CARTA_DIGITAL')],
+        data: { roles: ['ROOT', 'PROPIETARIO', 'ADMINISTRADOR'], hideFromMenu: true, requiereModulo: 'CARTA_DIGITAL' },
       },
 
       // ── Operación POS ────────────────────────────────────────────────────────

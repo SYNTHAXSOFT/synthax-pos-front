@@ -1,6 +1,6 @@
 export const environment = {
 
-  production: true,
+  production: false,
   companyName: 'MOED',
   companyName2: 'POS',
   companySlogan: 'Seguimiento a tus Empresa',

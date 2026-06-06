@@ -5,9 +5,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { UsuarioService } from '../../services/usuario.service';
 import { Usuario } from '../../interfaces/usuario.interface';
 import { ToastService } from '../../../shared/services/toast.service';
+import { ModulosService } from '../../../shared/services/modulos.service';
+import { MODULOS } from '../../../shared/constants/modulos.constants';
 
 // Roles del POS — ROOT excluido: no se puede asignar mediante edición
-const ROLES_POS = ['PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO', 'CLIENTE'];
+const ROLES_POS_BASE = ['PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO', 'DOMICILIARIO', 'CLIENTE'];
 
 @Component({
   selector: 'app-actualizar-usuario',
@@ -18,7 +20,16 @@ const ROLES_POS = ['PROPIETARIO', 'ADMINISTRADOR', 'CAJERO', 'MESERO', 'COCINERO
 })
 export class ActualizarUsuarioPageComponent implements OnInit {
 
-  public readonly rolesPOS = ROLES_POS;
+  private readonly modulosService = inject(ModulosService);
+
+  get rolesPOS(): string[] {
+    return ROLES_POS_BASE.filter(r => {
+      if (r === 'COCINERO')     return this.modulosService.tieneModulo(MODULOS.COCINA);
+      if (r === 'MESERO')       return this.modulosService.tieneModulo(MODULOS.MESERO);
+      if (r === 'DOMICILIARIO') return this.modulosService.tieneModulo(MODULOS.DOMICILIOS);
+      return true;
+    });
+  }
 
   usuario: Usuario = {
     nombre:   '',
