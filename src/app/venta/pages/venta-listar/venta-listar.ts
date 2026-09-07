@@ -781,7 +781,34 @@ export class VentaListarPageComponent implements OnInit {
     });
   }
 
-  imprimirTirilla(): void {
+  /**
+   * Imprime una vista previa de la cuenta ANTES de cerrar la venta, con los
+   * valores actuales del modal de cierre (impuestos, descuento, servicios).
+   * No cierra la venta ni toca su estado — solo para mostrarle el total al
+   * cliente antes de cobrar.
+   */
+  imprimirPreCuenta(): void {
+    if (!this.ventaCierreId || this.cargandoModalData) return;
+    const ventaBase = this.ventasAbiertas?.find(v => v.id === this.ventaCierreId);
+    if (!ventaBase) return;
+
+    this.ventaParaImprimir = {
+      ...ventaBase,
+      descuento:       this.descuentoPct > 0 ? this.descuentoPct : undefined,
+      motivoDescuento: this.motivoDescuento.trim() || undefined,
+      cliente:         this.clienteSeleccionado ?? undefined,
+    };
+    this.impuestosParaImprimir      = [...this.totalImpuestosAplicados];
+    this.subtotalParaImprimir       = this.subtotalCierre;
+    this.descuentoValorParaImprimir = this.valorDescuento;
+    this.totalParaImprimir          = this.totalFinal;
+    this.serviciosParaImprimir      = [...this.serviciosAdicionales];
+    this.fechaImpresion             = new Date();
+
+    this.imprimirTirilla(true);
+  }
+
+  imprimirTirilla(esPreCuenta: boolean = false): void {
     const venta = this.ventaParaImprimir;
     if (!venta) return;
 
@@ -879,6 +906,12 @@ export class VentaListarPageComponent implements OnInit {
     }
     lines.push(DIV);
 
+    if (esPreCuenta) {
+      lines.push(center('*** PRE-CUENTA ***'));
+      lines.push(center('(no válida como factura)'));
+      lines.push(DIV);
+    }
+
     // Meta de la venta
     lines.push(lr('Ticket #', String(venta.id ?? '')));
     lines.push(lr('Fecha', fmtDate(this.fechaImpresion)));
@@ -889,8 +922,9 @@ export class VentaListarPageComponent implements OnInit {
       const nom = `${venta.usuarioCreador.nombre ?? ''} ${venta.usuarioCreador.apellido ?? ''}`.trim();
       lines.push(lr('Atendido', abrevNombre(nom, 17)));
     }
-    if (venta.usuarioCliente) {
-      const nom = `${venta.usuarioCliente.nombre ?? ''} ${venta.usuarioCliente.apellido ?? ''}`.trim();
+    const clienteVenta = venta.usuarioCliente ?? venta.cliente;
+    if (clienteVenta) {
+      const nom = `${clienteVenta.nombre ?? ''} ${clienteVenta.apellido ?? ''}`.trim();
       lines.push(lr('Cliente', abrevNombre(nom, 17)));
     }
     lines.push(DIV);
@@ -970,7 +1004,7 @@ export class VentaListarPageComponent implements OnInit {
     const html = `<!DOCTYPE html>
 <html lang="es"><head>
   <meta charset="UTF-8">
-  <title>Tirilla #${venta.id}</title>
+  <title>${esPreCuenta ? 'Pre-cuenta' : 'Tirilla'} #${venta.id}</title>
   <style>
     * { box-sizing:border-box; margin:0; padding:0; }
     body {
